@@ -18,11 +18,14 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/paddr.h>
+#include <memory/vaddr.h>
 
 static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void test_expr();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -49,8 +52,96 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  return -1;
+  	nemu_state.state = NEMU_QUIT;
+  	return -1;
 }
+
+static int cmd_si(char *args){
+	int step = 0;
+	if(args == NULL){
+		step = 1 ;    }
+	else{
+		sscanf(args, "%d" , &step);
+			}
+	cpu_exec(step);
+	return 0;
+}
+
+
+static int cmd_info(char *args){
+	if(args == NULL)
+		printf("No args.\nList: info r or info w\n");
+	else if( strcmp( args, "r" ) == 0 ) {
+		isa_reg_display();
+	}     
+	else if( strcmp( args, "w" ) == 0 ) {
+		wp_display(); 
+	}
+	else {
+		printf("Wrong args.\nList: info r or info w.\n");
+	}
+	return 0;
+}
+
+
+static int cmd_x(char *args){
+	char *number = strtok( args, " " );
+	char *address = strtok( NULL, " " );
+	int len = 0;
+	sscanf( number, "%d", &len );
+	paddr_t addr = 0;
+	sscanf( address, "%x", &addr );
+	for(int i = 0; i < len; i++ )
+	{
+		printf("0x%08x = 0x%08x\n", addr, paddr_read(addr, 4));
+		addr += 4;
+	}
+	return 0;
+}
+
+static int cmd_p(char *args){
+	bool success = false;
+	if( args == NULL ){
+		printf("No args.\n");
+		return 0;
+	}
+	word_t result = expr( args, &success );
+	if( success == false ){
+		printf("Invalid expression.\n");
+		return 0;
+	}
+	else{
+		printf("%d\n", result);
+	}
+	return 0;
+}
+
+static int cmd_w(char* args) {
+	if( args == NULL ) {
+		printf("The standard format is 'w EXPR'\n");
+		return 0;
+	}
+	bool success = false;
+	word_t result = expr(args, &success);
+	if( success == false ) {
+		printf("Invalid expression\n");
+	}
+	else {
+		wp_set(args, result);     ////
+	}
+	return 0;
+}
+
+static int cmd_d(char* args) {
+	if( args == NULL ) {
+		printf("The standard format is: 'd N'\n");
+		return 0;
+	}
+	int no = strtol(args, NULL, 10);
+	wp_delete(no);      ////
+	return 0;
+}
+
 
 static int cmd_help(char *args);
 
@@ -62,9 +153,13 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
-  /* TODO: Add more commands */
-
+	{"si", "One single step", cmd_si },
+	{"info", "Print register status", cmd_info },  
+	{"x", "Scan memory", cmd_x },
+	{"p", "Expression evaluation", cmd_p},
+ 	{"w", "Watch for the variation of the result of EXPR, pause at variation point", cmd_w}, 
+	{"d", "Delete watchpoint", cmd_d},
+  
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -137,7 +232,7 @@ void sdb_mainloop() {
 void init_sdb() {
   /* Compile the regular expressions. */
   init_regex();
-
+	test_expr();
   /* Initialize the watchpoint pool. */
   init_wp_pool();
 }

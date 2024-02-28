@@ -47,6 +47,21 @@ config ENGINE
   default "interpreter" if ENGINE_INTERPRETER
   default "none"
 
+
+config WATCHPOINT
+	bool "Enable watchpoint"
+	default y
+	help
+		Enable watchpoint feature.
+
+
+
+
+
+
+
+
+
 choice
   prompt "Running mode"
   default MODE_SYSTEM
@@ -67,6 +82,22 @@ config TARGET_SHARE
 config TARGET_AM
   bool "Application on Abstract-Machine (DON'T CHOOSE)"
 endchoice
+
+
+
+
+
+#choice
+#	prompt "Enable watchpoint feature"
+#	default WATCHPOINT
+#config WATCHPOINT
+#	bool "Enable watchpoint feature"
+#	default y
+#		help
+#		Enable this option to activate the watchpoint feature.
+#endchoice
+
+
 
 menu "Build Options"
 choice
