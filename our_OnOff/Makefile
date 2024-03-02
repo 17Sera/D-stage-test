@@ -1,9 +1,9 @@
-include $(NVBOARD_HOME)/scripts/nvboard.mk
+#include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 TOPNAME = top
 
-VSRC = $(shell find $(abspath /vsrc) -name "*.v")
-CSRC = $(shell find $(abspath /csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
+VSRC = $(shell find $(abspath) -name "*.v")
+CSRC = $(shell find $(abspath) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
 CSRC += $(SRC_AUTO_BIND)
@@ -28,7 +28,8 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS)  -DTOP_NAME="\"V$(TOPNAME)\""
 
 
-include $(NVBOARD_HOME)/scripts/nvboard.mk
+#include $(NVBOARD_HOME)/scripts/nvboard.mk
+include /home/zhong/ysyx-workbench/nvboard/scripts/nvboard.mk
 
 $(shell mkdir -p $(BUILD_DIR))
 
