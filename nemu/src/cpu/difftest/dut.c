@@ -82,9 +82,9 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   assert(ref_difftest_init);
 
   Log("Differential testing: %s", ANSI_FMT("ON", ANSI_FG_GREEN));
-  Log("The result of every instruction will be compared with %s. "
-      "This will help you a lot for debugging, but also significantly reduce the performance. "
-      "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
+  //Log("The result of every instruction will be compared with %s. "
+  //    "This will help you a lot for debugging, but also significantly reduce the performance. "
+  //    "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
 
   ref_difftest_init(port);
   ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
@@ -92,12 +92,14 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 }
 
 static void checkregs(CPU_state *ref, vaddr_t pc) {
-  if (!isa_difftest_checkregs(ref, pc)) {
+  if (!isa_difftest_checkregs(ref, pc)) {     ////如果difftest对比结果不一致，则输出寄存器值
     nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
-    isa_reg_display();
+    //isa_reg_display();
+    isa_difftest_attach(ref);   //显示寄存器值
   }
 }
+
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
   CPU_state ref_r;

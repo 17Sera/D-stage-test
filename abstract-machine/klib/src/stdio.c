@@ -42,14 +42,14 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       continue;         //继续下一个字符的处理
     }
 
-    ++fmt;      //当前字符为%，让指针指向%下一个字符
+    ++fmt;              //当前字符为%，让指针指向%下一个字符
 
-    base = 10;  //默认为10进制  
+    base = 10;          //默认为10进制  
 
-    switch(*fmt){     //据%后一个字符分情况
+    switch(*fmt){       //据%后一个字符分情况
       case 'c':
         *str++ = (unsigned char) va_arg(ap, int);
-//从可变参数列表取出一个int型参数，转成unsigned char存入输出字符串中
+        //从可变参数列表取出一个int型参数，转成unsigned char存入输出字符串中
         continue;
       case 's':
         s = va_arg(ap, char *);   //从可变参数列表取出一个char *型参数
@@ -59,8 +59,10 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         strcat(str, s);     //将该字符串拼接到输出字符串的末尾
         str += strlen(s);   //更新输出字符串的位置指针
         continue;
+
       case 'd':
         break;
+        
       default:
         *str++ = '%';
         if(*fmt)
@@ -94,18 +96,26 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 
-
-
-
-
-
-
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+  //panic("Not implemented");
+  int i;
+  char buf[256];
+
+  memset(buf, 0, sizeof(buf));
+
+  va_list args;
+  va_start(args, fmt);
+  i = vsprintf(buf, fmt, args);
+  va_end(args);
+
+  char *tmp = buf;
+  while(*tmp != 0){
+    putch(*tmp);
+    tmp++;
+  }
+
+  return i;
 }
-
-
-
 
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
