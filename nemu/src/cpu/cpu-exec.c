@@ -12,11 +12,14 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-
 #include <cpu/cpu.h>
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+#include <common.h>     /////////////
+#include <debug.h>     /////////////
+#include <elf.h>        ////////////
+#include <device/map.h> ///////////
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -33,8 +36,32 @@ static bool g_print_step = false;
 void device_update();
 void wp_difftest();
 
+
+ 
+//void display_inst(); ///////  
+#define INST_NUM 16     ////////for iringbuf begin
+static int cur_inst = 0;
+//static int func_num = 0;
+typedef struct
+{
+  word_t pc;
+  uint32_t inst;
+}InstBuf;
+
+InstBuf iringbuf[INST_NUM];
+
+void trace_inst(word_t pc, uint32_t inst)
+{
+  iringbuf[cur_inst].pc = pc;
+  iringbuf[cur_inst].inst = inst;
+  cur_inst = (cur_inst + 1) % INST_NUM; 
+} 
+
+
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-#ifdef CONFIG_ITRACE_COND
+
+#ifdef CONFIG_ITRACE_COND   //ITRACE_COND额外考虑写入log
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
@@ -47,23 +74,26 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-#ifdef CONFIG_ITRACE
+
+IFDEF(CONFIG_IRINGBUF, trace_inst( s->pc, s->isa.inst.val )); ///////////////
+
+#ifdef CONFIG_ITRACE    //itrace的实现
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
-  int ilen = s->snpc - s->pc;
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc); //将pc值存入p所指向的位置，并更新p
+  int ilen = s->snpc - s->pc; //表示指令的长度
   int i;
-  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
-  for (i = ilen - 1; i >= 0; i --) {
-    p += snprintf(p, 4, " %02x", inst[i]);
+  uint8_t *inst = (uint8_t *)&s->isa.inst.val;  //将s->isa.inst.val 的起始地址存入指针inst
+  for (i = ilen - 1; i >= 0; i --) {      //根据指令的长度作为循环次数
+    p += snprintf(p, 4, " %02x", inst[i]);//通过循环来获取完整指令，存入p中
   }
-  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
-  int space_len = ilen_max - ilen;
-  if (space_len < 0) space_len = 0;
-  space_len = space_len * 3 + 1;
-  memset(p, ' ', space_len);
+  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);  //最长的指令的长度
+  int space_len = ilen_max - ilen;  //空余位置
+  if (space_len < 0) space_len = 0; //空余位置不为负
+  space_len = space_len * 3 + 1;    
+  memset(p, ' ', space_len);   //根据计算得到的空余长度，用空格填充，对齐美观
   p += space_len;
 
-#ifndef CONFIG_ISA_loongarch32r
+#ifndef CONFIG_ISA_loongarch32r //通过不同的指令架构，调用函数反汇编
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
@@ -72,6 +102,27 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #endif
 #endif
 }
+
+
+void display_inst()         //出错的是前一条指令    //负责打印
+{
+  int end = cur_inst;
+  char buf[128];
+  char *p;
+  int i = cur_inst;
+  if(iringbuf[i+1].pc == 0) i = 0;
+  do{
+      p = buf;
+      if(i == end) p += sprintf(buf, "-->");
+      p += sprintf(buf, "%s" FMT_WORD ":  %08x\t", (i + 1) % INST_NUM == end ? "--->  " : "      ", iringbuf[i].pc, iringbuf[i].inst);
+      void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+      disassemble(p, buf + sizeof(buf) - p, iringbuf[i].pc, (uint8_t *)&iringbuf[i].inst, 4);
+      //printf("%s",buf);
+      puts(buf);
+      i = (i + 1) % INST_NUM;
+  } while (i != end);
+}                             //for iringbuf end   
+
 
 static void execute(uint64_t n) {
   Decode s;
@@ -95,6 +146,7 @@ static void statistic() {
 
 void assert_fail_msg() {
   isa_reg_display();
+  IFDEF(CONFIG_IRINGBUF,display_inst());  /////////////
   statistic();
 }
 
@@ -116,9 +168,13 @@ void cpu_exec(uint64_t n) {
   g_timer += timer_end - timer_start;
 
   switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+    case NEMU_RUNNING: 
+      nemu_state.state = NEMU_STOP; 
+      IFDEF(CONFIG_IRINGBUF,display_inst());  ////////////
+      break;
 
     case NEMU_END: case NEMU_ABORT:
+      IFDEF(CONFIG_IRINGBUF,display_inst());  ////////////
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
@@ -127,4 +183,4 @@ void cpu_exec(uint64_t n) {
       // fall through
     case NEMU_QUIT: statistic();
   }
-}
+} 
