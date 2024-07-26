@@ -1,6 +1,6 @@
 all:
 
-TOPNAME = example	
+TOPNAME = riscv_top	
 VSRC = $(shell find $(./vsrc) -name "*.v")
 CSRC = $(shell find $(./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 
@@ -13,7 +13,7 @@ sim:$(CSRC) $(VSRC)
 		-top $(TOPNAME) \
 		$^ 
 		
-	./obj_dir/Vexample
+	./obj_dir/Vriscv_top
 	gtkwave wave.vcd
 
 	rm -rf obj_dir

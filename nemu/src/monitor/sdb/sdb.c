@@ -21,7 +21,7 @@
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
 
-static int is_batch_mode = false;  //Automatically cmd_c
+static int is_batch_mode = true;  //Automatically cmd_c
 
 void init_regex();
 void init_wp_pool();
