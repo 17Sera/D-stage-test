@@ -21,14 +21,14 @@
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
 
-static int is_batch_mode = true;  //Automatically cmd_c
+static int is_batch_mode = false;  //Automatically cmd_c
 
 void init_regex();
 void init_wp_pool();
 void test_expr();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
-static char* rl_gets() {
+static char* rl_gets() {			//允许程序从标准输入中读取一行用户输入
   static char *line_read = NULL;
 
   if (line_read) {

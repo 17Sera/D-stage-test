@@ -81,6 +81,7 @@ static long load_img() {
 }
 
 static int parse_args(int argc, char *argv[]) {
+
   const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
     {"elf"      , required_argument, NULL, 'e'},    //////////
@@ -120,7 +121,10 @@ void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
   
   /* Parse arguments. */
-  parse_args(argc, argv);
+  parse_args(argc, argv);     //此函数给img_file赋值
+
+
+  //printf("img_file = %s\n", img_file);    //////////////////////////
 
   parse_elf(elf_file);
 
@@ -143,6 +147,7 @@ void init_monitor(int argc, char *argv[]) {
   long img_size = load_img();
 
   /* Initialize differential testing. */
+  printf("\n--------------------- diff_so_file = %s --------------------------\n",diff_so_file);
   init_difftest(diff_so_file, img_size, difftest_port);
 
   /* Initialize the simple debugger. */

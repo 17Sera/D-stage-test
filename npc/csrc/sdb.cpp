@@ -1,0 +1,583 @@
+// #include "../include/common.h"
+// #include "../include/debug.h"
+// #include "../include/utils.h"
+// #include <readline/readline.h>
+// #include <readline/history.h>
+
+
+// /*************extern functions or variables*************/
+// extern void     cpu_exec            (uint64_t n); 
+// extern void     regs_display        (); 
+// extern void     init_regex          ();
+// extern void     single_reg_display  (char *reg_name); 
+// extern void     wp_display          ();
+// extern void     init_wp_pool        ();
+// extern void     wp_set              (char *expr, word_t result);
+// extern void     wp_delete           (int no);
+// extern word_t   reg_str2val         (const char *s, bool *success); 
+// extern uint8_t* guest_to_host       (paddr_t paddr);
+// extern word_t   host_read           (void *addr, int len);
+// extern word_t   expr                (char *e, bool *success);
+// extern NPCState npc_state;
+
+// /*****************************************************/
+
+// static int is_batch_mode = false;
+
+// static int cmd_c    (char *args) {
+//     cpu_exec(-1);
+//     return 0;
+// }
+// static int cmd_q    (char *args) {
+//     npc_state.state = NPC_QUIT;
+//     return -1;
+// }
+// static int cmd_help (char *args);
+// static int cmd_si   (char *args);
+// static int cmd_info (char *args);
+// static int cmd_x    (char *args);
+// static int cmd_p    (char *args);
+// static int cmd_w    (char* args);
+// static int cmd_d    (char* args);
+
+
+// static struct {
+//   const char *name;
+//   const char *description;
+//   int (*handler) (char *);
+// } cmd_table [] = {
+//     { "help", "Display information about all supported commands", cmd_help },
+//     { "c", "Continue the execution of the program", cmd_c },
+//     { "q", "Exit NEMU", cmd_q },
+// 	{ "si", "One single step", cmd_si },
+// 	{ "info", "Print register status", cmd_info },  
+// 	{ "x", "Scan memory", cmd_x },
+// 	{ "p", "Expression evaluation", cmd_p},
+//  	{ "w", "Watch for the variation of the result of EXPR, pause at variation point", cmd_w}, 
+// 	{ "d", "Delete watchpoint", cmd_d},
+// };
+
+
+
+// #define NR_CMD ARRLEN(cmd_table)
+
+
+// static int cmd_si(char *args) {
+//     char *buff = strtok(NULL, " ");     /* 提取第一个参数 args是s后面的int参数 步数*/
+    
+//     int step = 0;
+//     if (buff == NULL)  step = 1;        // 单个si默认为1步
+
+//     sscanf(buff, "%d", &step);          // 从一个字符串中提取出表示数字的部分
+    
+//     _Log(ANSI_FG_BLUE "------------- %d instruction(s) excuted ------------- \n" ANSI_NONE, step);
+//     cpu_exec(step);
+//     return 0;
+// }
+
+
+// static int cmd_info(char *args) {
+//     char *buff = strtok(NULL, " ");         /* 提取第一个参数 args是info后面的单字符参数*/
+
+//     if (buff == NULL)                       /* info后面没有跟参数 */
+//         Warn("No args.\nList: info r or info w\n");
+//     else {
+//         if(strcmp(buff, "r") == 0)
+//         {
+//             //register
+//             _Log(ANSI_FG_BLUE "Display register information.\n" ANSI_NONE);
+//             buff = strtok(NULL, " ");
+//             if(buff == NULL)
+//                 regs_display();
+//             else
+//                 single_reg_display(buff);   /* 打印单个寄存器 */
+//         }
+//         else if( strcmp( buff, "w" ) == 0 ) /* info w 打印监视点 */
+// 		    wp_display(); 
+//         else
+//             Warn("Unknown arguments '%s'\nList: info r or info w", buff);
+//     }
+//     return 0;
+// }
+
+
+// static int cmd_x(char *args)
+// {
+//     /* extract the first argument */
+//     char *buf = NULL;
+//     int word_num = 0;     //The number of words to display.
+//     vaddr_t mem_addr = 0;
+//     bool success = true;
+
+//     /* no argument given */
+//     if(args == NULL)
+//     {
+//         Warn("No argument inputed!");
+//         return 0;
+//     }
+
+//     buf = strtok(NULL, " ");
+//     //the number argument
+//     sscanf(buf, "%d", &word_num);
+
+//     //the addrdess argument
+//     buf = strtok(NULL, "");
+//     if (buf == NULL) 
+//     {
+//         /* no argument given */
+//         Warn("No memory address inputed!");
+//         return 0;
+//     }
+//     else 
+//     {
+//         mem_addr = expr(buf, &success);
+//         assert(success == true);
+//     }
+
+//     _Log(ANSI_FG_BLUE "Display memory content of %d words:\n" ANSI_NONE, word_num);
+//     _Log(ANSI_FG_RED " Address       value\n" ANSI_NONE);   
+//     for(int i = 0; i < word_num; i++, mem_addr+=4)
+//     {
+//         _Log(ANSI_FG_YELLOW "[0x%08x]:" ANSI_NONE, mem_addr);
+//         _Log("  0x%08x\n",host_read(guest_to_host(mem_addr), 4));
+//     }
+//     return 0;
+// }
+
+// static int cmd_p(char *args) {
+//     bool success = true;
+//     uint32_t result;
+
+//     if (args == NULL) 
+//         Warn("No expression inputed.");
+//     else {
+//         result = expr(args, &success);
+//         _Log(ANSI_FG_GREEN "%s=%d\n" ANSI_NONE, args, result);
+//     }
+//     assert(success == true);  
+//     return 0;
+// }
+
+// static int cmd_help(char *args) {
+//     /* extract the first argument */
+//     char *arg = strtok(NULL, " ");
+//     int i;
+
+//     if (arg == NULL) {
+//         /* no argument given */
+//         for (i = 0; i < NR_CMD; i ++) 
+//             printf("  %s - %s\n", cmd_table[i].name, cmd_table[i].description);
+//     }
+//     else 
+//     {
+//         for (i = 0; i < NR_CMD; i ++) {
+//             if (strcmp(arg, cmd_table[i].name) == 0)
+//             {
+//                 printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
+//                 return 0;
+//             }
+//     }
+//         printf("Unknown command '%s'\n", arg);
+//     }
+//     return 0;
+// }
+
+// static int cmd_w(char* args) {
+// 	if( args == NULL ) {
+// 		printf("The standard format is 'w EXPR'\n");
+// 		return 0;
+// 	}
+// 	//bool success = false;
+//     bool success = true;
+// 	word_t result = expr(args, &success);
+// 	if( success == false ) {
+// 		printf("Invalid expression\n");
+// 	}
+// 	else {
+// 		wp_set(args, result);     ////
+// 	}
+// 	return 0;
+// }
+
+// static int cmd_d(char* args) {
+// 	if( args == NULL ) {
+// 		printf("The standard format is: 'd N'\n");
+// 		return 0;
+// 	}
+// 	int no = strtol(args, NULL, 10);
+// 	wp_delete(no);      ////
+// 	return 0;
+// }
+
+// /* We use the `readline' library to provide more flexibility to read from stdin. */
+// static char* rl_gets() 
+// {
+//     static char *line_read = NULL;
+//     if (line_read) {                // 确保每次都释放了之前的内存
+//         free(line_read);
+//         line_read = NULL;
+//     }
+
+//     line_read = readline(ANSI_FG_GREEN "zhong-(npc): " ANSI_NONE);
+//     if (line_read && *line_read)    // 如果成功读入则记录进命令历史记录
+//         add_history(line_read);
+
+//     return line_read;
+// }
+
+// void sdb_set_batch_mode(void) 
+// {
+//   is_batch_mode = true;
+// }
+
+
+// void sdb_mainloop() 
+// {
+//     if(is_batch_mode) 
+//     {
+//         cmd_c(NULL);
+//         return;
+//     }
+
+//     for (char *str; (str = rl_gets()) != NULL; ) 
+//     {
+//         char *str_end = str + strlen(str);
+
+//         /* extract the first token as the command */
+//         char *cmd = strtok(str, " ");
+//         if (cmd == NULL) { continue; }
+
+//         /* treat the remaining string as the arguments,
+//         * which may need further parsing
+//         */
+//         char *args = cmd + strlen(cmd) + 1;
+//         if (args >= str_end) 
+//             args = NULL;
+
+//     int i;
+//     for (i = 0; i < NR_CMD; i ++) 
+//     {
+//         if (strcmp(cmd, cmd_table[i].name) == 0) 
+//         {
+//             if (cmd_table[i].handler(args) < 0) 
+//                 return;
+//             break;
+//         }
+//     }
+
+//     if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
+//   }
+// }
+
+
+
+// void init_sdb() 
+// {
+//   /* Compile the regular expressions. */
+//   init_regex();
+
+//   init_wp_pool();
+// }
+
+
+
+//上面是添加了watchpoint的
+
+
+//============================================================
+
+#include "../include/common.h"
+#include "../include/debug.h"
+#include "../include/utils.h"
+#include <readline/readline.h>
+#include <readline/history.h>
+
+
+/********extern functions or variables********/
+extern void     cpu_exec            (uint64_t n); 
+extern void     regs_display        (); 
+extern void     init_regex          ();
+extern void     single_reg_display  (char *reg_name); 
+extern void     wp_display          ();
+extern void     init_wp_pool        ();
+extern void     wp_set              (char *expr, word_t result);
+extern void     wp_delete           (int no);
+extern word_t   reg_str2val         (const char *s, bool *success); 
+extern uint8_t* guest_to_host       (paddr_t paddr);
+extern word_t   host_read           (void *addr, int len);
+extern word_t   expr                (char *e, bool *success);
+extern NPCState npc_state;
+
+/*********************************************/
+
+
+static int is_batch_mode = false;
+
+
+static int cmd_c(char *args) {
+    cpu_exec(-1);
+    return 0;
+}
+static int cmd_q(char *args) {
+    npc_state.state = NPC_QUIT;
+    return -1;
+}
+static int cmd_help(char *args);
+static int cmd_si(char *args);
+static int cmd_info(char *args);
+static int cmd_x(char *args);
+static int cmd_p(char *args);
+static int cmd_w    (char* args);
+static int cmd_d    (char* args);
+
+static struct {
+    const char *name;
+    const char *description;
+    int (*handler) (char *);
+} cmd_table [] = {
+    { "help", "Display information about all supported commands", cmd_help },
+    { "c", "Continue the execution of the program", cmd_c },
+    { "q", "Exit NEMU", cmd_q },
+    { "si", "Excute N instruction(s)", cmd_si },
+    { "info", "Display information about registers", cmd_info },
+    { "x", "Display memory content of N word(s) in HEX", cmd_x },
+    { "p", "Get the value of the expression", cmd_p },
+ 	{ "w", "Watch for the variation of the result of EXPR, pause at variation point", cmd_w}, 
+	{ "d", "Delete watchpoint", cmd_d},
+};
+
+
+
+#define NR_CMD ARRLEN(cmd_table)
+
+
+static int cmd_si(char *args) 
+{
+    /* extract the first argument */
+    char *buff = strtok(NULL, " ");
+    //The number of instruction to excute.
+    int inst_num = 0;
+
+    if (buff == NULL) 
+        /* no argument given */
+        inst_num = 1;
+    else 
+        //extract the number by converting  char* into int
+        sscanf(buff, "%d", &inst_num);
+    
+    _Log(ANSI_FG_BLUE "%d instruction(s) excuted.\n" ANSI_NONE, inst_num);
+    cpu_exec(inst_num);
+    return 0;
+}
+
+
+static int cmd_info(char *args) 
+{
+    /* extract the first argument */
+    char *buff = strtok(NULL, " ");
+
+    if (buff == NULL) 
+    {
+        /* no argument given */
+        Warn("Input 'r' for registers!");
+    }
+    else 
+    {
+        if(strcmp(buff, "r") == 0)
+        {
+            //register
+            _Log(ANSI_FG_BLUE "Display register information.\n" ANSI_NONE);
+            buff = strtok(NULL, " ");
+            if(buff == NULL)
+                regs_display();
+            else
+                single_reg_display(buff);
+        }
+        else
+            Warn("Unknown arguments '%s'. Input 'r' for registers", buff);
+    }
+    return 0;
+}
+
+
+static int cmd_x(char *args)
+{
+    /* extract the first argument */
+    char *buf = NULL;
+    int word_num = 0;     //The number of words to display.
+    vaddr_t mem_addr = 0;
+    bool success = true;
+
+    /* no argument given */
+    if(args == NULL)
+    {
+        Warn("No argument inputed!");
+        return 0;
+    }
+
+    buf = strtok(NULL, " ");
+    //the number argument
+    sscanf(buf, "%d", &word_num);
+
+    //the addrdess argument
+    buf = strtok(NULL, "");
+    if (buf == NULL) 
+    {
+        /* no argument given */
+        Warn("No memory address inputed!");
+        return 0;
+    }
+    else 
+    {
+        mem_addr = expr(buf, &success);
+        assert(success == true);
+    }
+
+    _Log(ANSI_FG_BLUE "Display memory content of %d words:\n" ANSI_NONE, word_num);
+    _Log(ANSI_FG_RED " Address       value\n" ANSI_NONE);   
+    for(int i = 0; i < word_num; i++, mem_addr+=4)
+    {
+        _Log(ANSI_FG_YELLOW "[0x%08x]:" ANSI_NONE, mem_addr);
+        _Log("  0x%08x\n",host_read(guest_to_host(mem_addr), 4));
+    }
+    return 0;
+}
+
+static int cmd_p(char *args) 
+    {
+    bool success = true;
+    uint32_t result;
+
+    if (args == NULL) 
+        /* no argument given */
+        Warn("No expression inputed!");
+    else 
+    {
+        result = expr(args, &success);
+        _Log(ANSI_FG_BLUE "%s = %d\n" ANSI_NONE, args, result);
+    }
+    assert(success == true);  
+    return 0;
+}
+
+static int cmd_help(char *args) {
+    /* extract the first argument */
+    char *arg = strtok(NULL, " ");
+    int i;
+
+    if (arg == NULL) {
+        /* no argument given */
+        for (i = 0; i < NR_CMD; i ++) 
+            printf("  %s - %s\n", cmd_table[i].name, cmd_table[i].description);
+    }
+    else 
+    {
+        for (i = 0; i < NR_CMD; i ++) {
+            if (strcmp(arg, cmd_table[i].name) == 0)
+            {
+                printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
+                return 0;
+            }
+    }
+        printf("Unknown command '%s'\n", arg);
+    }
+    return 0;
+}
+
+static int cmd_w(char* args) {
+	if( args == NULL ) {
+		printf("The standard format is 'w EXPR'\n");
+		return 0;
+	}
+	//bool success = false;
+    bool success = true;
+	word_t result = expr(args, &success);
+	if( success == false ) {
+		printf("Invalid expression\n");
+	}
+	else {
+		wp_set(args, result);     ////
+	}
+	return 0;
+}
+
+static int cmd_d(char* args) {
+	if( args == NULL ) {
+		printf("The standard format is: 'd N'\n");
+		return 0;
+	}
+	int no = strtol(args, NULL, 10);
+	wp_delete(no);      ////
+	return 0;
+}
+
+
+
+/* We use the `readline' library to provide more flexibility to read from stdin. */
+static char* rl_gets() 
+{
+    static char *line_read = NULL;
+    if (line_read) 
+    {
+        free(line_read);
+        line_read = NULL;
+    }
+
+    line_read = readline(ANSI_FG_GREEN "zhong-(npc): " ANSI_NONE);
+    if (line_read && *line_read) 
+        add_history(line_read);
+
+    return line_read;
+}
+
+void sdb_set_batch_mode(void) 
+{
+  is_batch_mode = true;
+}
+
+
+void sdb_mainloop() 
+{
+    if(is_batch_mode) 
+    {
+        cmd_c(NULL);
+        return;
+    }
+
+    for (char *str; (str = rl_gets()) != NULL; ) 
+    {
+        char *str_end = str + strlen(str);
+
+        /* extract the first token as the command */
+        char *cmd = strtok(str, " ");
+        if (cmd == NULL) { continue; }
+
+        /* treat the remaining string as the arguments,
+        * which may need further parsing
+        */
+        char *args = cmd + strlen(cmd) + 1;
+        if (args >= str_end) 
+            args = NULL;
+
+    int i;
+    for (i = 0; i < NR_CMD; i ++) 
+    {
+        if (strcmp(cmd, cmd_table[i].name) == 0) 
+        {
+            if (cmd_table[i].handler(args) < 0) 
+                return;
+            break;
+        }
+    }
+
+    if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
+  }
+}
+
+
+
+void init_sdb() 
+{
+  /* Compile the regular expressions. */
+  init_regex();
+}
