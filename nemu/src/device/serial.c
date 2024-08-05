@@ -19,6 +19,8 @@
 /* http://en.wikibooks.org/wiki/Serial_Programming/8250_UART_Programming */
 // NOTE: this is compatible to 16550
 
+/* 模拟串口功能  */
+
 #define CH_OFFSET 0
 
 static uint8_t *serial_base = NULL;
@@ -40,11 +42,11 @@ static void serial_io_handler(uint32_t offset, int len, bool is_write) {
   }
 }
 
-void init_serial() {
+void init_serial() {    // 串口初始化
   serial_base = new_space(8);
-#ifdef CONFIG_HAS_PORT_IO
+#ifdef CONFIG_HAS_PORT_IO     // 注册端口
   add_pio_map ("serial", CONFIG_SERIAL_PORT, serial_base, 8, serial_io_handler);
-#else
+#else                         // 注册MMIO空间 --- 都会映射到串口的数据寄存器
   add_mmio_map("serial", CONFIG_SERIAL_MMIO, serial_base, 8, serial_io_handler);
 #endif
 

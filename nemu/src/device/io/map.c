@@ -23,6 +23,8 @@
 static uint8_t *io_space = NULL;
 static uint8_t *p_space = NULL;
 
+/* 实现了映射的管理, 包括I/O空间的分配及其映射, 还有映射的访问接口.  */
+
 uint8_t* new_space(int size) {
   uint8_t *p = p_space;
   // page aligned;
@@ -52,7 +54,7 @@ void init_map() {
   p_space = io_space;
 }
 
-word_t map_read(paddr_t addr, int len, IOMap *map) {
+word_t map_read(paddr_t addr, int len, IOMap *map) {    // 将地址addr映射到map所指示的目标空间，并进行访问
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
