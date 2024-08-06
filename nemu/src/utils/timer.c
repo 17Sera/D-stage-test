@@ -24,7 +24,7 @@ IFDEF(CONFIG_TIMER_CLOCK_GETTIME,
 static uint64_t boot_time = 0;
 
 static uint64_t get_time_internal() {
-#if defined(CONFIG_TARGET_AM)
+#if defined(CONFIG_TARGET_AM)       // 在AM的测试用例中是通过 io_read(AM_TIMER_UPTIME)获取时间
   uint64_t us = io_read(AM_TIMER_UPTIME).us;
 #elif defined(CONFIG_TIMER_GETTIMEOFDAY)
   struct timeval now;
@@ -38,10 +38,10 @@ static uint64_t get_time_internal() {
   return us;
 }
 
-uint64_t get_time() {
+uint64_t get_time() {     // get_time()调用库函数来获取时间
   if (boot_time == 0) boot_time = get_time_internal();
   uint64_t now = get_time_internal();
-  return now - boot_time;
+  return now - boot_time;     // 把获取的时间返回rtc_io_handler()  即MMIO空间
 }
 
 void init_rand() {

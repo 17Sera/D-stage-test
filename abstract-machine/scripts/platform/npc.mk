@@ -17,14 +17,18 @@ LDFLAGS   += --gc-sections -e _start
 ######################
 NPCFLAGS += -l $(shell dirname $(IMAGE).elf)/npc-log.txt
 NPCFLAGS += -e $(IMAGE).elf            #开启解析elf文件功能
-NPCFLAGS += -b
+
+# --------- not used --------------
+# NPCFLAGS += -b
 #NPCFLAGS += -d
-NPCFLAGS += -i
+# NPCFLAGS += -i
+
 #按monitor定义的顺序排  d在i前面
 #NPCFLAGS += -l ./log/npc-log.txt
+#CFLAGS += -I$(AM_HOME)/am/src/riscv
+# ----------------------------------
 
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
-#CFLAGS += -I$(AM_HOME)/am/src/riscv
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 

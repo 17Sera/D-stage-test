@@ -92,7 +92,7 @@ static int parse_args(int argc, char *argv[]) {
     {"elf"      , required_argument, NULL, 'e'},    //////////
     {"log"      , required_argument, NULL, 'l'},
     {"diff"     , required_argument, NULL, 'd'},
-    {"image"    , required_argument, NULL, 'i'},
+    //{"image"    , required_argument, NULL, 'i'},
     {"help"     , no_argument      , NULL, 'h'},
     {0          , 0                , NULL,  0 },
   };
@@ -104,14 +104,14 @@ static int parse_args(int argc, char *argv[]) {
       case 'e': elf_file = optarg; break;     //////////
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg;
-                printf("\n----------000----------- diff_so_file = %s --------------------------\n",diff_so_file);
-                printf("\n----------000----------- img_file = %s --------------------------\n",img_file);
+                //printf("\n----------000----------- diff_so_file = %s --------------------------\n",diff_so_file);
+                //printf("\n----------000----------- img_file = %s --------------------------\n",img_file);
 
                 break;
-      case 'i': img_file = optarg;
-                printf("\n----------000----------- img_file = %s --------------------------\n",img_file);
-                return 0;
-      //case 1: img_file = optarg; return 0;
+      //case 'i': img_file = optarg;
+                //printf("\n----------000----------- img_file = %s --------------------------\n",img_file);
+                //return 0;
+      case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
         printf("\t-b,--batch              run with batch mode\n");
@@ -119,7 +119,7 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-l,--log=FILE           output log to FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
-        printf("\t-i,--image=FILE         specify the image file\n");
+        //printf("\t-i,--image=FILE         specify the image file\n");
         printf("\n");
         exit(0);
     }

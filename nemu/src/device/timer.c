@@ -19,12 +19,12 @@
 
 static uint32_t *rtc_port_base = NULL;
 
-static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
+static void rtc_io_handler(uint32_t offset, int len, bool is_write) {   // CPU访问rtc_port_base获取时间
   assert(offset == 0 || offset == 4);
   if (!is_write && offset == 4) {
     uint64_t us = get_time();
-    rtc_port_base[0] = (uint32_t)us;
-    rtc_port_base[1] = us >> 32;
+    rtc_port_base[0] = (uint32_t)us;  // 相关MMIO空间CONFIG_RTC_MMIO (0xa0000048)会被映射到rtc_port_base
+    rtc_port_base[1] = us >> 32;      // 从get time()获取的时间赋值给 RTC 寄存器
   }
 }
 

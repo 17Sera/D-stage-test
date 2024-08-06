@@ -114,8 +114,8 @@ void display_inst()         //出错的是前一条指令    //负责打印
       p = buf;
       if(i == end) p += sprintf(buf, "-->");
       p += sprintf(buf, "%s" FMT_WORD ":  %08x\t", (i + 1) % INST_NUM == end ? "--->  " : "      ", iringbuf[i].pc, iringbuf[i].inst);
-      void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-      disassemble(p, buf + sizeof(buf) - p, iringbuf[i].pc, (uint8_t *)&iringbuf[i].inst, 4);
+      // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+      // disassemble(p, buf + sizeof(buf) - p, iringbuf[i].pc, (uint8_t *)&iringbuf[i].inst, 4);
       //printf("%s",buf);
       puts(buf);
       i = (i + 1) % INST_NUM;
