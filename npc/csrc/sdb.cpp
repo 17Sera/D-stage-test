@@ -311,7 +311,7 @@ extern NPCState npc_state;
 /*********************************************/
 
 
-static int is_batch_mode = false;
+static int is_batch_mode = true;
 
 
 static int cmd_c(char *args) {

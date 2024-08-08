@@ -64,13 +64,25 @@ VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")	#递归地查找 ./vsrc �
 INC_PATH = $(NPC_HOME)/include/			#指定包含文件路径，用-I选项传递给verilator
 LIBS = -lreadline   # 链接的库文件 link the <readline> lib
 LIBS += -ldl        # 链接的库文件 link the <dlfcn> lib
-# LIBS += $(shell llvm-config-11 --libs)
-# CXXFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
+LIBS += $(shell llvm-config-11 --libs)
+CXXFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
+
 
 # ifdef CONFIG_DIFFTEST			#差分测试的路径			###
-# DIFF_REF_PATH = $(NEMU_HOME)
-# DIFF_REF_SO = $(DIFF_REF_PATH)/build/riscv32-nemu-interpreter-so	#动态链接库
-# #ARGS_DIFF = $(DIFF_REF_SO)
+DIFF_REF_PATH = $(NEMU_HOME)
+DIFF_REF_SO = $(DIFF_REF_PATH)/build/riscv32-nemu-interpreter-so	#动态链接库
+ARGS_DIFF = --diff=$(DIFF_REF_SO)
+
+# .PHONY: $(DIFF_REF_SO)			## 有这步会报错，不能再编译nemu，只要手动编译nemu生成了动态库就可以了，运行nemu的话会报错（正常的）
+# $(DIFF_REF_SO):
+# 	$(MAKE) -s -C $(DIFF_REF_PATH) 
+
+# endif
+ 
+
+# ifdef CONFIG_DIFFTEST
+# DIFF_REF_PATH = ./difftest
+# DIFF_REF_SO = $(DIFF_REF_PATH)/riscv32-nemu-interpreter-so		## 这里应该要加 /build
 # ARGS_DIFF = --diff=$(DIFF_REF_SO)
 
 # .PHONY: $(DIFF_REF_SO)
@@ -78,7 +90,8 @@ LIBS += -ldl        # 链接的库文件 link the <dlfcn> lib
 # 	$(MAKE) -s -C $(DIFF_REF_PATH) 
 
 # endif
- 
+
+
 
 .PHONY:gtkw
 gtkw: wave.gtkw			#zhong.gtkw
@@ -108,18 +121,23 @@ waveform.vcd: ./obj_dir/V$(MODULE)
 
 IMG ?=      #loaded by AM Makefile (npc.mk)
 override ARGS ?= --log=./log/npc-log.txt
-# override ARGS += $(ARGS_DIFF)					###
+override ARGS += $(ARGS_DIFF)					###
 BINARY := ./obj_dir/V$(MODULE)
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
 
 
 .PHONY:run-env
-run-env: $(BINARY) #$(DIFF_REF_SO)				###
+run-env: $(BINARY) $(DIFF_REF_SO)				###
 
 
 .PHONY:run
 run: run-env
 	$(NEMU_EXEC)
+
+
+.PHONY:gdb										###
+gdb: run-env
+	gdb -s $(BINARY) --args $(NEMU_EXEC)
 
 
 .PHONY:build

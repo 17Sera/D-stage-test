@@ -1,6 +1,8 @@
 #include "../include/difftest.h"
 #include <dlfcn.h>
 #include "Vysyx_23060219_top.h"
+#include "Vysyx_23060219_top___024root.h"
+#include "Vysyx_23060219_top__Syms.h"
 
 
 /********extern functions or variables********/
@@ -11,7 +13,7 @@ extern uint8_t* guest_to_host(paddr_t paddr);
 
 #ifdef CONFIG_DIFFTEST
 
-#define top_regs top->rv32__DOT__register_file_inst__DOT__regs
+#define top_regs top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
 CPU_state cpu;
 static int skip_cnt_ref = 0;   // the amount to skip the ref
 static bool skip_flag = false; // the flag   to skip the ref 
@@ -34,7 +36,7 @@ const char *ref_regs[] = {
 
 static void update_cpu_state(CPU_state *cpu)
 {
-    cpu->pc = top->rv32__DOT__pc;
+    cpu->pc = top->rootp->ysyx_23060219_top__DOT__pc;
     for(int i = 0; i < 32; i++)
         cpu->gpr[i] = top_regs[i];
 }
@@ -81,8 +83,8 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)
     //check pc
     if(ref_r->pc != pc)
     {
-        _Log(ANSI_FG_YELLOW "[difftest]" ANSI_NONE   ANSI_FG_RED "pc" 
-             ANSI_NONE "  dut:0x%08x   ref:0x%08x\n", pc, ref_r->pc);
+        _Log(ANSI_FG_YELLOW "[difftest]  " ANSI_NONE   ANSI_FG_RED "pc" 
+             ANSI_NONE "  dut : 0x%08x   ref : 0x%08x\n", pc, ref_r->pc);
         success = false;
     }
 
@@ -90,8 +92,8 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)
     for(int i = 0; i < 32; i++)
         if(top_regs[i] != ref_r->gpr[i])
         {
-            _Log(ANSI_FG_YELLOW "[difftest]" ANSI_NONE   ANSI_FG_RED "%s" 
-                 ANSI_NONE "  dut:0x%08x   ref:0x%08x\n", ref_regs[i], top_regs[i], ref_r->gpr[i]);
+            _Log(ANSI_FG_YELLOW "[difftest]  " ANSI_NONE   ANSI_FG_RED "%s" 
+                 ANSI_NONE "  dut : 0x%08x   ref : 0x%08x\n", ref_regs[i], top_regs[i], ref_r->gpr[i]);
             success = false;
         }
         

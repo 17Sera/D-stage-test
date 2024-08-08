@@ -110,4 +110,4 @@ Vysyx_23060219_top: $(VK_USER_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_H
 
 
 # Verilated -*- Makefile -*-
-LIBS +=-lreadline    -ldl        
+LIBS +=-lreadline    -ldl         -lLLVM-11
