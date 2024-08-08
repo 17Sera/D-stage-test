@@ -133,9 +133,6 @@ void init_monitor(int argc, char *argv[]) {
     /* Parse arguments. */
     parse_args(argc, argv);
 
-    //printf("\n----------111----------- diff_so_file = %s --------------------------\n",diff_so_file);
-    //printf("\n--------------- elf_file = %s -------------------\n",elf_file);
-
     /* Open the log file. */
     init_log(log_file);
 
@@ -152,7 +149,6 @@ void init_monitor(int argc, char *argv[]) {
     img_size = load_img();
 
     /* Initialize differential testing. */
-    //printf("\n----------222----------- diff_so_file = %s --------------------------\n",diff_so_file);
     //init_difftest(diff_so_file, img_size, difftest_port);       ////////////
 
     /* Initialize the simple debugger. */

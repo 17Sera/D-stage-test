@@ -55,11 +55,12 @@ void init_map() {
 }
 
 word_t map_read(paddr_t addr, int len, IOMap *map) {    // 将地址addr映射到map所指示的目标空间，并进行访问
-  assert(len >= 1 && len <= 8);
-  check_bound(map, addr);
-  paddr_t offset = addr - map->low;
+  assert(len >= 1 && len <= 8);     // 确保长度在合理范围内（1到8之间）
+  check_bound(map, addr);           // 检查地址是否在映射范围内
+  paddr_t offset = addr - map->low; // 计算物理地址相对于映射起始地址的偏移量,用于确定从映射空间中哪个位置读取数据
   invoke_callback(map->callback, offset, len, false); // prepare data to read
-  word_t ret = host_read(map->space + offset, len);
+  word_t ret = host_read(map->space + offset, len);   // 回调函数，准备读取数据，传递偏移量和长度
+  IFDEF(CONFIG_DTRACE, Log("[dtrace]   address =  " FMT_PADDR "  read " FMT_PADDR "    device = %s", addr, ret, map->name));
   return ret;
 }
 
@@ -69,4 +70,5 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
   invoke_callback(map->callback, offset, len, true);
+  IFDEF(CONFIG_DTRACE, Log("[dtrace]   address =  " FMT_PADDR "  write " FMT_PADDR "   device = %s", addr, data, map->name));
 }

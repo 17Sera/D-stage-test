@@ -1,10 +1,15 @@
 #include <am.h>
+#include "../riscv.h"
 
 void __am_timer_init() {
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = 0;
+  // uptime->us = 0;
+
+  uint32_t time_high = inl(RTC_ADDR + 4);
+  uint32_t time_low = inl(RTC_ADDR);
+  uptime->us = ((uint64_t)time_high << 32) + time_low;
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

@@ -74,15 +74,20 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+  uint32_t sync = vgactl_port_base[1];
+  if (sync) {         // 若同步寄存器非零，则表示需要处理同步状态，更新屏幕 
+    update_screen();
+    vgactl_port_base[1] = 0;  // 表示处理完同步状态后，清除同步寄存器，表示处理已完成
+  }
 }
 
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
-  vgactl_port_base[0] = (screen_width() << 16) | screen_height();
+  vgactl_port_base[0] = (screen_width() << 16) | screen_height();   // 宽度在高位 高度在低位
 #ifdef CONFIG_HAS_PORT_IO
-  add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);
+  add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);   // vgactl_port_base 作为映射的基地址传给 add_pio_map 函数
 #else
-  add_mmio_map("vgactl", CONFIG_VGA_CTL_MMIO, vgactl_port_base, 8, NULL);
+  add_mmio_map("vgactl", CONFIG_VGA_CTL_MMIO, vgactl_port_base, 8, NULL);   // 向系统添加一个MMIO映射，vgactl_port_base 作为映射的基地址传给 add_mmio_map 函数
 #endif
 
   vmem = new_space(screen_size());

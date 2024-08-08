@@ -31,4 +31,12 @@ enum { MODE_U, MODE_S, MODE_M = 3 };
 #define MSTATUS_UXL  0
 #endif
 
+
+
+#define DEVICE_BASE     0xa0000000
+#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8)
+#define RTC_ADDR        (DEVICE_BASE + 0x0000048)
+
+
+
 #endif

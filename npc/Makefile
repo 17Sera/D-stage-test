@@ -78,7 +78,7 @@ LIBS += -ldl        # 链接的库文件 link the <dlfcn> lib
 # 	$(MAKE) -s -C $(DIFF_REF_PATH) 
 
 # endif
-
+ 
 
 .PHONY:gtkw
 gtkw: wave.gtkw			#zhong.gtkw

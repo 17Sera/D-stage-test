@@ -5,6 +5,9 @@
 #define npc_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))   ///////////
 
 extern char _heap_start;
+// void malloc_reset();
+
+
 int main(const char *args);
 
 extern char _pmem_start;
@@ -18,16 +21,17 @@ Area heap = RANGE(&_heap_start, PMEM_END);
 static const char mainargs[] = MAINARGS;
 
 void putch(char ch) {
+  outb(SERIAL_PORT, ch);
 }
 
 void halt(int code) {
   npc_trap(code);
-
   // should not reach here
   while (1);
 }
 
 void _trm_init() {
+  //malloc_reset();
   int ret = main(mainargs);
   halt(ret);
 }

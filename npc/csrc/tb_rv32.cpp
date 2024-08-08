@@ -32,9 +32,13 @@ extern void   ebreak(int station, int inst);                   // control_unit.v
 extern int    pmem_read(int raddr);                            // mem.v
 extern int    pmem_read_inst(int pc);
 extern void   pmem_write(int waddr, int wdata, char wmask);    // mem.v
+extern uint64_t get_time();                               
+extern void difftest_skip_ref();
 /*********************************************/
 
 #define start_time 3
+
+static uint32_t rtc_port_base[2] = {0, 0};
 
 static const char *alu_names[16] = {
   "Unit_ALU", "Unit_MEM", "Unit_CU1", "Unit_CU2",
@@ -81,15 +85,30 @@ extern void ebreak(int station, int inst, char unit)
 }
 
 
-extern int pmem_read(int raddr)
-{
+
+
+extern int pmem_read(int raddr){
   static int data = 0xdeadbeaf;
   if(top->clk == 0)
     return data;
 
-  if(main_time >= start_time)
-  {
-    data = pmem_r(raddr, 4);
+  if(main_time >= start_time){
+    // device rtc 判断时钟
+    if((raddr == CONFIG_RTC_MMIO) || (raddr == CONFIG_RTC_MMIO + 4))
+    {
+      if(raddr == CONFIG_RTC_MMIO + 4)
+      {
+        uint64_t us = get_time();
+        rtc_port_base[0] = (uint32_t)us;
+        rtc_port_base[1] = us >> 32;
+      }
+      data = rtc_port_base[(raddr - CONFIG_RTC_MMIO) / 4];
+#ifdef CONFIG_DIFFTEST
+      difftest_skip_ref();
+#endif
+    }
+    else
+      data = pmem_r(raddr, 4);
     return data; 
     // return pmem_r((raddr & ~0x3u), 4);
   } 
@@ -98,18 +117,34 @@ extern int pmem_read(int raddr)
 }
 
 
+
 void pmem_write(int waddr, int wdata, char wmask)
 {
-  if(top->clk == 0)
+  if(top->clk == 0)   // 时钟低电平 不执行写操作
     return;
 
-  switch (wmask)
+  // device serial  判断串口
+  if(waddr == CONFIG_SERIAL_MMIO)
   {
-    case WByte: pmem_w(waddr, 1, wdata);
+    assert(wmask == WByte);   // 确保写掩码是字节
+    char ch = (char)wdata;    // 将写入数据转换为字符
+    putchar(ch);              // 将字符输出到串口
+
+#ifdef CONFIG_DIFFTEST
+    difftest_skip_ref();
+#endif
+
+    return;
+  }
+
+  // memory 内存写入
+  switch (wmask)    // 写掩码类型
+  {
+    case WByte: pmem_w(waddr, 1, wdata);  // 字节
                 break;
-    case WHalf: pmem_w(waddr, 2, wdata);
+    case WHalf: pmem_w(waddr, 2, wdata);  // 半字（两个字节）
                 break;
-    case WWord: pmem_w(waddr, 4, wdata);
+    case WWord: pmem_w(waddr, 4, wdata);  // 字（四个字节）
                 break;
     default:    assert(0);
                 break;
@@ -121,10 +156,20 @@ void single_cycle(void)
 {
   if(!Verilated::gotFinish())
   { 
-    top->clk = 0; top->eval(); tfp->dump(main_time);  main_time++; //推动仿真时间
-    top->clk = 1; top->eval(); tfp->dump(main_time);  main_time++; //推动仿真时间
+    top->clk = 0; top->eval(); 
+#ifdef CONFIG_WAVES
+    tfp->dump(main_time);  
+#endif
+    main_time++; //推动仿真时间
+
+    top->clk = 1; top->eval(); 
+#ifdef CONFIG_WAVES
+    tfp->dump(main_time);  
+#endif
+    main_time++; //推动仿真时间
   }
 }
+
 
 static void reset(void)
 {
@@ -151,10 +196,9 @@ int main(int argc, char *argv[])
   /* Initialize the verilator. */
   init_verilator();
 
-  // nemu只有在init_monitor调用difftest
   /* Initialize differential testing. */
   //printf("\n--------------------- diff_so_file = %s --------------------------\n",diff_so_file);
-  //init_difftest(diff_so_file, img_size, difftest_port);
+  init_difftest(diff_so_file, img_size, difftest_port);
 
   /* Receive commands from user. */
   sdb_mainloop();
@@ -166,164 +210,3 @@ int main(int argc, char *argv[])
 
   return is_exit_status_bad();
 }
-
-
-
-
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <assert.h>
-// #include "Vysyx_23060219_top.h"
-// #include "verilated_vcd_c.h"
-// #include "Vysyx_23060219_top__Dpi.h"
-// #include "svdpi.h"
-
-
-// #define HIT_GOOD_TRAP 1
-// #define ABORT         2
-// // #define HIT_BAD_TRAP  2
-// // #define ABORT         3
-
-
-// VerilatedVcdC* tfp = new VerilatedVcdC(); //导出vcd波形需要加此语句
-// Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
-// vluint64_t main_time = 0;  //initial 仿真时间
-// static  uint32_t inst[] = {
-// // 80000000 <_start>:
-//   0x00000413,          //	li	s0,0
-//   0x00009117,          //	auipc	sp,0x9
-//   0xffc10113,          //	add	sp,sp,-4 # 80009000 <_end>
-//   0x00c000ef,          //	jal	80000018 <_trm_init>
-// // 80000010 <main>:
-//   0x00000513,          //	li	a0,0
-//   0x00008067,          //	ret
-// // 80000018 <_trm_init>:
-//   0xff010113,          //	add	sp,sp,-16
-//   0x00000517,          //	auipc	a0,0x0
-//   0x01450513,          //	add	a0,a0,20 # 80000030 <_etext>
-//   0x00112623,          //	sw	ra,12(sp)
-//   0xfe9ff0ef,          //	jal	80000010 <main>
-//   0x00050513,          // mv	a0,a0
-//   0x00100073,          // ebreak
-//   0x0000006f,          // j	80000034 <_trm_init+0x1c>
-
-// //   0xffc10113,    //addi	sp,sp,-4
-// //   0x06400593,    //li	  a1,100
-// //   0x06458613,    //add	a2,a1,100
-// //   0x0c860693,    //add	a3,a2,200
-// //   0xed468713,    //add	a4,a3,-300
-// //   0xe7070793,    //add	a5,a4,-400
-// //   0x00009117,    //auipc	sp,0x9
-// //   0x80178813,    //add	a6,a5,-2047
-// //   0x7fa80893,    //add	a7,a6,2042
-// //   0x00000517,    //auipc	a0,0x0
-// //   0x7fa88893,    //add	a7,a7,2042
-// //   0x00100073,    //ebreak
-// //   0x06458613,    //add	a2,a1,100
-// //   0x0c860693,    //add	a3,a2,200
-// };
-
- 
-// extern int pmem_read(int raddr)
-// {
-//   if(raddr < 0x80000000)
-//     return 0;
-//   if((raddr - 0x80000000) % 4 != 0)
-//     return 0;
-
-//   return inst[(raddr - 0x80000000) / 4];
-// }
-
-
-// void pmem_write(int waddr, int wdata, char wmask)
-// {
-//   printf("inst=0x%08x, waddr=0x%08x, wdata=0x%08x, wmask=0x%08x\n\n" ,top->ysyx_23060219_top__DOT__pc, waddr, wdata, wmask);
-//   inst[(waddr - 0x80000000) / 4] = wdata;
-  
-  
-//   // switch (wmask)
-//   // {
-//   //   // case WByte: pmem_w(waddr, 1, wdata);
-//   //   //             break;
-//   //   // case WHalf: pmem_w(waddr, 2, wdata);
-//   //   //             break;
-//   //   case WWord: pmem_w(waddr, 4, wdata);
-//   //               break;
-//   //   default:    assert(0);
-//   //               break;
-//   // }
-// }
-
-// extern void ebreak(int station, int inst)
-// {
-//   switch(station)
-//   {
-//     case HIT_GOOD_TRAP:
-//       printf("\33[1;32m HIT GOOD TRAP \33[0m at pc = 0x%08x   ", top->ysyx_23060219_top__DOT__pc);
-//       printf("\33[1;35m Instruction \33[0m = 0x%08x\n", inst);
-//       break;
-    
-//     // case HIT_BAD_TRAP:
-//     //   printf("\33[1;31m HIT BAD TRAP\33[0m at pc = 0x%08x   ", top->ysyx_23060219_top__DOT__pc);
-//     //   printf("\33[1;32m Instruction \33[0m = 0x%08x\n", inst);
-//     //   break;
-
-//     case ABORT:
-//     default:
-//       if(main_time >= 4)
-//       {
-//         printf("\33[1;31m ABORT\33[0m at pc = 0x%08x   ", top->ysyx_23060219_top__DOT__pc);
-//         printf("\33[1;32m Instruction \33[0m = 0x%08x\n", inst);
-//       }
-//       break;
-//   }
-
-//   if(main_time >= 4)
-//     Verilated::gotFinish(true);
-// }
-
-
-// void single_cycle(void) 
-// {
-//   if(!Verilated::gotFinish())
-//   { 
-//     top->clk = 0; top->eval(); tfp->dump(main_time);  main_time++; //推动仿真时间
-//     top->clk = 1; top->eval(); tfp->dump(main_time);  main_time++; //推动仿真时间
-//     // top->inst = pmem_read(top->pc);
-//   }
-// }
-
-
-// static void reset(void)
-// {
-//   top->rst = 0; single_cycle();
-//   top->rst = 1; single_cycle();
-//   top->rst = 0; single_cycle();
-//   single_cycle(); 
-// }
-
-
-// int main(void)
-// {
-//   Verilated::traceEverOn(true); //导出vcd波形需要加此语句
-
-//   top->trace(tfp, 0);
-//   tfp->open("waveform.vcd"); //打开vcd
-
-//   //复位
-//   reset();
-
-//   while(!Verilated::gotFinish())
-//   {                                           
-//     if(main_time > 100)
-//       break;                                                                                                                                                                 
-//     single_cycle(); single_cycle(); single_cycle();
-//   }
-
-//   single_cycle();    
-
-//   top->final();
-//   tfp->close();
-//   delete top;
-//   return 0;
-// }

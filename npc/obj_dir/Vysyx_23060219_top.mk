@@ -51,6 +51,7 @@ VM_USER_CLASSES = \
 	reg \
 	sdb \
 	tb_rv32 \
+	time \
 	verilator-sim \
 	main \
 	trace \
@@ -91,6 +92,8 @@ reg.o: /home/zhong/ysyx-workbench/npc/csrc/reg.cpp
 sdb.o: /home/zhong/ysyx-workbench/npc/csrc/sdb.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 tb_rv32.o: /home/zhong/ysyx-workbench/npc/csrc/tb_rv32.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+time.o: /home/zhong/ysyx-workbench/npc/csrc/time.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 verilator-sim.o: /home/zhong/ysyx-workbench/npc/csrc/tmp/cpu/verilator-sim.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
