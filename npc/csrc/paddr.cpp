@@ -1,9 +1,12 @@
 #include "../include/paddr.h"
 #include "Vysyx_23060219_top.h"
+#include "verilated_fst_c.h"
+
 
 /********extern functions or variables********/
 extern Vysyx_23060219_top *top;
 extern vluint64_t main_time;
+extern VerilatedFstC* tfp;
 /*********************************************/
 
 uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
@@ -57,10 +60,18 @@ static inline bool in_pmem(paddr_t addr) {
   return (addr - PMEM_BASE < PMEM_SIZE);
 }
 
+
 static inline void out_of_bound(paddr_t addr) {
+  #ifdef CONFIG_WAVES
+    top->final();
+    tfp->close();
+    delete top;
+  #endif
   panic("address = 0x%08x is out of bound of pmem [0x%08x, 0x%08x] at pc = 0x%08x  time = %ld", 
          addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyx_23060219_top__DOT__pc, main_time);
 }
+
+
 
 word_t pmem_r(paddr_t addr, int len) 
 {

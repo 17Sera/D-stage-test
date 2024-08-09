@@ -1,12 +1,12 @@
 // Verilated -*- C++ -*-
 // DESCRIPTION: Verilator output: Tracing implementation internals
-#include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 #include "Vysyx_23060219_top__Syms.h"
 
 
-void Vysyx_23060219_top___024root__trace_chg_sub_0(Vysyx_23060219_top___024root* vlSelf, VerilatedVcd::Buffer* bufp);
+void Vysyx_23060219_top___024root__trace_chg_sub_0(Vysyx_23060219_top___024root* vlSelf, VerilatedFst::Buffer* bufp);
 
-void Vysyx_23060219_top___024root__trace_chg_top_0(void* voidSelf, VerilatedVcd::Buffer* bufp) {
+void Vysyx_23060219_top___024root__trace_chg_top_0(void* voidSelf, VerilatedFst::Buffer* bufp) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_23060219_top___024root__trace_chg_top_0\n"); );
     // Init
     Vysyx_23060219_top___024root* const __restrict vlSelf VL_ATTR_UNUSED = static_cast<Vysyx_23060219_top___024root*>(voidSelf);
@@ -16,7 +16,7 @@ void Vysyx_23060219_top___024root__trace_chg_top_0(void* voidSelf, VerilatedVcd:
     Vysyx_23060219_top___024root__trace_chg_sub_0((&vlSymsp->TOP), bufp);
 }
 
-void Vysyx_23060219_top___024root__trace_chg_sub_0(Vysyx_23060219_top___024root* vlSelf, VerilatedVcd::Buffer* bufp) {
+void Vysyx_23060219_top___024root__trace_chg_sub_0(Vysyx_23060219_top___024root* vlSelf, VerilatedFst::Buffer* bufp) {
     if (false && vlSelf) {}  // Prevent unused
     Vysyx_23060219_top__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_23060219_top___024root__trace_chg_sub_0\n"); );
@@ -220,7 +220,7 @@ void Vysyx_23060219_top___024root__trace_chg_sub_0(Vysyx_23060219_top___024root*
     bufp->chgBit(oldp+149,(vlSelf->rst));
 }
 
-void Vysyx_23060219_top___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {
+void Vysyx_23060219_top___024root__trace_cleanup(void* voidSelf, VerilatedFst* /*unused*/) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_23060219_top___024root__trace_cleanup\n"); );
     // Init
     Vysyx_23060219_top___024root* const __restrict vlSelf VL_ATTR_UNUSED = static_cast<Vysyx_23060219_top___024root*>(voidSelf);

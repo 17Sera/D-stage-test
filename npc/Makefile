@@ -32,12 +32,12 @@
 # 	@gdb --silent -s ${BIN} --args ${NPC_EXEC}
 
 # wave:
-# 	@gtkwave wave.vcd					# 打开波形
-# 	# @gtkwave $(OBJ_DIR)/wave.vcd
+# 	@gtkwave wave.fst					# 打开波形
+# 	# @gtkwave $(OBJ_DIR)/wave.fst
 
 # clean:
 # 	rm -rf ${OBJ_DIR}
-# 	rm wave.vcd
+# 	rm wave.fst
 
 # # sim:$(CSRC) $(VSRC)
 # # 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
@@ -47,10 +47,10 @@
 # # 		$^ 
 		
 # # 	./obj_dir/Vriscv_top
-# # 	gtkwave wave.vcd
+# # 	gtkwave wave.fst
 
 # # 	rm -rf obj_dir
-# # 	rm wave.vcd
+# # 	rm wave.fst
 	
 # include ../Makefile
 
@@ -101,18 +101,18 @@ gtkw: wave.gtkw			#zhong.gtkw
 
 
 .PHONY:sim
-sim: waveform.vcd
+sim: waveform.fst
 
 
 .PHONY:waves
-waves: waveform.vcd
+waves: waveform.fst
 	@echo
 	@echo "### WAVES ###"
-	gtkwave waveform.vcd
+	gtkwave waveform.fst
 
 
-.PHONY:waveform.vcd
-waveform.vcd: ./obj_dir/V$(MODULE)
+.PHONY:waveform.fst
+waveform.fst: ./obj_dir/V$(MODULE)
 	@echo
 	@echo "### SIMULATING ###"
 	@./obj_dir/V$(MODULE) #+verilator+rand+reset+2
@@ -172,7 +172,7 @@ verilate: .zhong.verilate
 .zhong.verilate: $(VSRCS) $(CSRCS)
 	@echo
 	@echo "### VERILATING ###"
-	verilator -Wno-STMTDLY -Wno-MODDUP --trace --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH)
+	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH)
 	@echo "LIBS +=$(LIBS)" >> ./obj_dir/V$(MODULE).mk    # to link readline and dlfcn library
 # @echo "CXXFLAGS +=$(CXXFLAGS)" >> ./obj_dir/V$(MODULE).mk 
 	@touch .zhong.verilate
@@ -194,5 +194,5 @@ lint: $(MODULE).v
 clean:
 	rm -rf .zhong.*;
 	rm -rf ./obj_dir
-	rm -rf waveform.vcd
+	rm -rf waveform.fst
 	rm ./log/*

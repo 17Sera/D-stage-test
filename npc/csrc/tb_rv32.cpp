@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "Vysyx_23060219_top.h"
-#include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 #include "Vysyx_23060219_top__Dpi.h"
 #include "svdpi.h"
 #include "../include/common.h"
@@ -11,7 +11,7 @@
 
 
 
-VerilatedVcdC* tfp = new VerilatedVcdC(); //导出vcd波形需要加此语句
+VerilatedFstC* tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
 vluint64_t main_time = 0;  //initial 仿真时间
 
@@ -158,15 +158,26 @@ void single_cycle(void)
   { 
     top->clk = 0; top->eval(); 
 #ifdef CONFIG_WAVES
+  //if( top->rootp->ysyx_23060219_top__DOT__pc >= 0x800246f4 ) {
     tfp->dump(main_time);  
+  //}
 #endif
     main_time++; //推动仿真时间
 
     top->clk = 1; top->eval(); 
 #ifdef CONFIG_WAVES
+  //if( top->rootp->ysyx_23060219_top__DOT__pc>= 0x800246f4) {
     tfp->dump(main_time);  
+  //}
 #endif
     main_time++; //推动仿真时间
+
+
+  //if( top->rootp->ysyx_23060219_top__DOT__pc == 0x800246f8 ){
+    // top->final();
+    // tfp->close();
+    // delete top;
+  //}
   }
 }
 
@@ -180,10 +191,10 @@ static void reset(void)
 
 static void init_verilator(void)
 {
-  Verilated::traceEverOn(true); //导出vcd波形需要加此语句
+  Verilated::traceEverOn(true); //导出fst波形需要加此语句
 
   top->trace(tfp, 0);
-  tfp->open("waveform.vcd"); //打开vcd
+  tfp->open("waveform.fst"); //打开fst
 
   reset();  //复位
 }
@@ -204,6 +215,9 @@ int main(int argc, char *argv[])
   sdb_mainloop();
 
   /* End the simulation */
+
+
+
   top->final();
   tfp->close();
   delete top;

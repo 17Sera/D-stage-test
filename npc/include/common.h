@@ -63,7 +63,7 @@
 //#define CONFIG_MTRACE     1
 //#define CONFIG_FTRACE       1
 //#define CONFIG_IRINGBUF     1     ## 依赖itrace对logbuf的定义，要开iringbuf就要开itrace
-//#define CONFIG_DIFFTEST   1
+#define CONFIG_DIFFTEST   1
 
 #define MAX_iringbuf_size   20
 
@@ -73,7 +73,7 @@
 #define CONFIG_SERIAL_MMIO 0xa00003f8
 #define CONFIG_RTC_MMIO    0xa0000048
 
-// #define CONFIG_WAVES 1
+//#define CONFIG_WAVES 1
 
 
 #endif
