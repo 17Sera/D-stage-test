@@ -57,13 +57,13 @@
 //#define CONFIG_WATCHPOINT 1
 
 // trace
-#define CONFIG_TRACE        1
+//#define CONFIG_TRACE        1
 
 //#define CONFIG_ITRACE       1
 //#define CONFIG_MTRACE     1
 //#define CONFIG_FTRACE       1
 //#define CONFIG_IRINGBUF     1     ## 依赖itrace对logbuf的定义，要开iringbuf就要开itrace
-#define CONFIG_DIFFTEST   1
+//#define CONFIG_DIFFTEST   1
 
 #define MAX_iringbuf_size   20
 

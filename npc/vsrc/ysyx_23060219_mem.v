@@ -49,10 +49,10 @@ module ysyx_23060219_mem(
     // rdata_temp -> rdata
     always @(*) begin
         case (rmask)
-            `LoadBU:  rdata = {24'd0, rdata_temp[7:0]};
-            `LoadHU:  rdata = {16'd0, rdata_temp[15:0]};
-            // `LoadB:   rdata = {{24{rdata_temp[7]}}, rdata_temp[7:0]};
-            `LoadH:   rdata = {{16{rdata_temp[15]}}, rdata_temp[15:0]};
+            `LoadBU:  rdata = {24'd0, rdata_temp[7:0]};                     // lbu读一个字节，经过高位补0后存入rdata
+            `LoadHU:  rdata = {16'd0, rdata_temp[15:0]};                    // lhu读两个字节，经过高位补0后存入rdata
+            `LoadB:   rdata = {{24{rdata_temp[7]}} , rdata_temp[7:0]} ;     // lb读一个字节，符号扩展后存入rdata
+            `LoadH:   rdata = {{16{rdata_temp[15]}}, rdata_temp[15:0]};     // lh读两个字节，符号扩展后存入rdata
             `LoadW:   rdata = rdata_temp;
             default:  begin
                         rdata = 32'hdeadbeaf;

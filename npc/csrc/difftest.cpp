@@ -67,8 +67,7 @@ void init_difftest(char *ref_so_file, long img_size, int port)
     void (*ref_difftest_init)(int) = (void (*)(int))dlsym(handle, "difftest_init");
     assert(ref_difftest_init);
 
-    Log("The result of every instruction will be compared with %s. "
-        "This will help you a lot for debugging, but also significantly reduce the performance. ", ref_so_file);
+    Log("The result of every instruction will be compared with %s. ", ref_so_file);
 
     ref_difftest_init(port);
     ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
@@ -76,7 +75,7 @@ void init_difftest(char *ref_so_file, long img_size, int port)
 }
 
 
-bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) 
+bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)   // 检查设计和参考模型的寄存器状态是否一致
 {
     bool success = true;
 
@@ -110,7 +109,7 @@ static void checkregs(CPU_state *ref, vaddr_t pc, vaddr_t npc)
     }
 }
 
-
+// 在每个步骤中执行差分测试，包括跳过特定的测试周期
 void difftest_step(vaddr_t pc, vaddr_t npc) 
 {
     CPU_state ref_r;

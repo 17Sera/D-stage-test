@@ -16,18 +16,20 @@
 `define INST_AND    3'b111
 
 
-// I type instruction
+// I type instruction   fun3
 `define INST_TYPE_I  7'b001_0011
 `define INST_ADDI    3'b000
 `define INST_SLLI    3'b001
 `define INST_SLTIU   3'b011
 `define INST_XORI    3'b100
 `define INST_SRLAI   3'b101
+`define INST_ORI     3'b110
 `define INST_ANDI    3'b111
 
 
 // L type instruction
 `define INST_TYPE_L 7'b000_0011
+`define INST_LB     3'b000
 `define INST_LH     3'b001
 `define INST_LW     3'b010
 `define INST_LBU    3'b100
@@ -124,7 +126,7 @@
 // ALU
 `define ADD       5'b00000
 `define SUB       5'b00001
-`define SLL       5'b00010
+`define SLLI       5'b00010
 `define XOR       5'b00011
 `define SRL       5'b00100
 `define SRA       5'b00101
@@ -138,7 +140,7 @@
 `define GEU       5'b01101
 `define ADD_LUI   5'b01110
 `define ADD_JALR  5'b01111
-//`define SLT       5'b10000
+`define SLL       5'b10000
 `define AlucBus   4:0
 
 

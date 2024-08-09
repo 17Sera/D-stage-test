@@ -32,21 +32,21 @@ module ysyx_23060219_control_unit(
 
     always @(*) begin
         case(opcode_6_0)    //按opcode分类
-            `INST_TYPE_R: begin             // 写入R指令信息
+            `INST_TYPE_R: begin             // 写入R指令信息    两个寄存器之间的操作
                 IType   = `INST_R;          //指令类型为R
                 reg_wen = `WEnable;         // 1'b1
                 mem_wen = `WDisen;          // 1'b0
                 mem_ren = `WDisen;   
                 wmask   = `WWord;          // don't care      
                 rmask   = `LoadW;          // don't care      
-                m1      = `MUX1_NBpc;      //not bump inst / is bump inst
-                m2      = `MUX2_PCadd4;    //MUX2_result / MUX2_PCadd4
-                m3      = `MUX3_src2;      //MUX3_src2 / MUX3_imm32
-                m4      = `MUX4_src1;      //MUX4_src1 / MUX4_pc
-                m5      = `MUX5_result;
+                m1      = `MUX1_NBpc;      // not bump inst / is bump inst
+                m2      = `MUX2_PCadd4;    // MUX2_result / MUX2_PCadd4
+                m3      = `MUX3_src2;      // MUX3_src2 / MUX3_imm32
+                m4      = `MUX4_src1;      // MUX4_src1 / MUX4_pc
+                m5      = `MUX5_result;    // 写进寄存器的是 MUX5_PCadd4、MUX5_memdat、MUX5_result、MUX5_IDLE
                 if(fun7_31_25 == 7'b000_0000) begin     //R指令基础上 按fun7分类
                     case (fun3_14_12)                   //再按fun3分类 
-                        `INST_ADD:  aluc = `ADD;        //决定alu控制信号
+                        `INST_ADD:  aluc = `ADD;
                         `INST_SLL:  aluc = `SLL;
                         `INST_SLTU: aluc = `LTU;        //还要进一步分成SLTU和BLTU
                         `INST_XOR:  aluc = `XOR;
@@ -81,17 +81,18 @@ module ysyx_23060219_control_unit(
                 case (fun3_14_12)
                     `INST_ADDI:  aluc = `ADD;
                     `INST_SLTIU: aluc = `LTU;
+                    `INST_ORI:   aluc = `OR;
                     `INST_XORI:  aluc = `XOR;
                     `INST_ANDI:  aluc = `AND;
-                    `INST_SLLI:  aluc = `SLL;
+                    `INST_SLLI:  aluc = `SLLI;
                     `INST_SRLAI:begin 
                                     case (fun7_31_25)
                                         7'b000_0000: aluc = `SRL;
                                         7'b010_0000: aluc = `SRA;
-                                        default: ebreak(`ABORT, inst, `Unit_CU4);  //zhong
+                                        default: ebreak(`ABORT, inst, `Unit_CU4);
                                     endcase
                                 end 
-                     default:     ebreak(`ABORT, inst, `Unit_CU5);  //zhong
+                     default:     ebreak(`ABORT, inst, `Unit_CU5);
                 endcase
             end          
             `INST_TYPE_L: begin
@@ -107,11 +108,12 @@ module ysyx_23060219_control_unit(
                 m4      = `MUX4_src1;
                 m5      = `MUX5_memdat;
                 case (fun3_14_12)
+                    `INST_LB:  rmask = `LoadB;
                     `INST_LH:  rmask = `LoadH;
                     `INST_LW:  rmask = `LoadW;
                     `INST_LBU: rmask = `LoadBU;
                     `INST_LHU: rmask = `LoadHU;
-                    default:  ebreak(`ABORT, inst, `Unit_CU6);  //zhong
+                    default:  ebreak(`ABORT, inst, `Unit_CU6);
                 endcase
             end
             `INST_TYPE_S: begin
@@ -130,7 +132,7 @@ module ysyx_23060219_control_unit(
                     `INST_SB: wmask = `WByte;
                     `INST_SH: wmask = `WHalf;
                     `INST_SW: wmask = `WWord;
-                    default:  ebreak(`ABORT, inst, `Unit_CU7);  //zhong
+                    default:  ebreak(`ABORT, inst, `Unit_CU7);
                 endcase
             end
             `INST_TYPE_B: begin
@@ -152,7 +154,7 @@ module ysyx_23060219_control_unit(
                     `INST_BGE:  aluc = `GE;
                     `INST_BLTU: aluc = `LTU;
                     `INST_BGEU: aluc = `GEU;
-                    default:   ebreak(`ABORT, inst, `Unit_CU8);  //zhong
+                    default:   ebreak(`ABORT, inst, `Unit_CU8);
                 endcase
             end
             `INST_TYPE_LUI: begin
@@ -217,7 +219,7 @@ module ysyx_23060219_control_unit(
                      default:     ebreak(`ABORT, inst, `Unit_CU10);
                 endcase
             end
-            default: ebreak(`ABORT, inst, `Unit_CU11);   //zhong
+            default: ebreak(`ABORT, inst, `Unit_CU11);
         endcase
     end
 
