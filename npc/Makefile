@@ -68,7 +68,7 @@ LIBS += $(shell llvm-config-11 --libs)
 CXXFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
 
 
-# ifdef CONFIG_DIFFTEST			#差分测试的路径			###
+ifdef CONFIG_DIFFTEST			#差分测试的路径			###
 DIFF_REF_PATH = $(NEMU_HOME)
 DIFF_REF_SO = $(DIFF_REF_PATH)/build/riscv32-nemu-interpreter-so	#动态链接库
 ARGS_DIFF = --diff=$(DIFF_REF_SO)
@@ -77,7 +77,7 @@ ARGS_DIFF = --diff=$(DIFF_REF_SO)
 # $(DIFF_REF_SO):
 # 	$(MAKE) -s -C $(DIFF_REF_PATH) 
 
-# endif
+endif
  
 
 # ifdef CONFIG_DIFFTEST
