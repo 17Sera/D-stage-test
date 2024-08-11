@@ -93,6 +93,7 @@ extern int pmem_read(int raddr){
     return data;
 
   if(main_time >= start_time){
+
     // device rtc 判断时钟
     if((raddr == CONFIG_RTC_MMIO) || (raddr == CONFIG_RTC_MMIO + 4))
     {
@@ -120,7 +121,7 @@ extern int pmem_read(int raddr){
 
 void pmem_write(int waddr, int wdata, char wmask)
 {
-  if(top->clk == 0)   // 时钟低电平 不执行写操作
+  if(top->clk == 0)   // 写操作仅在时钟为高电平时有效
     return;
 
   // device serial  判断串口
@@ -131,13 +132,13 @@ void pmem_write(int waddr, int wdata, char wmask)
     putchar(ch);              // 将字符输出到串口
 
 #ifdef CONFIG_DIFFTEST
-    difftest_skip_ref();
+    difftest_skip_ref();     // 跳过参考模型的测试
 #endif
 
     return;
   }
 
-  // memory 内存写入
+  // memory 不是串口地址则进行内存写入
   switch (wmask)    // 写掩码类型
   {
     case WByte: pmem_w(waddr, 1, wdata);  // 字节
@@ -157,27 +158,21 @@ void single_cycle(void)
   if(!Verilated::gotFinish())
   { 
     top->clk = 0; top->eval(); 
+
 #ifdef CONFIG_WAVES
-  //if( top->rootp->ysyx_23060219_top__DOT__pc >= 0x800246f4 ) {
     tfp->dump(main_time);  
-  //}
 #endif
+
     main_time++; //推动仿真时间
 
     top->clk = 1; top->eval(); 
+
 #ifdef CONFIG_WAVES
-  //if( top->rootp->ysyx_23060219_top__DOT__pc>= 0x800246f4) {
     tfp->dump(main_time);  
-  //}
 #endif
+
     main_time++; //推动仿真时间
 
-
-  //if( top->rootp->ysyx_23060219_top__DOT__pc == 0x800246f8 ){
-    // top->final();
-    // tfp->close();
-    // delete top;
-  //}
   }
 }
 
@@ -189,15 +184,17 @@ static void reset(void)
   top->rst = 0; 
 }
 
+
 static void init_verilator(void)
 {
   Verilated::traceEverOn(true); //导出fst波形需要加此语句
 
   top->trace(tfp, 0);
-  tfp->open("waveform.fst"); //打开fst
+  tfp->open("waveform.fst");    //打开fst
 
   reset();  //复位
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -215,8 +212,6 @@ int main(int argc, char *argv[])
   sdb_mainloop();
 
   /* End the simulation */
-
-
 
   top->final();
   tfp->close();

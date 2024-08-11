@@ -19,7 +19,7 @@ static const char *regs[] = {
 
 void regs_display() 
 {
-    _Log(ANSI_FG_RED "RegName  Hex_Value       Dec_Value\n" ANSI_NONE);
+    _Log(ANSI_FG_GREEN "RegName    H_data          D_data\n" ANSI_NONE);
     _Log(ANSI_FG_YELLOW "  $%s\t" ANSI_NONE " 0x%08x\t %010u\n", "pc", 
          top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__pc);
     for(int i = 0; i < 32; i++)

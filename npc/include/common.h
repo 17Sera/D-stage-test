@@ -53,8 +53,9 @@
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 
+//------------------------------------------------------------------------------------
 // watchpoint
-//#define CONFIG_WATCHPOINT 1
+#define CONFIG_WATCHPOINT 1
 
 // trace
 //#define CONFIG_TRACE        1

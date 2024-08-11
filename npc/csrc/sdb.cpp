@@ -311,7 +311,7 @@ extern NPCState npc_state;
 /*********************************************/
 
 
-static int is_batch_mode = true;
+static int is_batch_mode = false;
 
 
 static int cmd_c(char *args) {
@@ -371,30 +371,26 @@ static int cmd_si(char *args)
 }
 
 
-static int cmd_info(char *args) 
-{
-    /* extract the first argument */
-    char *buff = strtok(NULL, " ");
+static int cmd_info(char *args) {
+    char *buff = strtok(NULL, " ");         /* 提取第一个参数 args是info后面的单字符参数*/
 
-    if (buff == NULL) 
-    {
-        /* no argument given */
-        Warn("Input 'r' for registers!");
-    }
-    else 
-    {
+    if (buff == NULL)                       /* info后面没有跟参数 */
+        Warn("No args.\nList: info r or info w\n");
+    else {
         if(strcmp(buff, "r") == 0)
         {
             //register
-            _Log(ANSI_FG_BLUE "Display register information.\n" ANSI_NONE);
+            // _Log(ANSI_FG_BLUE "Display register information.\n" ANSI_NONE);
             buff = strtok(NULL, " ");
             if(buff == NULL)
                 regs_display();
             else
-                single_reg_display(buff);
+                single_reg_display(buff);   /* 打印单个寄存器 */
         }
+        else if( strcmp( buff, "w" ) == 0 ) /* info w 打印监视点 */
+		    wp_display(); 
         else
-            Warn("Unknown arguments '%s'. Input 'r' for registers", buff);
+            Warn("Unknown arguments '%s'\nList: info r or info w", buff);
     }
     return 0;
 }
@@ -443,16 +439,14 @@ static int cmd_x(char *args)
     return 0;
 }
 
-static int cmd_p(char *args) 
-    {
+static int cmd_p(char *args) {
     bool success = true;
     uint32_t result;
 
     if (args == NULL) 
         /* no argument given */
         Warn("No expression inputed!");
-    else 
-    {
+    else {
         result = expr(args, &success);
         _Log(ANSI_FG_BLUE "%s = %d\n" ANSI_NONE, args, result);
     }
@@ -580,4 +574,5 @@ void init_sdb()
 {
   /* Compile the regular expressions. */
   init_regex();
+  init_wp_pool();
 }
