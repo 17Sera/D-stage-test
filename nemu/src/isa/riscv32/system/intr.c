@@ -15,12 +15,13 @@
 
 #include <isa.h>
 
-word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
-   * Then return the address of the interrupt/exception vector.
-   */
+word_t isa_raise_intr(word_t NO, vaddr_t epc) {   //模拟触发异常后硬件的响应过程
+  // cpu.csr.mcause = NO;    // NO对应异常种类
 
-  return 0;
+  cpu.csr.mcause = 0xb;   // 在mcause寄存器中设置异常号
+  cpu.csr.mepc = epc;     // epc对应触发异常的指令地址，将当前PC值保存到mepc寄存器
+  return cpu.csr.mtvec;   // 从mtvec寄存器中取出异常入口地址
+
 }
 
 word_t isa_query_intr() {

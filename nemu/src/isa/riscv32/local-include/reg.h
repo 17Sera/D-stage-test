@@ -18,12 +18,33 @@
 
 #include <common.h>
 
+word_t isa_raise_intr(word_t NO, vaddr_t epc);
+
 static inline int check_reg_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < MUXDEF(CONFIG_RVE, 16, 32)));
   return idx;
 }
 
 #define gpr(idx) (cpu.gpr[check_reg_idx(idx)])
+
+
+// #define MSTATUS 0
+// #define MTVEC   1
+// #define MEPC    2
+// #define MCAUSE  3
+// static inline int csr_idx_map(int idx) {
+//   switch (idx){                                       
+//     case 0x300 : return MSTATUS;    break;   // mstatus          
+//     case 0x305 : return MTVEC;      break;   // mtvec          
+//     case 0x341 : return MEPC;       break;   // mepc          
+//     case 0x342 : return MCAUSE;     break;   // mcause          
+//     default    : assert(0); 
+//     // default    : Log("pc = 0x%08x", cpu.pc); assert(0); 
+//   }   
+// }
+// #define CSR(idx) (cpu.csr[csr_idx_map(idx)])
+
+
 
 static inline const char* reg_name(int idx) {
   extern const char* regs[];
