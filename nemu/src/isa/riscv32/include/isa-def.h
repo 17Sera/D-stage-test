@@ -18,10 +18,6 @@
 
 #include <common.h>
 
-// #define MSTATUS 0
-// #define MTVEC   1
-// #define MEPC    2
-// #define MCAUSE  3
 
 typedef struct {
   word_t    mcause;
@@ -36,7 +32,6 @@ typedef struct {
   vaddr_t pc;
   riscv32_CSRs csr;
 
-  // word_t csr[4];
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 
