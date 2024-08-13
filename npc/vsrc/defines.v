@@ -67,6 +67,10 @@
 
 // E type instruction
 `define INST_TYPE_E   7'b111_0011
+`define INST_CSRRW    3'b001
+`define INST_CSRRS    3'b010
+`define INST_MRET     12'b0011_0000_0010
+`define INST_ECALL    12'b0000_0000_0000
 `define INST_EBREAK   12'b0000_0000_0001
 `define HIT_TRAP      1
 `define ABORT         2
@@ -86,7 +90,7 @@
 `define Unit_IE1      13   //imm extended unit
 `define Unit_IE2      14  
 `define Unit_IE3      15 
-
+`define Unit_CR       16   //csr regs
 
 // type
 `define TYPE_BUS 2:0
@@ -105,8 +109,10 @@
 
 
 // MUX2
-`define MUX2_PCadd4  1'b0
-`define MUX2_result  1'b1
+`define MUX2_PCadd4  2'd0
+`define MUX2_result  2'd1
+`define MUX2_CsrNpc  2'd2
+`define MUX2_IDLE    2'd3
 
 // MUX3
 `define MUX3_src2  1'b0
@@ -120,14 +126,15 @@
 `define MUX5_PCadd4 2'd0
 `define MUX5_memdat 2'd1
 `define MUX5_result 2'd2
-`define MUX5_IDLE   2'd3
+`define MUX5_CsrVal 2'd3
+//`define MUX5_IDLE   2'd3
 
 
 
 // ALU
 `define ADD       5'b00000
 `define SUB       5'b00001
-`define SLLI       5'b00010
+`define SLLI      5'b00010
 `define XOR       5'b00011
 `define SRL       5'b00100
 `define SRA       5'b00101
@@ -155,6 +162,7 @@
 `define Reg0_VAL  32'd0
 `define WDisen    1'b0
 `define WEnable   1'b1
+`define Mcause_gpr 15  // riscve : a5 ; others a7
 
 
 // mem
@@ -176,3 +184,6 @@
 `define RegBus    31:0
 `define RegRstVal 32'd0
 
+// FLAH
+`define TRUE  1'b1
+`define FALSE 1'b0
