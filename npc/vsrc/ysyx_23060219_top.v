@@ -7,6 +7,7 @@ module PC(
   input  wire           m2,
   input  wire [`RegBus] result,   //  31:0
   input  wire [`RegBus] imm32,
+  input  wire [`RegBus] csr_npc,
   output wire [`RegBus] PCadd4,
   output reg  [`RegBus] pc
 );
@@ -34,9 +35,15 @@ module PC(
   );
 
   // MUX2 module
-  MuxKey #(2, 1, `BitWidth) i2  (npc_temp, (m2), {
-      `MUX2_PCadd4, PCadd4,   //  1'b0
-      `MUX2_result, result}   //  1'b1 
+  // MuxKey #(2, 1, `BitWidth) i2  (npc_temp, (m2), {
+  //     `MUX2_PCadd4, PCadd4,   //  1'b0
+  //     `MUX2_result, result}   //  1'b1 
+  // );
+  MuxKey #(4, 2, `BitWidth) i2  (npc_temp, (m2), {
+    `MUX2_PCadd4, PCadd4,
+    `MUX2_result, result,
+    `MUX2_CsrNpc, csr_npc,
+    `MUX2_IDLE,   32'hdead000c} 
   );
 
 endmodule
@@ -59,6 +66,8 @@ module ysyx_23060219_top(
   wire[`RegBus]   inst;     
   wire[`RegBus]   pc;     
   wire[`TYPE_BUS] IType;      //inst type 2:0 
+  wire            is_ecall;
+  wire            csr_wen;    //csr write enable 
   wire            reg_wen;    //RegFile 写使能
   wire            mem_wen;    //mem 写使能
   wire            mem_ren;    //mem 读使能
@@ -79,6 +88,8 @@ module ysyx_23060219_top(
   wire[`RegBus]   num1;       //alu operation number1       
   wire[`RegBus]   num2;       //alu operation number2
   wire[`RegBus]   mem_rdata;  //mem 读到的数据
+  wire[`RegBus]   csr_npc;    //next pc read from csr 
+  wire[`RegBus]   csr_val;    //csr value
 
 
   // PC module
@@ -89,6 +100,7 @@ module ysyx_23060219_top(
     .m2       (m2),
     .result   (result),
     .imm32    (imm32),
+    .csr_npc  (csr_npc),
     .PCadd4   (PCadd4),
     .pc       (pc)   
   );
@@ -118,6 +130,8 @@ module ysyx_23060219_top(
     .fun7_31_25(funct7),
     .IType     (IType),
     .aluc      (aluc),
+    .is_ecall  (is_ecall),
+    .csr_wen   (csr_wen),
     .reg_wen   (reg_wen),    
     .mem_wen   (mem_wen),
     .mem_ren   (mem_ren),  
@@ -134,6 +148,7 @@ module ysyx_23060219_top(
   ysyx_23060219_register_file register_file_inst(
     .clk      (clk),
     .rst      (rst),
+    .is_ecall (is_ecall),
     .reg_wen  (reg_wen),
     .rs1      (rs1),
     .rs2      (rs2),
@@ -141,6 +156,20 @@ module ysyx_23060219_top(
     .reg_in   (reg_in),
     .src1     (src1),
     .src2     (src2)
+  );
+
+  // CSR Registers  module
+  csr_regs csr_regs_inst(
+    .clk     (clk),
+    .rst     (rst),
+    .is_ecall(is_ecall),
+    .csr_wen (csr_wen),
+    .funct3  (funct3),
+    .csr     ({funct7, rs2}),
+    .src1    (src1),
+    .pc      (pc),
+    .csr_npc (csr_npc),
+    .csr_val (csr_val)
   );
 
   // Imm Extend module
@@ -155,23 +184,24 @@ module ysyx_23060219_top(
   );
 
   // MUX3 module
-  MuxKey #(2, 1, `BitWidth) i3(num2, m3, {
+  MuxKey #(2, 1, `BitWidth) i3 (num2, m3, {
       `MUX3_src2,  src2,
       `MUX3_imm32, imm32}
   );
 
   // MUX4 module
-  MuxKey #(2, 1, `BitWidth) i4(num1, m4, {
+  MuxKey #(2, 1, `BitWidth) i4 (num1, m4, {
       `MUX4_pc,   pc,
       `MUX4_src1, src1}
   );
 
   // MUX5 module
-  MuxKey #(4, 2, `BitWidth) i5(reg_in, m5, {
+  MuxKey #(4, 2, `BitWidth) i5 (reg_in, m5, {
       `MUX5_PCadd4, PCadd4,
       `MUX5_memdat, mem_rdata,
       `MUX5_result, result,
-      `MUX5_IDLE,   32'hdeadbeaf}       
+      `MUX5_CsrVal, csr_val} 
+      //`MUX5_IDLE,   32'hdeadbeaf}       
   );
   
   // ALU module

@@ -3,6 +3,7 @@
 module ysyx_23060219_register_file(
     input  wire           clk,
     input  wire           rst,
+    input  wire           is_ecall,
     input  wire           reg_wen,
     input  wire [4:0]     rs1,
     input  wire [4:0]     rs2,
@@ -14,7 +15,7 @@ module ysyx_23060219_register_file(
 
     integer i;
     reg[`RegBus] regs[`BitWidth-1 : 0];
-
+    wire[`RegBus] src1_temp;
 
     //wire register
     always @(posedge clk) begin
@@ -29,7 +30,9 @@ module ysyx_23060219_register_file(
     end
 
     //read register
-    assign src1 = (rs1 == `Reg0) ? `Reg0_VAL : regs[rs1];
+    // assign src1 = (rs1 == `Reg0) ? `Reg0_VAL : regs[rs1];
+    assign src1_temp = (rs1 == `Reg0) ? `Reg0_VAL : regs[rs1];
+    assign src1 = (is_ecall == 1'b1) ? regs[`Mcause_gpr] : src1_temp;       // 判断ecall
     assign src2 = (rs2 == `Reg0) ? `Reg0_VAL : regs[rs2];
    
 endmodule
