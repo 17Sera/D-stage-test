@@ -8,14 +8,14 @@ void init_fs(void);
 void init_proc(void);
 
 int main() {
-  extern const char logo[];
-  printf("%s", logo);
+  extern const char logo[];     //  打印Project-N的logo
+  printf("%s", logo);           // log宏通过klib的printf输出，最终调用TRM的putch()
   Log("'Hello World!' from Nanos-lite");
   Log("Build time: %s, %s", __TIME__, __DATE__);
 
   init_mm();
 
-  init_device();
+  init_device();                // 初始化设备，会直接调用ioe_init()
 
   init_ramdisk();
 
@@ -23,9 +23,9 @@ int main() {
   init_irq();
 #endif
 
-  init_fs();
+  init_fs();                    // 初始化文件系统
 
-  init_proc();
+  init_proc();                  // 创建进程
 
   Log("Finish initialization");
 
