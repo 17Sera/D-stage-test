@@ -40,8 +40,27 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
+
+//kstack是栈的范围, entry是内核线程的入口, arg则是内核线程的参数.
+
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+
+  //Context *c = (Context *)(kstack.end - sizeof(Context));     // -4？ // 得到并指向栈中上下文结构体指针的起始地址
+  Context *c = (Context*)kstack.end - 1;          // 这里的1等同于一个Context
+  c->mcause = 0xb;
+  c->mstatus = 0x1800;            // difftest pass
+  c->mepc = (uintptr_t) entry;      // 当前进程的上下文指针保存在PCB当中
+
+  // //入口为f()
+  // c->mepc = (uint32_t)entry;
+  // for(int i = 0; i < NR_REGS; i++)
+  //   c->gpr[i] = 0;
+  
+  // //观察汇编，a0为传参寄存器
+  // c->gpr[10] = (uint32_t)arg;
+
+
+  return c;
 }
 
 
