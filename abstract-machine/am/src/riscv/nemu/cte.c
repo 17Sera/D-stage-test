@@ -2,10 +2,10 @@
 #include <riscv/riscv.h>
 #include <klib.h>
 
-static Context* (*user_handler)(Event, Context*) = NULL;
+static Context* (*user_handler)(Event, Context*) = NULL;    // user_handler是一个静态函数指针 (Event, Context*)是函数的输入参数
 
 
-// __am_asm_trap调用__am_irq_handle 用于构造事件
+// __am_asm_trap调用__am_irq_handle 根据mcause异常号识别出是什么事件ev.event
 Context* __am_irq_handle(Context *c) {
   if (user_handler) {     //user_handler是cte_init中注册的回调函数
     Event ev = {0};
@@ -30,7 +30,7 @@ extern void __am_asm_trap(void);
 
 
 
-bool cte_init(Context*(*handler)(Event, Context*)) {
+bool cte_init(Context*(*handler)(Event, Context*)) {        // handler也是一个函数指针，和user_handler同类型
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));    // 异常处理的入口地址设置为__am_asm_trap
                                                             // %0 表示内联汇编指令中第一个操作数，在这里是__am_asm_trap，“r”表示将一个寄存器作为输入操作数
@@ -45,19 +45,17 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 
-  //Context *c = (Context *)(kstack.end - sizeof(Context));     // -4？ // 得到并指向栈中上下文结构体指针的起始地址
-  Context *c = (Context*)kstack.end - 1;          // 这里的1等同于一个Context
-  c->mcause = 0xb;
-  c->mstatus = 0x1800;            // difftest pass
-  c->mepc = (uintptr_t) entry;      // 当前进程的上下文指针保存在PCB当中
+  Context *c = (Context*)kstack.end - 1;  // 这里的1等同于一个Context大小  // 上下文指针 c 指向栈的起始地址
+  //c->mcause = 0xb;
+  c->mstatus = 0x1800;              // difftest pass
+  c->mepc = (uintptr_t) entry;      // 创建以entry为入口的上下文
 
-  // //入口为f()
-  // c->mepc = (uint32_t)entry;
+  //入口函数为f()
   // for(int i = 0; i < NR_REGS; i++)
   //   c->gpr[i] = 0;
   
-  // //观察汇编，a0为传参寄存器
-  // c->gpr[10] = (uint32_t)arg;
+  //观察汇编，a0为传参寄存器
+  c->gpr[10] = (uintptr_t)arg;  // gpr[10] 对应a0
 
 
   return c;

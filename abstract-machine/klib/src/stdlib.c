@@ -5,7 +5,7 @@
 //-----------------------------------------------------------
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 static unsigned long int next = 1;
-static char* start_addr;    // addr初始值
+static char* start_addr;    // addr初始值    native运行则注释，nemu运行则需要
 static bool init_flag = 0;  // 初始化的标志, 初始化完成后置1
 // static char *hbrk;
 //-----------------------------------------------------------

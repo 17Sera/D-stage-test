@@ -57,12 +57,12 @@ __am_asm_trap:
   or t1, t1, a0
   csrw mstatus, t1
 
-  mv a0, sp
+  mv a0, sp                   // 保存当前进程的上下文，栈指针sp复制到寄存器a0，a0是用于传递参数的寄存器
   jal __am_irq_handle
 
   mv sp, a0                   // 由schedule汇编代码可知，current->cp放在了a0
 
-  LOAD t1, OFFSET_STATUS(sp)
+  LOAD t1, OFFSET_STATUS(sp)  // 恢复上下文
   LOAD t2, OFFSET_EPC(sp)
   csrw mstatus, t1
   csrw mepc, t2
