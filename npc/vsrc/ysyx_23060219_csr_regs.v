@@ -36,14 +36,17 @@ module csr_regs(
 
     // write register
     always @(posedge clk) begin
-        if(rst == `RST_VAL) begin       // 复位
-                mstatus <= `RegRstVal;  
-                mtvec   <= `RegRstVal;  
-                mepc    <= `RegRstVal;  
+        if(rst == `RST_VAL) begin           // 复位
+                mstatus <=  32'h1800;
+                mtvec   <= `RESET_VECTOR;
+                mepc    <= `RESET_VECTOR;
+                //mtvec   <= `RegRstVal;  
+                //mepc    <= `RegRstVal;  
                 mcause  <= `RegRstVal;  
         end else if(is_ecall == 1'b1) begin // The inst is 'ecall', and the src1 is gpr[15] (for riscv-32e)
-            mepc   <= pc;           // 保存引发异常的指令地址
-            mcause <= csr_wdata;    // 设置异常号
+            mepc   <= pc;                   // 保存引发异常的指令地址
+            //mcause <= csr_wdata;          // 设置异常号
+            mcause <= 32'hb;
         end else if(csr_wen == 1'b1) begin
             case (csr)
                 12'h300: mstatus <= csr_wdata;

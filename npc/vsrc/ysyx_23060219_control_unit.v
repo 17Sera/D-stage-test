@@ -17,7 +17,7 @@ module ysyx_23060219_control_unit(
     output reg  [7:0]       wmask,      //mem  写掩码
     output reg  [2:0]       rmask,      //mem  读掩码
     output reg              m1, 
-    output reg              m2,  
+    output reg  [1:0]       m2,  
     output reg              m3,  
     output reg              m4,
     output reg  [1:0]       m5 

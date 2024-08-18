@@ -4,7 +4,7 @@ module PC(
   input  wire           clk,
   input  wire           rst,
   input  wire           m1,       // 作为key参与PC选择
-  input  wire           m2,
+  input  wire [1:0]     m2,
   input  wire [`RegBus] result,   //  31:0
   input  wire [`RegBus] imm32,
   input  wire [`RegBus] csr_npc,
@@ -53,43 +53,43 @@ endmodule
 
 
 module ysyx_23060219_top(
-  input  wire           clk,
-  input  wire           rst
+  input  wire       clk,
+  input  wire       rst
 );
   
-  wire[4:0]       rs1;
-  wire[4:0]       rs2;
-  wire[4:0]       rd;
-  wire[2:0]       funct3;
-  wire[6:0]       funct7;
+  wire  [4:0]       rs1;
+  wire  [4:0]       rs2;
+  wire  [4:0]       rd;
+  wire  [2:0]       funct3;
+  wire  [6:0]       funct7;
 
-  wire[`RegBus]   inst;     
-  wire[`RegBus]   pc;     
-  wire[`TYPE_BUS] IType;      //inst type 2:0 
-  wire            is_ecall;
-  wire            csr_wen;    //csr write enable 
-  wire            reg_wen;    //RegFile 写使能
-  wire            mem_wen;    //mem 写使能
-  wire            mem_ren;    //mem 读使能
-  wire[7:0]       wmask;      //mem 写掩码
-  wire[2:0]       rmask;      //mem 读掩码
-  wire            m1;         //一系列选择器
-  wire            m2;
-  wire            m3;
-  wire            m4;
-  wire[1:0]       m5;
-  wire[`AlucBus]  aluc;       //alu control  4:0
-  wire[`RegBus]   PCadd4;     //pc + 4
-  wire[`RegBus]   result;     //alu 结果
-  wire[`RegBus]   reg_in;     //regisrer file input value
-  wire[`RegBus]   src1;       //rs1 value
-  wire[`RegBus]   src2;       //rs2 value
-  wire[`RegBus]   imm32;      //32 bit imm ext
-  wire[`RegBus]   num1;       //alu operation number1       
-  wire[`RegBus]   num2;       //alu operation number2
-  wire[`RegBus]   mem_rdata;  //mem 读到的数据
-  wire[`RegBus]   csr_npc;    //next pc read from csr 
-  wire[`RegBus]   csr_val;    //csr value
+  wire  [`RegBus]   inst;     
+  wire  [`RegBus]   pc;     
+  wire  [`TYPE_BUS] IType;      //inst type 2:0 
+  wire              is_ecall;
+  wire              csr_wen;    //csr write enable 
+  wire              reg_wen;    //RegFile 写使能
+  wire              mem_wen;    //mem 写使能
+  wire              mem_ren;    //mem 读使能
+  wire  [7:0]       wmask;      //mem 写掩码
+  wire  [2:0]       rmask;      //mem 读掩码
+  wire              m1;         //一系列选择器
+  wire  [1:0]       m2;
+  wire              m3;
+  wire              m4;
+  wire  [1:0]       m5;
+  wire  [`AlucBus]  aluc;       //alu control  4:0
+  wire  [`RegBus]   PCadd4;     //pc + 4
+  wire  [`RegBus]   result;     //alu 结果
+  wire  [`RegBus]   reg_in;     //regisrer file input value
+  wire  [`RegBus]   src1;       //rs1 value
+  wire  [`RegBus]   src2;       //rs2 value
+  wire  [`RegBus]   imm32;      //32 bit imm ext
+  wire  [`RegBus]   num1;       //alu operation number1       
+  wire  [`RegBus]   num2;       //alu operation number2
+  wire  [`RegBus]   mem_rdata;  //mem 读到的数据
+  wire  [`RegBus]   csr_npc;    //next pc read from csr 
+  wire  [`RegBus]   csr_val;    //csr value
 
 
   // PC module

@@ -8,15 +8,17 @@
 #include "Vysyx_23060219_top__Syms.h"
 #include "Vysyx_23060219_top___024root.h"
 
-extern "C" int pmem_read(int raddr);
+extern "C" int pmem_read(int raddr, int num);
 
-VL_INLINE_OPT void Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top__DOT__mem_inst__DOT__pmem_read_TOP(IData/*31:0*/ raddr, IData/*31:0*/ &pmem_read__Vfuncrtn) {
+VL_INLINE_OPT void Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top__DOT__mem_inst__DOT__pmem_read_TOP(IData/*31:0*/ raddr, IData/*31:0*/ num, IData/*31:0*/ &pmem_read__Vfuncrtn) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top__DOT__mem_inst__DOT__pmem_read_TOP\n"); );
     // Body
     int raddr__Vcvt;
     for (size_t raddr__Vidx = 0; raddr__Vidx < 1; ++raddr__Vidx) raddr__Vcvt = raddr;
+    int num__Vcvt;
+    for (size_t num__Vidx = 0; num__Vidx < 1; ++num__Vidx) num__Vcvt = num;
     int pmem_read__Vfuncrtn__Vcvt;
-    pmem_read__Vfuncrtn__Vcvt = pmem_read(raddr__Vcvt);
+    pmem_read__Vfuncrtn__Vcvt = pmem_read(raddr__Vcvt, num__Vcvt);
     pmem_read__Vfuncrtn = pmem_read__Vfuncrtn__Vcvt;
 }
 
@@ -46,6 +48,16 @@ VL_INLINE_OPT void Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top_
     char unit__Vcvt;
     for (size_t unit__Vidx = 0; unit__Vidx < 1; ++unit__Vidx) unit__Vcvt = unit;
     ebreak(station__Vcvt, inst__Vcvt, unit__Vcvt);
+}
+
+extern "C" void etrace(int inst);
+
+VL_INLINE_OPT void Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top__DOT__control_unit_inst__DOT__etrace_TOP(IData/*31:0*/ inst) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_23060219_top___024root____Vdpiimwrap_ysyx_23060219_top__DOT__control_unit_inst__DOT__etrace_TOP\n"); );
+    // Body
+    int inst__Vcvt;
+    for (size_t inst__Vidx = 0; inst__Vidx < 1; ++inst__Vidx) inst__Vcvt = inst;
+    etrace(inst__Vcvt);
 }
 
 #ifdef VL_DEBUG
