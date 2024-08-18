@@ -29,7 +29,7 @@ Context* __am_irq_handle(Context *c) {
 extern void __am_asm_trap(void);
 
 
-
+// 负责CTE初始化，保存异常处理入口函数地址 以及保存用户回调函数
 bool cte_init(Context*(*handler)(Event, Context*)) {        // handler也是一个函数指针，和user_handler同类型
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));    // 异常处理的入口地址设置为__am_asm_trap
@@ -47,8 +47,8 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 
   Context *c = (Context*)kstack.end - 1;  // 这里的1等同于一个Context大小  // 上下文指针 c 指向栈的起始地址
   //c->mcause = 0xb;
-  c->mstatus = 0x1800;              // difftest pass
-  c->mepc = (uintptr_t) entry;      // 创建以entry为入口的上下文
+  c->mstatus = 0x1800;                    // difftest pass
+  c->mepc = (uintptr_t) entry;            // 创建以entry为入口的上下文
 
   //入口函数为f()
   // for(int i = 0; i < NR_REGS; i++)

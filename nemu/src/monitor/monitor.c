@@ -65,93 +65,99 @@ static int difftest_port = 1234;
 #ifdef CONFIG_FTRACE 
 
 typedef struct {
-    uint32_t   name_index;            //Elf32_Sym.st_name
-    char       name[20];              //Elf32_Sym's name
-    Elf32_Addr value;                 //Elf32_Sym.st_value
-    uint32_t   size;                  //Elf32_Sym.st_size
+    uint32_t   name_index;            //符号名称在字符串表中的索引
+    char       name[20];              //用于存储符号名称的字符数组，最多 20 个字符
+    Elf32_Addr value;                 //符号的地址
+    uint32_t   size;                  //符号的大小
 }Func_Sym;
 
-#define Is_FUNC(info)  ((ELF32_ST_TYPE(info)) == STT_FUNC)
-#define MAX_func_size 32               //the max amount of FUNC symbols
-static int func_amount = 0;            //FUNC symbol amount
-static Func_Sym sym_fun_group[MAX_func_size] = {0};
+#define Is_FUNC(info)  ((ELF32_ST_TYPE(info)) == STT_FUNC)    // 用于判断给定的信息是否为函数类型的符号
+#define MAX_func_size   1000000000      //能够存储的最大函数符号数量
+static int func_amount = 0;            //当前存储的函数符号数量
+static Func_Sym sym_fun_group[MAX_func_size] = {0};   // 存储函数符号的数组
 
-static Elf32_Ehdr ELF_header = {0};     //ELF Header
-static Elf32_Shdr symtab = {0};         //symbol table section
-static Elf32_Shdr strtab = {0};         //string table section (containing name strings of symbols)
-static Elf32_Sym sym_temp = {0};        //symbol temp
+static Elf32_Ehdr ELF_header = {0};     //ELF Header文件头
+static Elf32_Shdr symtab = {0};         //symbol table section符号表节
+static Elf32_Shdr strtab = {0};         //string table section 字符串表节，存储符号的名称字符串
+static Elf32_Sym sym_temp = {0};        //symbol temp符号临时存储
 
 FILE *fp;                               //ELF FILE
-static int sym_amount = 0;              //symbok amount
-static char sym_name_buff[20] = {0};    //symbol name string temp
+static int sym_amount = 0;              //符号总数
+static char sym_name_buff[20] = {0};    //符号名称字符串临时存储
 
 
-FILE *ftrace_log ;    // the log recording ftrace infomation
-uint32_t loop = 0;    // the depth of calls
-uint32_t check_func_interval(uint32_t pc)
-{
+FILE *ftrace_log ;                      // 记录 ftrace 信息的日志文件
+uint32_t loop = 0;                      // 调用的深度
+
+
+uint32_t check_func_interval(uint32_t pc){    // 获取函数符号索引
   int i;
-  for(i = 0; i < func_amount; i++)
-  {
-    uint32_t addr_s = sym_fun_group[i].value;
-    uint32_t addr_e = sym_fun_group[i].value + sym_fun_group[i].size;
-    if(addr_s <= pc && pc < addr_e)
-      break;
+  for(i = 0; i < func_amount; i++){                                       // 遍历所有函数（func_amount 是函数数量）
+    uint32_t addr_s = sym_fun_group[i].value;                             // 获取当前函数的起始地址
+    uint32_t addr_e = sym_fun_group[i].value + sym_fun_group[i].size;     // 获取当前函数的结束地址（起始地址 + 函数大小）
+    if(addr_s <= pc && pc < addr_e)                                       // 检查程序计数器 pc 是否在当前函数的地址范围内
+      break;                                                              // 如果在范围内，跳出循环，说明找到了该地址的函数索引
   }
-  assert(i < func_amount);
+  assert(i < func_amount);              //确保找到的函数索引 i 小于 func_amount
   return i;
 }
 
 
-// if the inst is ret, log the call
+// 如果指令是返回指令 (ret)，则记录调用信息
 void RET_Log(uint32_t pc, uint32_t npc)
 {
   // Log("s->pc:%x, s->dnpc:%x", pc, npc);
   loop--;
-  //get the FUNC symbol index in sym_fun_group
-  uint32_t index = check_func_interval(npc);   
-  fprintf(ftrace_log, "[ftrace] 0x%08x: ", pc); 
-  //print the certain amount of '  '
-  for(int i=0; i<loop; i++)                           
+
+  uint32_t index = check_func_interval(npc);                // 获取函数符号索引，通过调用check_func_interval，检查 npc 是否在函数区间内
+  fprintf(ftrace_log, "[ftrace] 0x%08x: ", pc);             // 当前PC存入ftrace_log
+
+  for(int i=0; i<loop; i++)                                 // 根据 loop 变量输出相应数量的空格
     fprintf(ftrace_log, "  "); 
-  fprintf(ftrace_log, "ret [%s]\n", sym_fun_group[index].name); 
-  fflush(ftrace_log); 
+
+  fprintf(ftrace_log, "ret [%s]\n", sym_fun_group[index].name);     // 在日志中记录返回指令，并输出对应函数名称
+  fflush(ftrace_log);                                       // 刷新日志文件流，确保日志信息立即写入文件
 }
 
 
 
 // if the inst is jal or jalr(other than ret), log the call
-void J_Log(uint32_t pc, uint32_t npc)
+void J_Log(uint32_t pc, uint32_t npc)                       // 同上
 {
   // Log("s->pc:%x, s->dnpc:%x", pc, npc);
-  //get the FUNC symbol index in sym_fun_group
+
   uint32_t index = check_func_interval(npc);
   fprintf(ftrace_log, "[ftrace] 0x%08x: ", pc); 
-  //print the certain amount of '  '
+
   for(int i=0; i<loop; i++)
     fprintf(ftrace_log, "  "); 
+
   fprintf(ftrace_log, "call[%s@0x%08x]\n", sym_fun_group[index].name, sym_fun_group[index].value); 
   fflush(ftrace_log); 
+
   loop++;
 }
 
 
-//look up names of symbols in the strtab
+
+// 查找符号表中的符号名称
 static void Get_sym_name(uint32_t name_index, char *name)
 {
   int i = 0;
-  fseek(fp, (strtab.sh_offset + name_index), SEEK_SET);      //strtab.sh_offset is the start of string table (those strings are the names of symbols)
-  int ret = fread((sym_name_buff + i), 1, 1, fp);  assert(ret == 1);
+  fseek(fp, (strtab.sh_offset + name_index), SEEK_SET);                  // 定位到字符串表中的符号名称位置
+  int ret = fread((sym_name_buff + i), 1, 1, fp);  assert(ret == 1);     // 读取第一个字符到缓冲区
   i++;
-  while(1)
+  while(1)    // 继续读取下一个字符
   {
     ret = fread((sym_name_buff + i), 1, 1, fp);   assert(ret == 1);
-    if(sym_name_buff[i++] == 0)   // == '.' in strtab
+    if(sym_name_buff[i++] == 0)     // 如果读取到字符串结束符（'\0'），则退出循环
       break;
   }
-  sym_name_buff[i-1] = '\0';     
-  strcpy(name, sym_name_buff);
+  sym_name_buff[i-1] = '\0';        // 将最后一个字符设置为字符串结束符
+  strcpy(name, sym_name_buff);      // 将读取的名称复制到name
 }
+
+
 
 static void load_elf(void) {
   if (elf_file == NULL){

@@ -60,7 +60,7 @@ __am_asm_trap:
   mv a0, sp                   // 保存当前进程的上下文，栈指针sp复制到寄存器a0，a0是用于传递参数的寄存器
   jal __am_irq_handle
 
-  mv sp, a0                   // 由schedule汇编代码可知，current->cp放在了a0
+  mv sp, a0                   // 进入schedule函数   (由schedule汇编代码可知，current->cp放在了a0)
 
   LOAD t1, OFFSET_STATUS(sp)  // 恢复上下文
   LOAD t2, OFFSET_EPC(sp)
@@ -70,4 +70,4 @@ __am_asm_trap:
   MAP(REGS, POP)
 
   addi sp, sp, CONTEXT_SIZE
-  mret
+  mret                        //mret将PC设置为mepc,跳转到kcontext里注册的f，陷入死循环
