@@ -20,7 +20,8 @@ module RISB_type(
             `INST_J: imm_12 = 12'b0000_0000_0000;
             default: begin
                         imm_12 = 0;
-                        ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE1);
+                        //ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE1);
+                        ebreak(`ABORT, 32'hdead0001, `Unit_IE1);
                     end
         endcase
     end
@@ -47,7 +48,7 @@ module UJ_type(
             `INST_J: imm_20 = {funct7[6], rs1, funct3, rs2[0], funct7[5:0], rs2[4:1]};
             default: begin
                         imm_20 = 0;
-                        ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE2);
+                        ebreak(`ABORT, 32'hdead0002, `Unit_IE2);
                     end 
         endcase
     end
@@ -120,10 +121,16 @@ module ysyx_23060219_imm_extend(
             `INST_B:                   imm32 = imm_12_to_32 << 1;
             `INST_U:                   imm32 = imm_20_to_32 << 12;
             `INST_J:                   imm32 = imm_20_to_32 << 1;
+
             default: begin
-                        imm32 = 32'hdeafbeaf;
-                        ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE3);
+                        imm32 = 32'hdead0003;
+                        ebreak(`ABORT, 32'hdead0004, `Unit_IE3);
                     end
+
+            // default: begin
+            //             imm32 = 32'hdeafbeaf;
+            //             ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE3);
+            //         end
         endcase
     end
 endmodule

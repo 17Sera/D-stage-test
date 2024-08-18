@@ -9,6 +9,8 @@ module ysyx_23060219_control_unit(
     output wire [6:0]       fun7_31_25,
     output reg  [`TYPE_BUS] IType,      //inst type   2:0
     output reg  [`AlucBus]  aluc,       //alu control   4:0
+    output reg              is_ecall,
+    output reg              csr_wen,
     output reg              reg_wen,    //RegFile 写使能
     output reg              mem_wen,    //mem  写使能
     output reg              mem_ren,    //mem  读使能
@@ -22,6 +24,7 @@ module ysyx_23060219_control_unit(
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
+    import "DPI-C" function void etrace(input int inst);
 
     wire [6:0] opcode_6_0 = inst[6:0];      //拆分指令inst
     assign rd_11_7        = inst[11:7];
@@ -34,6 +37,8 @@ module ysyx_23060219_control_unit(
         case(opcode_6_0)    //按opcode分类
             `INST_TYPE_R: begin             // 写入R指令信息    两个寄存器之间的操作
                 IType   = `INST_R;          //指令类型为R
+                is_ecall = `FALSE;          //////////
+                csr_wen  = `WDisen;         //////////
                 reg_wen = `WEnable;         // 1'b1
                 mem_wen = `WDisen;          // 1'b0
                 mem_ren = `WDisen;   
@@ -67,7 +72,9 @@ module ysyx_23060219_control_unit(
                 end
             end
             `INST_TYPE_I: begin
-                IType   = `INST_I;   
+                IType   = `INST_I;
+                is_ecall = `FALSE;          //////
+                csr_wen  = `WDisen;         /////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -81,6 +88,7 @@ module ysyx_23060219_control_unit(
                 case (fun3_14_12)
                     `INST_ADDI:  aluc = `ADD;
                     `INST_SLTIU: aluc = `LTU;
+                    `INST_SLTI:  aluc = `LT;            ////////////
                     `INST_ORI:   aluc = `OR;
                     `INST_XORI:  aluc = `XOR;
                     `INST_ANDI:  aluc = `AND;
@@ -97,7 +105,9 @@ module ysyx_23060219_control_unit(
             end          
             `INST_TYPE_L: begin
                 IType   = `INST_I; 
-                aluc    = `ADD;  
+                aluc    = `ADD;
+                is_ecall = `FALSE;          ////////
+                csr_wen  = `WDisen;         ///////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WEnable;   
@@ -119,6 +129,8 @@ module ysyx_23060219_control_unit(
             `INST_TYPE_S: begin
                 IType   = `INST_S;   
                 aluc    = `ADD;
+                is_ecall = `FALSE;          ////////
+                csr_wen  = `WDisen;         ////////
                 reg_wen = `WDisen;   
                 mem_wen = `WEnable;   
                 mem_ren = `WDisen;   
@@ -137,6 +149,8 @@ module ysyx_23060219_control_unit(
             end
             `INST_TYPE_B: begin
                 IType   = `INST_B;   
+                is_ecall = `FALSE;          ///////////
+                csr_wen  = `WDisen;         //////////
                 reg_wen = `WDisen;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -160,6 +174,8 @@ module ysyx_23060219_control_unit(
             `INST_TYPE_LUI: begin
                 IType   = `INST_U;   
                 aluc    = `ADD_LUI;
+                is_ecall = `FALSE;          ////////////
+                csr_wen  = `WDisen;         ///////////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -174,6 +190,8 @@ module ysyx_23060219_control_unit(
             `INST_TYPE_AUIPC: begin
                 IType   = `INST_U;   
                 aluc    = `ADD;
+                is_ecall = `FALSE;          //////////
+                csr_wen  = `WDisen;         /////////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -188,6 +206,8 @@ module ysyx_23060219_control_unit(
             `INST_TYPE_JALR: begin
                 IType   = `INST_I;   
                 aluc    = `ADD_JALR;
+                is_ecall = `FALSE;          //////////
+                csr_wen  = `WDisen;         //////////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -202,6 +222,8 @@ module ysyx_23060219_control_unit(
             `INST_TYPE_JAL: begin
                 IType   = `INST_J;   
                 aluc    = `ADD;
+                is_ecall = `FALSE;          //////////
+                csr_wen  = `WDisen;         //////////
                 reg_wen = `WEnable;   
                 mem_wen = `WDisen;   
                 mem_ren = `WDisen;   
@@ -213,12 +235,54 @@ module ysyx_23060219_control_unit(
                 m4      = `MUX4_pc;
                 m5      = `MUX5_PCadd4;
             end
+            // `INST_TYPE_E: begin
+            //     case ({fun7_31_25, rs2_24_20})
+            //         `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
+            //          default:     ebreak(`ABORT, inst, `Unit_CU10);
+            //     endcase
+            // end
             `INST_TYPE_E: begin
-                case ({fun7_31_25, rs2_24_20})
-                    `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
-                     default:     ebreak(`ABORT, inst, `Unit_CU10);
+                IType    = `INST_I;         // don't care   
+                aluc     = `ADD;            // don't care   
+                mem_wen  = `WDisen;   
+                mem_ren  = `WDisen;   
+                wmask    = `WWord;          // don't care      
+                rmask    = `LoadW;          // don't care      
+                m1       = `MUX1_NBpc;
+                m3       = `MUX3_imm32;     // don't care   
+                m4       = `MUX4_pc;        // don't care   
+                m5       = `MUX5_CsrVal;    // 将寄存器csr中的值写入寄存器rd 
+                case (fun3_14_12)
+                    `INST_CSRRW, `INST_CSRRS: begin
+                            is_ecall = `FALSE;   
+                            csr_wen  = `WEnable;   
+                            reg_wen  = `WEnable;   
+                            m2       = `MUX2_PCadd4;
+                        end
+                    default: begin
+                        case ({fun7_31_25, rs2_24_20})
+                            `INST_MRET:   begin
+                                is_ecall = `FALSE;   
+                                csr_wen  = `WDisen;   
+                                reg_wen  = `WDisen; 
+                                m2       = `MUX2_CsrNpc;        // 将PC设置为CSR[mepc]
+                            end
+                            `INST_ECALL:  begin
+                                is_ecall = `TRUE;   
+                                csr_wen  = `WEnable;   
+                                reg_wen  = `WEnable;                                  
+                                m2       = `MUX2_CsrNpc;
+                                etrace(32'hdeadeeee);
+                            end
+                            `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
+                            default:      ebreak(`ABORT, inst, `Unit_CU10);
+                        endcase
+                    end
                 endcase
+
             end
+
+
             default: ebreak(`ABORT, inst, `Unit_CU11);
         endcase
     end
