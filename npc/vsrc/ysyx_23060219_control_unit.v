@@ -235,12 +235,6 @@ module ysyx_23060219_control_unit(
                 m4      = `MUX4_pc;
                 m5      = `MUX5_PCadd4;
             end
-            // `INST_TYPE_E: begin
-            //     case ({fun7_31_25, rs2_24_20})
-            //         `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
-            //          default:     ebreak(`ABORT, inst, `Unit_CU10);
-            //     endcase
-            // end
             `INST_TYPE_E: begin
                 IType    = `INST_I;         // don't care   
                 aluc     = `ADD;            // don't care   

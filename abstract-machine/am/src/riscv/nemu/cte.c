@@ -7,6 +7,9 @@ static Context* (*user_handler)(Event, Context*) = NULL;    // user_handler是�
 
 // __am_asm_trap调用__am_irq_handle 根据mcause异常号识别出是什么事件ev.event
 Context* __am_irq_handle(Context *c) {
+
+  printf("\nc->mcause = %p, c->mstatus = %p , c->mepc = %p\n", c->mcause, c->mstatus , c->mepc);
+
   if (user_handler) {     //user_handler是cte_init中注册的回调函数
     Event ev = {0};
 
@@ -16,7 +19,6 @@ Context* __am_irq_handle(Context *c) {
                 break;
       default: ev.event = EVENT_ERROR; break;
     }
-    //printf("c->mcause = %d, c->mstatus = %d , c->mepc = %d\n", c->mcause, c->mstatus , c->mepc);
 
     c = user_handler(ev, c);
     assert(c != NULL);
@@ -46,17 +48,17 @@ bool cte_init(Context*(*handler)(Event, Context*)) {        // handler也是一�
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 
   Context *c = (Context*)kstack.end - 1;  // 这里的1等同于一个Context大小  // 上下文指针 c 指向栈的起始地址
-  //c->mcause = 0xb;
+  
+  // printf("\n---------------- c = %p   ,  kstack.end = %p -------------------\n",c,kstack.end);
   c->mstatus = 0x1800;                    // difftest pass
   c->mepc = (uintptr_t) entry;            // 创建以entry为入口的上下文
 
-  //入口函数为f()
-  // for(int i = 0; i < NR_REGS; i++)
-  //   c->gpr[i] = 0;
-  
+  // printf("\n----------- c->mcause = %p, c->mstatus = %p , c->mepc = %p------------- \n", c->mcause, c->mstatus , c->mepc);
+
   //观察汇编，a0为传参寄存器
   c->gpr[10] = (uintptr_t)arg;  // gpr[10] 对应a0
 
+  // printf("\n--------------- arg = %u  ,  a0 = %u -----------------\n",arg,c->gpr[10]);
 
   return c;
 }

@@ -101,7 +101,7 @@ static void Get_sym_name(uint32_t name_index, char *name)
     strcpy(name, sym_name_buff);
 }
 
-void load_elf() 
+void load_elf(void) 
 {
     if (elf_file == NULL){
         Log("No ELF file is given.");

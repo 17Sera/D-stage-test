@@ -13,7 +13,8 @@ extern uint8_t* guest_to_host(paddr_t paddr);
 
 #ifdef CONFIG_DIFFTEST
 
-#define top_regs top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
+#define top_gprs top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
+
 CPU_state cpu;
 static int skip_cnt_ref = 0;   // the amount to skip the ref
 static bool skip_flag = false; // the flag   to skip the ref 
@@ -38,7 +39,16 @@ static void update_cpu_state(CPU_state *cpu)
 {
     cpu->pc = top->rootp->ysyx_23060219_top__DOT__pc;
     for(int i = 0; i < 32; i++)
-        cpu->gpr[i] = top_regs[i];
+        cpu->gpr[i] = top_gprs[i];
+    
+    // 0x300 -> 0.mstatus;
+    // 0x305 -> 1.mtvec;
+    // 0x341 -> 2.mepc;
+    // 0x342 -> 3.mcause;
+    cpu->csr[0] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mstatus;
+    cpu->csr[1] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mtvec;
+    cpu->csr[2] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mepc;
+    cpu->csr[3] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mcause;
 }
 
 
@@ -75,9 +85,11 @@ void init_difftest(char *ref_so_file, long img_size, int port)
 }
 
 
-bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)   // 检查设计和参考模型的寄存器状态是否一致
+bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)       // 检查设计和参考模型的寄存器状态是否一致
 {
     bool success = true;
+
+    // Log("dut = 0x%08x, pc = 0x%08x", pc, ref_r->pc);
 
     //check pc
     if(ref_r->pc != pc)
@@ -89,10 +101,10 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc)   // 检查设计和�
 
     //check general purpose registers
     for(int i = 0; i < 32; i++)
-        if(top_regs[i] != ref_r->gpr[i])
+        if(top_gprs[i] != ref_r->gpr[i])
         {
             _Log(ANSI_FG_YELLOW "[difftest]  " ANSI_NONE   ANSI_FG_RED "%s" 
-                 ANSI_NONE "  dut : 0x%08x   ref : 0x%08x\n", ref_regs[i], top_regs[i], ref_r->gpr[i]);
+                 ANSI_NONE "  dut : 0x%08x   ref : 0x%08x\n", ref_regs[i], top_gprs[i], ref_r->gpr[i]);
             success = false;
         }
         

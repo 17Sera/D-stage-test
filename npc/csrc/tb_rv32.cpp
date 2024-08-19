@@ -10,10 +10,9 @@
 #include "../include/debug.h"
 
 
-
-VerilatedFstC* tfp = new VerilatedFstC(); //导出fst波形需要加此语句
+VerilatedFstC *tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
-vluint64_t main_time = 0;  //initial 仿真时间
+vluint64_t    main_time = 0;  //initial 仿真时间
 
 
 
@@ -29,9 +28,9 @@ extern void   init_difftest(char *ref_so_file, long img_size, int port);
 extern word_t pmem_r(paddr_t addr, int len); 
 extern void   pmem_w(paddr_t addr, int len, word_t data);
 extern void   ebreak(int station, int inst);                   // control_unit.v
-extern int    pmem_read(int raddr);                            // mem.v
-extern int    pmem_read_inst(int pc);
+extern int    pmem_read(int raddr, int num);                   // mem.v
 extern void   pmem_write(int waddr, int wdata, char wmask);    // mem.v
+extern void   etrace(int inst);                                     // control_unit.v
 extern uint64_t get_time();                               
 extern void difftest_skip_ref();
 /*********************************************/
@@ -40,18 +39,19 @@ extern void difftest_skip_ref();
 
 static uint32_t rtc_port_base[2] = {0, 0};
 
-static const char *alu_names[16] = {
+static const char *alu_names[17] = {
   "Unit_ALU", "Unit_MEM", "Unit_CU1", "Unit_CU2",
   "Unit_CU3", "Unit_CU4", "Unit_CU5", "Unit_CU6",
   "Unit_CU7", "Unit_CU8", "Unit_CU9", "Unit_CU10",
-  "Unit_CU11","Unit_IE1", "Unit_IE2", "Unit_IE3"
+  "Unit_CU11","Unit_IE1", "Unit_IE2", "Unit_IE3",
+  "Unit_CR"
 };
 
 extern void ebreak(int station, int inst, char unit)
 {
   if(Verilated::gotFinish())
     return;
-    // Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, top->ysyx_23060219_top__DOT__pc, top->ysyx_23060219_top__DOT__inst);
+    // Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__inst);
 
   //虽然波形图上inst随pc同时变化，但通过打印二者会发现inst会在pc变化之后才改变（这是因为二者都发生变化了之后才输出至波形图的）
   //然而，这个延时会导致decode错误，然后调用了 “ebreak(`ABORT, inst);”
@@ -63,7 +63,8 @@ extern void ebreak(int station, int inst, char unit)
     assert( (unit == Unit_ALU) || (unit == Unit_CU1) || (unit == Unit_CU2) || (unit == Unit_CU3) || 
             (unit == Unit_CU4) || (unit == Unit_CU5) || (unit == Unit_CU6) || (unit == Unit_CU7) || 
             (unit == Unit_CU8) || (unit == Unit_CU9) || (unit == Unit_CU10)|| (unit == Unit_CU11)||
-            (unit == Unit_MEM) || (unit == Unit_IE1) || (unit == Unit_IE2) || (unit == Unit_IE3));
+            (unit == Unit_MEM) || (unit == Unit_IE1) || (unit == Unit_IE2) || (unit == Unit_IE3) ||
+            (unit == Unit_CR) );
 
     Log("Ebreak takes place in the %s", alu_names[unit]);
     Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__inst);
@@ -84,16 +85,24 @@ extern void ebreak(int station, int inst, char unit)
   }
 }
 
+#define top_mstatus   top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mstatus
+#define top_mepc      top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mepc
+#define top_mcause    top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mcause
+extern void etrace(int inst)
+{
+  _Log(ANSI_FG_YELLOW "[etrace]  " ANSI_NONE ANSI_FG_YELLOW "mstatus : " ANSI_NONE "0x%08x, "
+       ANSI_FG_YELLOW "mepc : "    ANSI_NONE " 0x%08x, " ANSI_FG_YELLOW "mcause : " ANSI_NONE " 0x%08x\n", 
+      top_mstatus, top_mepc, top_mcause);
+}
 
-
-
-extern int pmem_read(int raddr){
-  static int data = 0xdeadbeaf;
+extern int pmem_read(int raddr, int num)
+{
+  static int data = 0xdead0009;
   if(top->clk == 0)
     return data;
 
-  if(main_time >= start_time){
-
+  if(main_time >= start_time)
+  {
     // device rtc 判断时钟
     if((raddr == CONFIG_RTC_MMIO) || (raddr == CONFIG_RTC_MMIO + 4))
     {
@@ -114,9 +123,8 @@ extern int pmem_read(int raddr){
     // return pmem_r((raddr & ~0x3u), 4);
   } 
   else
-    return 0xdeadbeaf;
+    return 0xdead0009;
 }
-
 
 
 void pmem_write(int waddr, int wdata, char wmask)
@@ -158,24 +166,18 @@ void single_cycle(void)
   if(!Verilated::gotFinish())
   { 
     top->clk = 0; top->eval(); 
-
 #ifdef CONFIG_WAVES
     tfp->dump(main_time);  
 #endif
-
     main_time++; //推动仿真时间
 
     top->clk = 1; top->eval(); 
-
 #ifdef CONFIG_WAVES
     tfp->dump(main_time);  
 #endif
-
     main_time++; //推动仿真时间
-
   }
 }
-
 
 static void reset(void)
 {
@@ -184,17 +186,21 @@ static void reset(void)
   top->rst = 0; 
 }
 
-
 static void init_verilator(void)
 {
   Verilated::traceEverOn(true); //导出fst波形需要加此语句
 
   top->trace(tfp, 0);
-  tfp->open("waveform.fst");    //打开fst
+  tfp->open("waveform.fst"); //打开fst
 
   reset();  //复位
 }
 
+
+// void close_tfp(void)
+// {
+//   tfp->close();
+// }
 
 int main(int argc, char *argv[])
 {
@@ -205,14 +211,12 @@ int main(int argc, char *argv[])
   init_verilator();
 
   /* Initialize differential testing. */
-  //printf("\n--------------------- diff_so_file = %s --------------------------\n",diff_so_file);
   init_difftest(diff_so_file, img_size, difftest_port);
 
   /* Receive commands from user. */
   sdb_mainloop();
 
   /* End the simulation */
-
   top->final();
   tfp->close();
   delete top;

@@ -12,44 +12,45 @@ extern word_t   reg_str2val(const char *s, bool *success);
 /*********************************************/
 
 
-enum{
+enum
+{
     TK_NOTYPE = 256,
     TK_EQ,
-    /* TODO: Add more token types */
     TK_INEQ,
     TK_AND,
     TK_HEX,
     TK_DEC,
     TK_RNAME,
+    TK_CSR,    //csr names
     TK_DEREF,
 };
 
-static struct rule{
+static struct rule
+{
     const char *regex;
     int token_type;
 } rules[] = {
-    {" +", TK_NOTYPE},             // spaces
-    {"&&", TK_AND},                // and
-    {"==", TK_EQ},                 // equal
-    {"!=", TK_INEQ},               // inequal
-    {"\\+", '+'},                  // plus
-    {"\\-", '-'},                  // substract
-    {"\\*", '*'},                  // multiply
-    {"\\/", '/'},                  // divide
-    {"0x([0-9A-Fa-f])+", TK_HEX},  // hex unsigned int, 0x...
-    {"[0-9]+", TK_DEC},            // dec unsigned int, 0x...
-    {"\\$([$a-z0-9])+", TK_RNAME}, // reg name
-    {"\\(", '('},                  // left parenthesis
-    {"\\)", ')'},                  // right parenthesis
+    {" +", TK_NOTYPE},                     // spaces
+    {"&&", TK_AND},                        // and
+    {"==", TK_EQ},                         // equal
+    {"!=", TK_INEQ},                       // inequal
+    {"\\+", '+'},                          // plus
+    {"\\-", '-'},                          // substract
+    {"\\*", '*'},                          // multiply
+    {"\\/", '/'},                          // divide
+    {"0x([0-9A-Fa-f])+", TK_HEX},          // hex unsigned int, 0x...
+    {"[0-9]+", TK_DEC},                    // dec unsigned int, 0x...
+    {"\\$([$a-z0-9])+", TK_RNAME},         // reg name
+    {"m(epc|cause|status|tvec)", TK_CSR}, // csr name
+    {"\\(", '('},                          // left parenthesis
+    {"\\)", ')'},                          // right parenthesis
 };
 
 #define NR_REGEX ARRLEN(rules)
 
 static regex_t re[NR_REGEX] = {};
 
-/* Rules are used for many times.
- * Therefore we compile them only once before any usage.
- */
+
 void init_regex()
 {
     int i;
@@ -95,7 +96,7 @@ static bool make_token(char *e)
                 char *substr_start = e + position;
                 int substr_len = pmatch.rm_eo;
 
-                // _Log(ANSI_FG_GREEN "match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+                // _Log(ANSI_FG_BLUE "match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                 //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
                 position += substr_len;
@@ -240,7 +241,8 @@ static uint32_t char2num(char c)
 }
 
 
-static uint32_t eval(int p, int q){
+static uint32_t eval(int p, int q)
+{
     if (p > q) {
         /* Bad expression */
         assert(0);
@@ -279,8 +281,6 @@ static uint32_t eval(int p, int q){
         else
             assert(0);
     }
-
-
     else if(check_parentheses(p, q) == true)
     {
         /* The expression is surrounded by a matched pair of parentheses.
@@ -317,10 +317,11 @@ static uint32_t eval(int p, int q){
 }
 
 
-word_t expr(char *e, bool *success){
-    if (!make_token(e)){
+word_t expr(char *e, bool *success)
+{
+    if (!make_token(e))
+    {
         *success = false;
-		printf("\nmake_token:  *pass = false\n");
         return 0;
     }
 

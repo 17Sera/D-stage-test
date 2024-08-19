@@ -11,7 +11,6 @@ module ysyx_23060219_mem(
     input  wire [`RegBus] raddr,
     input  wire [`RegBus] inst_addr,
     output reg  [`RegBus] rdata,
-    // output reg  [`RegBus] inst_data
     output wire  [`RegBus] inst_data
 );
     
