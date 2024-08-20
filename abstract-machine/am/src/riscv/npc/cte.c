@@ -6,7 +6,7 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {      // 三个参数都没有传进来 mcause mstatus mepc
 
-  printf("------------ c->mcause = %u ,  c->mstatus = %u  ,  c->mepc = %u --------------------in __am_irq_handle ---------------\n", c->mcause, c->mstatus , c->mepc);
+  // printf("------------ c->mcause = %x ,  c->mstatus = %u  ,  c->mepc = %u --------------------in __am_irq_handle ---------------\n", c->mcause, c->mstatus , c->mepc);
 
   if (user_handler) {
     Event ev = {0};

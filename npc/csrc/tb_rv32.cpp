@@ -85,15 +85,19 @@ extern void ebreak(int station, int inst, char unit)
   }
 }
 
-#define top_mstatus   top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mstatus
-#define top_mepc      top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mepc
-#define top_mcause    top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mcause
+#define top_mstatus   top->rootp->mstatus
+#define top_mepc      top->rootp->mepc
+#define top_mcause    top->rootp->mcause
+
+
 extern void etrace(int inst)
 {
   _Log(ANSI_FG_YELLOW "[etrace]  " ANSI_NONE ANSI_FG_YELLOW "mstatus : " ANSI_NONE "0x%08x, "
        ANSI_FG_YELLOW "mepc : "    ANSI_NONE " 0x%08x, " ANSI_FG_YELLOW "mcause : " ANSI_NONE " 0x%08x\n", 
       top_mstatus, top_mepc, top_mcause);
 }
+
+
 
 extern int pmem_read(int raddr, int num)
 {

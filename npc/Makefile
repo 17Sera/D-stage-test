@@ -1,62 +1,3 @@
-# # all:
-
-# TOP_NAME = riscv_top	
-# VSRC = $(shell find $(./vsrc) -name "*.v")
-# CSRC = $(shell find $(./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-
-# VERILATOR_FLAGS  = -Wall --trace --cc --exe --build
-# VERILATOR_FLAGS += -top $(TOP_NAME)
-
-# OBJ_DIR			:= ./obj_dir
-# BIN				:= $(OBJ_DIR)/V$(TOP_NAME)
-
-# IMG				?= ../am-kernels/tests/cpu-tests/build/dummy-riscv32e-npc.bin
-
-# RUN_FLAGS		:= --img = ${IMG} 			#--diff=${DIFFTEST}
-# NPC_EXEC		:= ${BIN} ${RUN_FLAGS}
-
-
-# .PHONY:run gdb wave clean
-
-
-# com: $(CSRC) $(VSRC)
-# 	@verilator ${VERILATOR_FLAGS} ${CSRC} ${VSRC}
-
-
-# run: com
-# 	$(call git_commit, "sim RTL") 		# DO NOT REMOVE THIS LINE!!!
-# 	@${NPC_EXEC}						# 执行完会生成波形
-
-# gdb: com 			#${DIFFTEST}
-# 	$(call git_commit, "gdb NPC")
-# 	@gdb --silent -s ${BIN} --args ${NPC_EXEC}
-
-# wave:
-# 	@gtkwave wave.fst					# 打开波形
-# 	# @gtkwave $(OBJ_DIR)/wave.fst
-
-# clean:
-# 	rm -rf ${OBJ_DIR}
-# 	rm wave.fst
-
-# # sim:$(CSRC) $(VSRC)
-# # 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-
-# # 	verilator $(VERILATOR_FLAGS) \
-# # 	#	-top $(TOP_NAME) \
-# # 		$^ 
-		
-# # 	./obj_dir/Vriscv_top
-# # 	gtkwave wave.fst
-
-# # 	rm -rf obj_dir
-# # 	rm wave.fst
-	
-# include ../Makefile
-
-#------------------------------------------------------------------------
-#=======================================================================
-
 MODULE=ysyx_23060219_top
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")		#只会查找 ./vsrc 目录中的.v文件
@@ -68,7 +9,7 @@ LIBS += $(shell llvm-config-11 --libs)
 CXXFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
 
 
-ifdef CONFIG_DIFFTEST			#差分测试的路径			###
+# ifdef CONFIG_DIFFTEST			#差分测试的路径			###有这个会报错 ref_so_file为空 difftest.cpp报错
 DIFF_REF_PATH = $(NEMU_HOME)
 DIFF_REF_SO = $(DIFF_REF_PATH)/build/riscv32-nemu-interpreter-so	#动态链接库
 ARGS_DIFF = --diff=$(DIFF_REF_SO)
@@ -77,7 +18,7 @@ ARGS_DIFF = --diff=$(DIFF_REF_SO)
 # $(DIFF_REF_SO):
 # 	$(MAKE) -s -C $(DIFF_REF_PATH) 
 
-endif
+# endif
  
 
 # ifdef CONFIG_DIFFTEST

@@ -45,10 +45,10 @@ static void update_cpu_state(CPU_state *cpu)
     // 0x305 -> 1.mtvec;
     // 0x341 -> 2.mepc;
     // 0x342 -> 3.mcause;
-    cpu->csr[0] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mstatus;
-    cpu->csr[1] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mtvec;
-    cpu->csr[2] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mepc;
-    cpu->csr[3] = top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mcause;
+    cpu->csr[0] = top->rootp->mstatus;
+    cpu->csr[1] = top->rootp->mtvec;
+    cpu->csr[2] = top->rootp->mepc;
+    cpu->csr[3] = top->rootp->mcause;
 }
 
 

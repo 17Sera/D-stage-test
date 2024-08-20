@@ -54,7 +54,11 @@ endmodule
 
 module ysyx_23060219_top(
   input  wire       clk,
-  input  wire       rst
+  input  wire       rst,
+  output wire  [`RegBus]   mstatus,
+  output wire  [`RegBus]   mepc,
+  output wire  [`RegBus]   mtvec,
+  output wire  [`RegBus]   mcause
 );
   
   wire  [4:0]       rs1;
@@ -90,6 +94,8 @@ module ysyx_23060219_top(
   wire  [`RegBus]   mem_rdata;  //mem 读到的数据
   wire  [`RegBus]   csr_npc;    //next pc read from csr 
   wire  [`RegBus]   csr_val;    //csr value
+
+
 
 
   // PC module
@@ -169,7 +175,11 @@ module ysyx_23060219_top(
     .src1    (src1),
     .pc      (pc),
     .csr_npc (csr_npc),
-    .csr_val (csr_val)
+    .csr_val (csr_val) ,
+    .mstatus (mstatus),
+    .mepc    (mepc),
+    .mtvec   (mtvec),
+    .mcause  (mcause)
   );
 
   // Imm Extend module
@@ -211,5 +221,22 @@ module ysyx_23060219_top(
     .num2  (num2),
     .result(result)
   );
+
+
+  // always@(*) begin
+  //   $display("\n------------ top_mcause = 0x%x --------------\n",mcause);
+  //   $display("\n------------ top_mepc = 0x%x --------------\n",mepc);
+  //   $display("\n------------ top_mstatus = 0x%x --------------\n",mstatus);
+  //   $display("\n------------ top_mtvec = 0x%x --------------\n",mtvec);
+  // end
+
+
+
+
+
+
+
+
+
 endmodule
 

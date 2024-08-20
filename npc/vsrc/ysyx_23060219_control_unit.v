@@ -266,7 +266,9 @@ module ysyx_23060219_control_unit(
                                 csr_wen  = `WEnable;   
                                 reg_wen  = `WEnable;                                  
                                 m2       = `MUX2_CsrNpc;
-                                etrace(32'hdeadeeee);
+                                `ifdef CONFIG_ETRACE
+                                    etrace(32'hdeadeeee);
+                                `endif 
                             end
                             `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
                             default:      ebreak(`ABORT, inst, `Unit_CU10);
