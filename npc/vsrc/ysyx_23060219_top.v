@@ -5,16 +5,16 @@ module PC(
   input  wire           rst,
   input  wire           m1,       // 作为key参与PC选择
   input  wire [1:0]     m2,
-  input  wire [`RegBus] result,   //  31:0
-  input  wire [`RegBus] imm32,
-  input  wire [`RegBus] csr_npc,
-  output wire [`RegBus] PCadd4,
-  output reg  [`RegBus] pc
+  input  wire [31:0]    result,   //  31:0
+  input  wire [31:0]    imm32,
+  input  wire [31:0]    csr_npc,
+  output wire [31:0]    PCadd4,
+  output reg  [31:0]    pc
 );
 
-  wire [`RegBus] npc;
-  wire [`RegBus] npc_temp;
-  wire [`RegBus] PCaddIMM32;
+  wire [31:0] npc;
+  wire [31:0] npc_temp;
+  wire [31:0] PCaddIMM32;
   
   assign PCadd4     = pc + `PC_INCREMENT;   //PC_INCREMENT = 32'd4
   assign PCaddIMM32 = pc + imm32;
@@ -53,8 +53,12 @@ endmodule
 
 
 module ysyx_23060219_top(
-  input  wire       clk,
-  input  wire       rst
+  input  wire           clk,
+  input  wire           rst,
+  output wire  [31:0]   mstatus,
+  output wire  [31:0]   mepc,
+  output wire  [31:0]   mtvec,
+  output wire  [31:0]   mcause
 );
   
   wire  [4:0]       rs1;
@@ -62,9 +66,8 @@ module ysyx_23060219_top(
   wire  [4:0]       rd;
   wire  [2:0]       funct3;
   wire  [6:0]       funct7;
-
-  wire  [`RegBus]   inst;     
-  wire  [`RegBus]   pc;     
+  wire  [31:0]      inst;     
+  wire  [31:0]      pc;     
   wire  [`TYPE_BUS] IType;      //inst type 2:0 
   wire              is_ecall;
   wire              csr_wen;    //csr write enable 
@@ -78,18 +81,20 @@ module ysyx_23060219_top(
   wire              m3;
   wire              m4;
   wire  [1:0]       m5;
-  wire  [`AlucBus]  aluc;       //alu control  4:0
-  wire  [`RegBus]   PCadd4;     //pc + 4
-  wire  [`RegBus]   result;     //alu 结果
-  wire  [`RegBus]   reg_in;     //regisrer file input value
-  wire  [`RegBus]   src1;       //rs1 value
-  wire  [`RegBus]   src2;       //rs2 value
-  wire  [`RegBus]   imm32;      //32 bit imm ext
-  wire  [`RegBus]   num1;       //alu operation number1       
-  wire  [`RegBus]   num2;       //alu operation number2
-  wire  [`RegBus]   mem_rdata;  //mem 读到的数据
-  wire  [`RegBus]   csr_npc;    //next pc read from csr 
-  wire  [`RegBus]   csr_val;    //csr value
+  wire  [`Aluc_width]  aluc;    //alu control  4:0
+  wire  [31:0]      PCadd4;     //pc + 4
+  wire  [31:0]      result;     //alu 结果
+  wire  [31:0]      reg_in;     //regisrer file input value
+  wire  [31:0]      src1;       //rs1 value
+  wire  [31:0]      src2;       //rs2 value
+  wire  [31:0]      imm32;      //32 bit imm ext
+  wire  [31:0]      num1;       //alu operation number1       
+  wire  [31:0]      num2;       //alu operation number2
+  wire  [31:0]      mem_rdata;  //mem 读到的数据
+  wire  [31:0]      csr_npc;    //next pc read from csr 
+  wire  [31:0]      csr_val;    //csr value
+
+
 
 
   // PC module
@@ -169,7 +174,11 @@ module ysyx_23060219_top(
     .src1    (src1),
     .pc      (pc),
     .csr_npc (csr_npc),
-    .csr_val (csr_val)
+    .csr_val (csr_val) ,
+    .mstatus (mstatus),
+    .mepc    (mepc),
+    .mtvec   (mtvec),
+    .mcause  (mcause)
   );
 
   // Imm Extend module
@@ -211,5 +220,9 @@ module ysyx_23060219_top(
     .num2  (num2),
     .result(result)
   );
+
+
+
+
 endmodule
 

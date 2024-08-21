@@ -11,9 +11,6 @@
 #include <Vysyx_23060219_top.h>
 
 
-//#define sword_t int32_t
-
-
 #define PMEM_SIZE   0x8000000
 #define PMEM_BASE   0x80000000
 #define PG_ALIGN    __attribute((aligned(4096)))
@@ -42,6 +39,8 @@
 #define Unit_IE1      13   //imm extended unit
 #define Unit_IE2      14  
 #define Unit_IE3      15 
+#define Unit_CR       16   //csr regs
+
 
 // npc mem wirte mask
 #define WByte  0b00000001
@@ -55,18 +54,19 @@
 
 //------------------------------------------------------------------------------------
 // watchpoint
-#define CONFIG_WATCHPOINT 1
+//#define CONFIG_WATCHPOINT       1
 
 // trace
-//#define CONFIG_TRACE        1
+//#define CONFIG_TRACE          1
 
-//#define CONFIG_ITRACE       1
-//#define CONFIG_MTRACE     1
-//#define CONFIG_FTRACE       1
-//#define CONFIG_IRINGBUF     1     ## 依赖itrace对logbuf的定义，要开iringbuf就要开itrace
-//#define CONFIG_DIFFTEST   1
+//#define CONFIG_ITRACE         1
+//#define CONFIG_MTRACE         1
+//#define CONFIG_FTRACE         1
+//#define CONFIG_ETRACE         1
+//#define CONFIG_IRINGBUF       1     ## 依赖itrace对logbuf的定义，要开iringbuf就要开itrace
+// #define CONFIG_DIFFTEST       1
 
-#define MAX_iringbuf_size   20
+#define MAX_iringbuf_size       20
 
 
 // device 
@@ -74,7 +74,16 @@
 #define CONFIG_SERIAL_MMIO 0xa00003f8
 #define CONFIG_RTC_MMIO    0xa0000048
 
+
+// wave
 //#define CONFIG_WAVES 1
+
+
+// CSR
+#define MSTATUS 0
+#define MTVEC   1
+#define MEPC    2
+#define MCAUSE  3
 
 
 #endif

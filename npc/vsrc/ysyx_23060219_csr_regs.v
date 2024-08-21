@@ -1,53 +1,62 @@
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module csr_regs(
-    input  wire           clk,
-    input  wire           rst,
-    input  wire           is_ecall,
-    input  wire           csr_wen,
-    input  wire [2:0]     funct3,
-    input  wire [11:0]    csr,
-    input  wire [`RegBus] src1,
-    input  wire [`RegBus] pc,
-    output wire [`RegBus] csr_npc,
-    output reg  [`RegBus] csr_val
+    input  wire         clk,
+    input  wire         rst,
+    input  wire         is_ecall,
+    input  wire         csr_wen,  // CSR写使能
+    input  wire [2:0]   funct3,
+    input  wire [11:0]  csr,      // {funct7, rs2}    CSR的地址
+    input  wire [31:0]  src1,
+    input  wire [31:0]  pc,
+    output wire [31:0]  csr_npc,  // 由ecall mret触发的下一条指令
+    output reg  [31:0]  csr_val,  // CSR存入的值
+    output reg  [31:0]  mstatus,
+    output reg  [31:0]  mtvec,
+    output reg  [31:0]  mepc,
+    output reg  [31:0]  mcause
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
 
-    reg [`RegBus] mstatus;
-    reg [`RegBus] mtvec;
-    reg [`RegBus] mepc;
-    reg [`RegBus] mcause;
-    wire[`RegBus] csr_wdata;
+    // reg [31:0] mstatus;
+    // reg [31:0] mtvec;
+    // reg [31:0] mepc;
+    // reg [31:0] mcause;
+    wire[31:0] csr_wdata;
 
 
-    // csr_wdata 写入csr的值
+    // csr_wdata 根据指令选择写入csr的值
     // (funct3[1] == 1'b1) : csrrs      010              --- csr的值和rs1按位或的结果写入csr
     // (funct3[1] == 1'b0) : csrrw or ecall  001 or 000  --- rs1的值写入csr
     assign csr_wdata = (funct3[1] == 1'b0) ? src1 : (src1 | csr_val);
 
-    // csr_npc 下一个PC
+    // csr_npc  根据指令选择下一个PC
     // {csr} = {funct7, rs2}------inst[31:20]
-    // inst[21] = csr[1] == 1, mret,  npc = MEPC  ---> mepc  保存引发异常的指令地址 / 异常发生时的PC值
-    // inst[21] = csr[1] == 0, ecall, npc = MTVEC ---> mtvec 指定了异常处理程序的入口地址 / 异常发生时 处理器应该跳转到哪个地方处理异常处理程序
+    // inst[21] = csr[1] == 1, mret,  npc = MEPC  ---> mepc  指向发生异常的指令 / 异常发生时的PC值
+    // inst[21] = csr[1] == 0, ecall, npc = MTVEC ---> mtvec 指定了异常处理程序的入口地址 / 异常时处理器需要跳转到的地址
     assign csr_npc = (csr[1] == 1'b0) ? mtvec : mepc;
 
 
     // write register
     always @(posedge clk) begin
         if(rst == `RST_VAL) begin           // 复位
-                mstatus <=  32'h1800;
-                mtvec   <= `RESET_VECTOR;
-                mepc    <= `RESET_VECTOR;
-                //mtvec   <= `RegRstVal;  
-                //mepc    <= `RegRstVal;  
-                mcause  <= `RegRstVal;  
-        end else if(is_ecall == 1'b1) begin // The inst is 'ecall', and the src1 is gpr[15] (for riscv-32e)
+                mstatus <= `RESET_VECTOR;
+                // mstatus <=  32'h1800;    // 在这里赋值的话 与nemu对不上 diff报错
+                mtvec   <= `RESET_VECTOR;   // 这些PC值初始化要赋值0x80000000 不能是全0
+                mepc    <= `RESET_VECTOR;   // 这些PC值初始化要赋值0x80000000 不能是全0
+                mcause  <=  32'hb;
+                //mtvec   <= 32'd0;  
+                //mepc    <= 32'd0;  
+                //mcause  <= 32'd0;  
+        end else if(is_ecall == 1'b1) begin // The inst is 'ecall', and the src1 is gpr[15] (for riscv-32e)            
             mepc   <= pc;                   // 保存引发异常的指令地址
-            //mcause <= csr_wdata;          // 设置异常号
             mcause <= 32'hb;
-        end else if(csr_wen == 1'b1) begin
+            //mcause <= csr_wdata;            // 设置异常号
+            // mstatus <=  32'h1800;
+            // $display("\n----------- mepc = 0x%x , mcause = 0x%x , mtvec = 0x%x , mstatus = 0x%x ---------in ecall -------\n" , mepc, mcause, mtvec, mstatus);      // mtvec 指向的是am_asm_trap
+
+        end else if(csr_wen == 1'b1) begin      // CSR写使能开启
             case (csr)
                 12'h300: mstatus <= csr_wdata;
                 12'h305: mtvec   <= csr_wdata;
@@ -60,13 +69,13 @@ module csr_regs(
 
 
     //read register
-    always @(*) begin
+    always @(*) begin           // 读使能一直开启
         case (csr)
-            12'h300: csr_val = mstatus;
-            12'h305: csr_val = mtvec;
-            12'h341: csr_val = mepc;
-            12'h342: csr_val = mcause;
-            default: csr_val = 32'hdead000b;
+            12'h300: begin  csr_val = mstatus;          end //$display("\n--------------- csr_val = mstatus = 0x%x ------------------\n",csr_val); end
+            12'h305: begin  csr_val = mtvec;            end //$display("\n--------------- csr_val = mtvec = 0x%x ------------------\n",csr_val);   end
+            12'h341: begin  csr_val = mepc;             end //$display("\n--------------- csr_val = mepc = 0x%x ------------------\n",csr_val);    end
+            12'h342: begin  csr_val = mcause;           end //$display("\n--------------- csr_val = mcause = 0x%x ------------------\n",csr_val);  end
+            default: begin  csr_val = 32'hdead000b;     end  //$display("\n--------------- csr_val = mstatus = dead ! ------------------\n");       end
         endcase
     end
 

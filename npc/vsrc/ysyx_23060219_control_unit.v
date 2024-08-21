@@ -1,26 +1,26 @@
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module ysyx_23060219_control_unit(
-    input  wire [`RegBus]   inst,
-    output wire [4:0]       rd_11_7,    //拆分指令inst
-    output wire [4:0]       rs1_19_15,
-    output wire [4:0]       rs2_24_20,
-    output wire [2:0]       fun3_14_12,
-    output wire [6:0]       fun7_31_25,
-    output reg  [`TYPE_BUS] IType,      //inst type   2:0
-    output reg  [`AlucBus]  aluc,       //alu control   4:0
-    output reg              is_ecall,
-    output reg              csr_wen,
-    output reg              reg_wen,    //RegFile 写使能
-    output reg              mem_wen,    //mem  写使能
-    output reg              mem_ren,    //mem  读使能
-    output reg  [7:0]       wmask,      //mem  写掩码
-    output reg  [2:0]       rmask,      //mem  读掩码
-    output reg              m1, 
-    output reg  [1:0]       m2,  
-    output reg              m3,  
-    output reg              m4,
-    output reg  [1:0]       m5 
+    input  wire [31:0]          inst,
+    output wire [4:0]           rd_11_7,    //拆分指令inst
+    output wire [4:0]           rs1_19_15,
+    output wire [4:0]           rs2_24_20,
+    output wire [2:0]           fun3_14_12,
+    output wire [6:0]           fun7_31_25,
+    output reg  [`TYPE_BUS]     IType,      //inst type   2:0
+    output reg  [`Aluc_width]   aluc,       //alu control   4:0
+    output reg                  is_ecall,
+    output reg                  csr_wen,
+    output reg                  reg_wen,    //RegFile 写使能
+    output reg                  mem_wen,    //mem  写使能
+    output reg                  mem_ren,    //mem  读使能
+    output reg  [7:0]           wmask,      //mem  写掩码
+    output reg  [2:0]           rmask,      //mem  读掩码
+    output reg                  m1, 
+    output reg  [1:0]           m2,  
+    output reg                  m3,  
+    output reg                  m4,
+    output reg  [1:0]           m5 
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
@@ -235,12 +235,6 @@ module ysyx_23060219_control_unit(
                 m4      = `MUX4_pc;
                 m5      = `MUX5_PCadd4;
             end
-            // `INST_TYPE_E: begin
-            //     case ({fun7_31_25, rs2_24_20})
-            //         `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
-            //          default:     ebreak(`ABORT, inst, `Unit_CU10);
-            //     endcase
-            // end
             `INST_TYPE_E: begin
                 IType    = `INST_I;         // don't care   
                 aluc     = `ADD;            // don't care   
@@ -272,7 +266,9 @@ module ysyx_23060219_control_unit(
                                 csr_wen  = `WEnable;   
                                 reg_wen  = `WEnable;                                  
                                 m2       = `MUX2_CsrNpc;
-                                etrace(32'hdeadeeee);
+                                `ifdef CONFIG_ETRACE
+                                    etrace(32'hdeadeeee);
+                                `endif 
                             end
                             `INST_EBREAK: ebreak(`HIT_TRAP, inst, `Unit_CU9);
                             default:      ebreak(`ABORT, inst, `Unit_CU10);

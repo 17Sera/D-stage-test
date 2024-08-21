@@ -7,8 +7,16 @@
 extern Vysyx_23060219_top *top;
 /*********************************************/
 
-
-#define gpr top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
+#define top_gprs      top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
+// #define top_mstatus   top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mstatus
+// #define top_mtvec     top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mtvec
+// #define top_mepc      top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mepc
+// #define top_mcause    top->rootp->ysyx_23060219_top__DOT__csr_regs_inst__DOT__mcause
+#define top_mstatus   top->rootp->mstatus
+#define top_mtvec     top->rootp->mtvec
+#define top_mepc      top->rootp->mepc
+#define top_mcause    top->rootp->mcause
+/************************************************************************************* */
 
 static const char *regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -25,7 +33,7 @@ void regs_display()
     for(int i = 0; i < 32; i++)
     {
         _Log(ANSI_FG_YELLOW "  $%s\t " ANSI_NONE, regs[i]);
-        _Log("0x%08x\t %010u\n", gpr[i], gpr[i]);
+        _Log("0x%08x\t %010u\n", top_gprs[i], top_gprs[i]);
     }
 }
 
@@ -45,16 +53,45 @@ void single_reg_display(char *reg_name)
     if(strcmp(reg_name, regs[0]) == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", 
-             "$0", gpr[1], gpr[1], gpr[1]);
+             "$0", top_gprs[1], top_gprs[1], top_gprs[1]);
         return;
     }      
 
-    //others
+    //other gprs
     for(i = 1; i < 32; i++)
         if(strcmp(reg_name, regs[i]) == 0)
         {
             _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", 
-                 regs[i], gpr[i], gpr[i], gpr[i]);
+                 regs[i], top_gprs[i], top_gprs[i], top_gprs[i]);
+            return;
+        }
+    
+    // mstatus
+    if(strcmp(reg_name, "mstatus") == 0)
+    {
+        _Log(ANSI_FG_YELLOW "$%s" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mstatus", 
+            top_mstatus, top_mstatus, top_mstatus);
+        return;
+    }
+    // mtvec;
+    if(strcmp(reg_name, "mtvec") == 0)
+    {
+        _Log(ANSI_FG_YELLOW "$%s  "     ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mtvec", 
+            top_mtvec, top_mtvec, top_mtvec);
+        return;
+    }
+    // mepc;
+    if(strcmp(reg_name, "mepc") == 0)
+    {
+        _Log(ANSI_FG_YELLOW "$%s   "      ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mepc", 
+            top_mepc, top_mepc, top_mepc);
+        return;
+    }
+    // mcause;
+    if(strcmp(reg_name, "mcause") == 0)
+    {
+        _Log(ANSI_FG_YELLOW "$%s " ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mcause", 
+            top_mcause, top_mcause, top_mcause);
             return;
         }
 
@@ -70,12 +107,12 @@ word_t reg_str2val(const char *s, bool *success)
         
     //reg $0
     if(strcmp(s, regs[0]) == 0)
-        return gpr[0];
+        return top_gprs[0];
         
     //others
     for(i = 1; i < 32; i++)
         if(strcmp(s, regs[i]) == 0)
-        return gpr[i];
+        return top_gprs[i];
 
     //no reg name matched
     *success = false;
