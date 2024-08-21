@@ -55,15 +55,15 @@ module UJ_type(
 endmodule
 
 module Extend_12(
-    input  wire [11:0]    imm_12,
-    output wire [`RegBus] imm_12_to_32
+    input  wire [11:0]  imm_12,
+    output wire [31:0]  imm_12_to_32
 );
     assign imm_12_to_32 = {{20{imm_12[11]}}, imm_12};
 endmodule
 
 module Extend_20(
-    input  wire [19:0]    imm_20,
-    output wire [`RegBus] imm_20_to_32
+    input  wire [19:0]  imm_20,
+    output wire [31:0]  imm_20_to_32
 );
     assign imm_20_to_32 = {{12{imm_20[19]}}, imm_20};
 endmodule
@@ -78,15 +78,15 @@ module ysyx_23060219_imm_extend(
     input  wire [2:0]       funct3,
     input  wire [6:0]       funct7,
     input  wire [`TYPE_BUS] IType,
-    output reg  [`RegBus]   imm32
+    output reg  [31:0]      imm32
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
 
-    wire[11:0]    imm_12;
-    wire[19:0]    imm_20;
-    wire[`RegBus] imm_12_to_32;
-    wire[`RegBus] imm_20_to_32;
+    wire  [11:0]  imm_12;
+    wire  [19:0]  imm_20;
+    wire  [31:0]  imm_12_to_32;
+    wire  [31:0]  imm_20_to_32;
 
     RISB_type RISB_type_inst(
         .rs2   (rs2),

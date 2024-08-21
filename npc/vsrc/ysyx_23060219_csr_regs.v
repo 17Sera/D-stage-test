@@ -1,29 +1,29 @@
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module csr_regs(
-    input  wire           clk,
-    input  wire           rst,
-    input  wire           is_ecall,
-    input  wire           csr_wen,  // CSR写使能
-    input  wire [2:0]     funct3,
-    input  wire [11:0]    csr,      // {funct7, rs2}    CSR的地址
-    input  wire [`RegBus] src1,
-    input  wire [`RegBus] pc,
-    output wire [`RegBus] csr_npc,  // 由ecall mret触发的下一条指令
-    output reg  [`RegBus] csr_val,   // CSR存入的值
-    output reg  [`RegBus] mstatus,
-    output reg  [`RegBus] mtvec,
-    output reg  [`RegBus] mepc,
-    output reg  [`RegBus] mcause
+    input  wire         clk,
+    input  wire         rst,
+    input  wire         is_ecall,
+    input  wire         csr_wen,  // CSR写使能
+    input  wire [2:0]   funct3,
+    input  wire [11:0]  csr,      // {funct7, rs2}    CSR的地址
+    input  wire [31:0]  src1,
+    input  wire [31:0]  pc,
+    output wire [31:0]  csr_npc,  // 由ecall mret触发的下一条指令
+    output reg  [31:0]  csr_val,  // CSR存入的值
+    output reg  [31:0]  mstatus,
+    output reg  [31:0]  mtvec,
+    output reg  [31:0]  mepc,
+    output reg  [31:0]  mcause
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
 
-    // reg [`RegBus] mstatus;
-    // reg [`RegBus] mtvec;
-    // reg [`RegBus] mepc;
-    // reg [`RegBus] mcause;
-    wire[`RegBus] csr_wdata;
+    // reg [31:0] mstatus;
+    // reg [31:0] mtvec;
+    // reg [31:0] mepc;
+    // reg [31:0] mcause;
+    wire[31:0] csr_wdata;
 
 
     // csr_wdata 根据指令选择写入csr的值
@@ -42,13 +42,13 @@ module csr_regs(
     always @(posedge clk) begin
         if(rst == `RST_VAL) begin           // 复位
                 mstatus <= `RESET_VECTOR;
-                // mstatus <=  32'h1800;
-                mtvec   <= `RESET_VECTOR;
-                mepc    <= `RESET_VECTOR;
+                // mstatus <=  32'h1800;    // 在这里赋值的话 与nemu对不上 diff报错
+                mtvec   <= `RESET_VECTOR;   // 这些PC值初始化要赋值0x80000000 不能是全0
+                mepc    <= `RESET_VECTOR;   // 这些PC值初始化要赋值0x80000000 不能是全0
                 mcause  <=  32'hb;
-                //mtvec   <= `RegRstVal;  
-                //mepc    <= `RegRstVal;  
-                //mcause  <= `RegRstVal;  
+                //mtvec   <= 32'd0;  
+                //mepc    <= 32'd0;  
+                //mcause  <= 32'd0;  
         end else if(is_ecall == 1'b1) begin // The inst is 'ecall', and the src1 is gpr[15] (for riscv-32e)            
             mepc   <= pc;                   // 保存引发异常的指令地址
             mcause <= 32'hb;
@@ -69,7 +69,7 @@ module csr_regs(
 
 
     //read register
-    always @(*) begin
+    always @(*) begin           // 读使能一直开启
         case (csr)
             12'h300: begin  csr_val = mstatus;          end //$display("\n--------------- csr_val = mstatus = 0x%x ------------------\n",csr_val); end
             12'h305: begin  csr_val = mtvec;            end //$display("\n--------------- csr_val = mtvec = 0x%x ------------------\n",csr_val);   end

@@ -3,15 +3,15 @@
 module ysyx_23060219_mem(
     input  wire           clk,
     input  wire           mem_wen,
-    input  wire [7:0]     wmask,
-    input  wire [`RegBus] waddr,
-    input  wire [`RegBus] wdata,
+    input  wire  [7:0]    wmask,
+    input  wire  [31:0]   waddr,
+    input  wire  [31:0]   wdata,
     input  wire           mem_ren,
-    input  wire [2:0]     rmask,
-    input  wire [`RegBus] raddr,
-    input  wire [`RegBus] inst_addr,
-    output reg  [`RegBus] rdata,
-    output wire  [`RegBus] inst_data
+    input  wire  [2:0]    rmask,
+    input  wire  [31:0]   raddr,
+    input  wire  [31:0]   inst_addr,
+    output reg   [31:0]   rdata,
+    output wire  [31:0]   inst_data
 );
     
     //import "DPI-C" function int  pmem_read(input int raddr);
@@ -19,8 +19,7 @@ module ysyx_23060219_mem(
     import "DPI-C" function void pmem_write(input int waddr, input int wdata, input byte wmask);
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
 
-    reg  [`RegBus] rdata_temp;
-
+    reg  [31:0] rdata_temp;
 
     //assign inst_data = pmem_read(inst_addr);
     assign inst_data = pmem_read(inst_addr, 32'hdead000c);

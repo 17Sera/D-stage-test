@@ -8,20 +8,20 @@ module ysyx_23060219_register_file(
     input  wire [4:0]     rs1,
     input  wire [4:0]     rs2,
     input  wire [4:0]     rd,
-    input  wire [`RegBus] reg_in,
-    output wire [`RegBus] src1,
-    output wire [`RegBus] src2
+    input  wire [31:0]    reg_in,
+    output wire [31:0]    src1,
+    output wire [31:0]    src2
 );
 
     integer i;
-    reg[`RegBus] regs[`BitWidth-1 : 0];
-    wire[`RegBus] src1_temp;
+    reg [31:0] regs[`BitWidth-1 : 0];
+    wire[31:0] src1_temp;
 
     //wire register
     always @(posedge clk) begin
         if(rst == `RST_VAL) begin       // 复位所有寄存器
             for(i=0; i<`RegNum; i=i+1) begin
-                regs[i] <= `RegRstVal;  
+                regs[i] <= 32'd0;  
             end
         end else if((reg_wen == 1'b1) && (rd != `Reg0))
             regs[rd] <= reg_in; 

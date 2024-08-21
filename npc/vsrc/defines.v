@@ -149,7 +149,7 @@
 `define ADD_LUI   5'b01110
 `define ADD_JALR  5'b01111
 `define SLL       5'b10000
-`define AlucBus   4:0
+`define Aluc_width   4:0        // AluBus
 
 
 // PC
@@ -162,7 +162,7 @@
 `define Reg0_VAL  32'd0
 `define WDisen    1'b0
 `define WEnable   1'b1
-`define Mcause_gpr 15  // riscve : a5 ; others a7
+`define Mcause_gpr 15  // riscve : a5 ; others a7   // 15---a5
 
 
 // mem
@@ -181,8 +181,8 @@
 // ARCH
 `define BitWidth  32
 `define RegNum    32
-`define RegBus    31:0
-`define RegRstVal 32'd0
+// `define RegBus    31:0
+// `define RegRstVal 32'd0
 
 // FLAH
 `define TRUE  1'b1
