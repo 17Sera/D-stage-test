@@ -40,10 +40,6 @@ class Vysyx_23060219_top___024root final : public VerilatedModule {
         CData/*0:0*/ __Vtrigrprev__TOP__clk;
         CData/*0:0*/ __VactContinue;
         SData/*11:0*/ ysyx_23060219_top__DOT__imm_extend_inst__DOT__imm_12;
-        VL_OUT(mstatus,31,0);
-        VL_OUT(mepc,31,0);
-        VL_OUT(mtvec,31,0);
-        VL_OUT(mcause,31,0);
         IData/*31:0*/ ysyx_23060219_top__DOT__inst;
         IData/*31:0*/ ysyx_23060219_top__DOT__pc;
         IData/*31:0*/ ysyx_23060219_top__DOT__result;
@@ -61,9 +57,13 @@ class Vysyx_23060219_top___024root final : public VerilatedModule {
         IData/*31:0*/ ysyx_23060219_top__DOT__PC_inst__DOT__i1__DOT__i0__DOT__lut_out;
         IData/*31:0*/ ysyx_23060219_top__DOT__PC_inst__DOT__i2__DOT__i0__DOT__lut_out;
         IData/*31:0*/ ysyx_23060219_top__DOT__mem_inst__DOT__rdata_temp;
+        IData/*31:0*/ ysyx_23060219_top__DOT__csr_reg_inst__DOT__mepc;
+        IData/*31:0*/ ysyx_23060219_top__DOT__csr_reg_inst__DOT__mcause;
+        IData/*31:0*/ ysyx_23060219_top__DOT__csr_reg_inst__DOT__mtvec;
+        IData/*31:0*/ ysyx_23060219_top__DOT__csr_reg_inst__DOT__mstatus;
+        IData/*31:0*/ ysyx_23060219_top__DOT__csr_reg_inst__DOT__csr_write;
         IData/*31:0*/ ysyx_23060219_top__DOT__register_file_inst__DOT__i;
         IData/*31:0*/ ysyx_23060219_top__DOT__register_file_inst__DOT__src1_temp;
-        IData/*31:0*/ ysyx_23060219_top__DOT__csr_regs_inst__DOT__csr_wdata;
         IData/*19:0*/ ysyx_23060219_top__DOT__imm_extend_inst__DOT__imm_20;
         IData/*31:0*/ ysyx_23060219_top__DOT__imm_extend_inst__DOT__imm_12_to_32;
         IData/*31:0*/ ysyx_23060219_top__DOT__imm_extend_inst__DOT__imm_20_to_32;

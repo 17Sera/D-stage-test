@@ -134,3 +134,4 @@ void cpu_exec(uint64_t n)
         case NPC_QUIT: statistic();
     }
 }
+

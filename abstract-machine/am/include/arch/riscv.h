@@ -8,16 +8,22 @@
 #endif
 
 
-struct Context {
+// struct Context {
+//   // TODO: fix the order of these members to match trap.S
+//   #ifdef __riscv_e
+//     uintptr_t gpr[16];
+//   #else
+//   uintptr_t gpr[32];
+//   #endif
+//   uintptr_t mcause, mstatus, mepc;
+//   void *pdir;
+//   uintptr_t np;
+// };
+
+struct Context { //上下文结构体
   // TODO: fix the order of these members to match trap.S
-  #ifdef __riscv_e
-    uintptr_t gpr[16];
-  #else
-  uintptr_t gpr[32];
-  #endif
-  uintptr_t mcause, mstatus, mepc;
+  uintptr_t gpr[NR_REGS], mcause, mstatus, mepc;
   void *pdir;
-  uintptr_t np;
 };
 
 
