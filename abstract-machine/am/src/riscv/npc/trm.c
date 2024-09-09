@@ -5,8 +5,6 @@
 #define npc_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))   ///////////
 
 extern char _heap_start;
-// void malloc_reset();
-
 
 int main(const char *args);
 
@@ -31,7 +29,6 @@ void halt(int code) {
 }
 
 void _trm_init() {
-  // malloc_reset();
   int ret = main(mainargs);
   halt(ret);
 }

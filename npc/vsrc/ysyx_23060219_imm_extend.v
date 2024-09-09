@@ -13,15 +13,14 @@ module RISB_type(
     always @(*) begin
         case (IType)
             `INST_R: imm_12 = 12'b0000_0000_0000;
-            `INST_I: imm_12 = {funct7, rs2};
+            `INST_I: imm_12 = {funct7, rs2}; //以R型指令进行分割
             `INST_S: imm_12 = {funct7, rd};
             `INST_B: imm_12 = {funct7[6], rd[0], funct7[5:0], rd[4:1]};
             `INST_U,
             `INST_J: imm_12 = 12'b0000_0000_0000;
             default: begin
                         imm_12 = 0;
-                        //ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE1);
-                        ebreak(`ABORT, 32'hdead0001, `Unit_IE1);
+                        ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE1);
                     end
         endcase
     end
@@ -48,22 +47,22 @@ module UJ_type(
             `INST_J: imm_20 = {funct7[6], rs1, funct3, rs2[0], funct7[5:0], rs2[4:1]};
             default: begin
                         imm_20 = 0;
-                        ebreak(`ABORT, 32'hdead0002, `Unit_IE2);
+                        ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE2);
                     end 
         endcase
     end
 endmodule
 
 module Extend_12(
-    input  wire [11:0]  imm_12,
-    output wire [31:0]  imm_12_to_32
+    input  wire [11:0]    imm_12,
+    output wire [`RegBus] imm_12_to_32
 );
     assign imm_12_to_32 = {{20{imm_12[11]}}, imm_12};
 endmodule
 
 module Extend_20(
-    input  wire [19:0]  imm_20,
-    output wire [31:0]  imm_20_to_32
+    input  wire [19:0]    imm_20,
+    output wire [`RegBus] imm_20_to_32
 );
     assign imm_20_to_32 = {{12{imm_20[19]}}, imm_20};
 endmodule
@@ -78,15 +77,15 @@ module ysyx_23060219_imm_extend(
     input  wire [2:0]       funct3,
     input  wire [6:0]       funct7,
     input  wire [`TYPE_BUS] IType,
-    output reg  [31:0]      imm32
+    output reg  [`RegBus]   imm32
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit);
 
-    wire  [11:0]  imm_12;
-    wire  [19:0]  imm_20;
-    wire  [31:0]  imm_12_to_32;
-    wire  [31:0]  imm_20_to_32;
+    wire[11:0]    imm_12;
+    wire[19:0]    imm_20;
+    wire[`RegBus] imm_12_to_32;
+    wire[`RegBus] imm_20_to_32;
 
     RISB_type RISB_type_inst(
         .rs2   (rs2),
@@ -121,16 +120,10 @@ module ysyx_23060219_imm_extend(
             `INST_B:                   imm32 = imm_12_to_32 << 1;
             `INST_U:                   imm32 = imm_20_to_32 << 12;
             `INST_J:                   imm32 = imm_20_to_32 << 1;
-
             default: begin
                         imm32 = 32'hdead0003;
                         ebreak(`ABORT, 32'hdead0004, `Unit_IE3);
                     end
-
-            // default: begin
-            //             imm32 = 32'hdeafbeaf;
-            //             ebreak(`ABORT, 32'hdeafbeaf, `Unit_IE3);
-            //         end
         endcase
     end
 endmodule
