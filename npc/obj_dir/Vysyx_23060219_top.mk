@@ -111,5 +111,4 @@ Vysyx_23060219_top: $(VK_USER_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_H
 
 
 # Verilated -*- Makefile -*-
-LIBS +=-lreadline    -ldl         -lLLVM-11 -lLLVM-11		
-CXXFLAGS +=-I/usr/lib/llvm-11/include -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fPIE	
+LIBS +=-lreadline    -ldl         -lLLVM-11		
