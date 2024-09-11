@@ -8,14 +8,14 @@ module ysyx_23060219_register_file(
     input  wire [4:0]     rs1, //源寄存器1地址，五位的地址位宽，最多可以表示32个寄存器
     input  wire [4:0]     rs2, //源寄存器2地址
     input  wire [4:0]     rd, //目标寄存器地址
-    input  wire [`RegBus] reg_in, //写入寄存器的数据
-    output wire [`RegBus] src1, //从源寄存器1中读出的数据
-    output wire [`RegBus] src2 //从源寄存器2中读出的数据
+    input  wire [31:0] reg_in, //写入寄存器的数据
+    output wire [31:0] src1, //从源寄存器1中读出的数据
+    output wire [31:0] src2 //从源寄存器2中读出的数据
 );
 
     integer i;
-    reg[`RegBus] regs[`BitWidth-1 : 0]; //32个位数为32的寄存器堆
-    wire [`RegBus] src1_temp;
+    reg[31:0] regs[`BitWidth-1 : 0]; //32个位数为32的寄存器堆
+    wire [31:0] src1_temp;
 
     //wire register
     always @(posedge clk) begin

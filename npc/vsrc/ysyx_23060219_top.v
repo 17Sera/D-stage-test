@@ -11,9 +11,9 @@ module ysyx_23060219_top(
   wire[2:0]       funct3;
   wire[6:0]       funct7;
 /* verilator lint_off UNOPTFLAT */
-  wire[`RegBus]   inst;     
+  wire[31:0]   inst;     
 /* verilator lint_off UNOPTFLAT */
-  wire[`RegBus]   pc;     
+  wire[31:0]   pc;     
   wire[`TYPE_BUS] IType;      //inst type
   wire            is_ecall;
   wire            csr_wen;
@@ -28,17 +28,17 @@ module ysyx_23060219_top(
   wire            m4;         //mux4 sel
   wire[1:0]       m5;         //mux5 sel
   wire[`AlucBus]  aluc;       //alu operation type, like add, sub...
-  wire[`RegBus]   PCadd4;     //pc + 4
-  wire[`RegBus]   result;     //alu operation result
-  wire[`RegBus]   reg_in;     //regisrer file input value
-  wire[`RegBus]   src1;       //rs1 value
-  wire[`RegBus]   src2;       //rs2 value
-  wire[`RegBus]   imm32;      //extended 32 bit immediate
-  wire[`RegBus]   num1;       //alu operation number1       
-  wire[`RegBus]   num2;       //alu operation number2
-  wire[`RegBus]   mem_rdata;  //mem read data
-  wire[`RegBus]   csr_npc;
-  wire[`RegBus]   csr_val;
+  wire[31:0]   PCadd4;     //pc + 4
+  wire[31:0]   result;     //alu operation result
+  wire[31:0]   reg_in;     //regisrer file input value
+  wire[31:0]   src1;       //rs1 value
+  wire[31:0]   src2;       //rs2 value
+  wire[31:0]   imm32;      //extended 32 bit immediate
+  wire[31:0]   num1;       //alu operation number1       
+  wire[31:0]   num2;       //alu operation number2
+  wire[31:0]   mem_rdata;  //mem read data
+  wire[31:0]   csr_npc;
+  wire[31:0]   csr_val;
 
 
   // PC module

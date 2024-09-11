@@ -7,19 +7,19 @@ module ysyx_23060219_csr_regs(
     input is_ecall,
     input [11:0] csr,
     input [2:0] funct3,
-    input [`RegBus] src1,
-    input [`RegBus] pc,
-    output reg [`RegBus] csr_val,
-    output wire [`RegBus] csr_npc
+    input [31:0] src1,
+    input [31:0] pc,
+    output reg [31:0] csr_val,
+    output wire [31:0] csr_npc
 );
 
     import "DPI-C" function void ebreak(input int station, input int inst, input byte uint);
 
-    reg [`RegBus] mepc;
-    reg [`RegBus] mcause;
-    reg [`RegBus] mtvec;
-    reg [`RegBus] mstatus;
-    reg [`RegBus] csr_write;
+    reg [31:0] mepc;
+    reg [31:0] mcause;
+    reg [31:0] mtvec;
+    reg [31:0] mstatus;
+    reg [31:0] csr_write;
 
     assign csr_write = (funct3[1] == 1'b0) ? src1 : (src1 | csr_val); //判定是csrrw还是csrrs指令
 

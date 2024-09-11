@@ -1,25 +1,25 @@
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module ysyx_23060219_mem(
-    input  wire           clk,
-    input  wire           mem_wen,
-    input  wire [7:0]     wmask, //写内存掩码
-    input  wire [`RegBus] waddr, //写入数据存储器的地址
-    input  wire [`RegBus] wdata, //写入数据存储器的数据
-    input  wire           mem_ren, //数据存储器使能信号
-    input  wire [2:0]     rmask, //读内存掩码
-    input  wire [`RegBus] raddr,
-    input  wire [`RegBus] inst_addr,
-    output reg  [`RegBus] rdata, //读到的数据
-    // output reg  [`RegBus] inst_data
-    output wire  [`RegBus] inst_data //读到的指令
+    input  wire             clk,
+    input  wire             mem_wen,
+    input  wire [7:0]       wmask,      //写内存掩码
+    input  wire [31:0]      waddr,      //写入数据存储器的地址
+    input  wire [31:0]      wdata,      //写入数据存储器的数据
+    input  wire             mem_ren,    //数据存储器使能信号
+    input  wire [2:0]       rmask,      //读内存掩码
+    input  wire [31:0]      raddr,
+    input  wire [31:0]      inst_addr,
+    output reg  [31:0]      rdata,      //读到的数据
+    // output reg  [31:0] inst_data
+    output wire  [31:0] inst_data       //读到的指令
 );
     
     import "DPI-C" function int  pmem_read(input int raddr, input int num); //用于利用从软件读取指令、数据
     import "DPI-C" function void pmem_write(input int waddr, input int wdata, input byte wmask); //用于将数据写入软件
     import "DPI-C" function void ebreak(input int station, input int inst, input byte unit); //指令终止
 
-    reg  [`RegBus] rdata_temp; //32，暂存读到的数据
+    reg  [31:0] rdata_temp; //32，暂存读到的数据
 
 
     assign inst_data = pmem_read(inst_addr, 32'hdead000c); //读指令

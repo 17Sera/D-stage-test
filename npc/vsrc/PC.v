@@ -5,16 +5,16 @@ module PC(
   input  wire           rst,
   input  wire           m1,
   input  wire [1:0]     m2,
-  input  wire [`RegBus] result,
-  input  wire [`RegBus] imm32,
-  input  wire [`RegBus] csr_npc,
-  output wire [`RegBus] PCadd4, //计算后的下一条指令地址（PC+4）
-  output reg  [`RegBus] pc //当前指令地址
+  input  wire [31:0] result,
+  input  wire [31:0] imm32,
+  input  wire [31:0] csr_npc,
+  output wire [31:0] PCadd4, //计算后的下一条指令地址（PC+4）
+  output reg  [31:0] pc //当前指令地址
 );
 
-  wire [`RegBus] npc;
-  wire [`RegBus] npc_temp;
-  wire [`RegBus] PCaddIMM32;
+  wire [31:0] npc;
+  wire [31:0] npc_temp;
+  wire [31:0] PCaddIMM32;
   
   assign PCadd4     = pc + `PC_INCREMENT; //PC+4
   assign PCaddIMM32 = pc + imm32;

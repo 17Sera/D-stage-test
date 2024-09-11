@@ -1,7 +1,7 @@
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module ysyx_23060219_control_unit( //控制 + 译码
-    input  wire [`RegBus]   inst,
+    input  wire [31:0]   inst,
     output wire [4:0]       rd_11_7,
     output wire [4:0]       rs1_19_15,
     output wire [4:0]       rs2_24_20,
@@ -125,7 +125,7 @@ module ysyx_23060219_control_unit( //控制 + 译码
                     `INST_LW:  rmask = `LoadW;
                     `INST_LBU: rmask = `LoadBU;
                     `INST_LHU: rmask = `LoadHU;
-                    default:  ebreak(`ABORT, inst, `Unit_CU6);  //zhong
+                    default:  ebreak(`ABORT, inst, `Unit_CU6); 
                 endcase
             end
             `INST_TYPE_S: begin
@@ -146,7 +146,7 @@ module ysyx_23060219_control_unit( //控制 + 译码
                     `INST_SB: wmask = `WByte;
                     `INST_SH: wmask = `WHalf;
                     `INST_SW: wmask = `WWord;
-                    default:  ebreak(`ABORT, inst, `Unit_CU7);  //zhong
+                    default:  ebreak(`ABORT, inst, `Unit_CU7); 
                 endcase
             end
             `INST_TYPE_B: begin
