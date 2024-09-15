@@ -3,15 +3,14 @@
 
 #include "common.h"
 
-//这些宏用于生成ANSI转义序列，用于在支持ANSI转义序列的终端上设置文本和背景颜色
-#define ANSI_FG_BLACK   "\33[1;30m" //文本颜色
+#define ANSI_FG_BLACK   "\33[1;30m"
 #define ANSI_FG_RED     "\33[1;31m"
 #define ANSI_FG_GREEN   "\33[1;32m"
 #define ANSI_FG_YELLOW  "\33[1;33m"
 #define ANSI_FG_BLUE    "\33[1;34m"
-#define ANSI_FG_MAGENTA "\33[1;35m" //洋红色（紫红色）
-#define ANSI_FG_CYAN    "\33[1;36m" //青色
-#define ANSI_FG_WHITE   "\33[1;37m" //背景颜色
+#define ANSI_FG_MAGENTA "\33[1;35m"
+#define ANSI_FG_CYAN    "\33[1;36m"
+#define ANSI_FG_WHITE   "\33[1;37m"
 #define ANSI_BG_BLACK   "\33[1;40m"
 #define ANSI_BG_RED     "\33[1;41m"
 #define ANSI_BG_GREEN   "\33[1;42m"

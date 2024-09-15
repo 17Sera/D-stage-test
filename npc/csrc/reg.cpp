@@ -1,18 +1,18 @@
 #include "../include/common.h"
 #include "../include/debug.h"
 #include "Vysyx_23060219_top.h"
-
+#include "Vysyx_23060219_top___024root.h"
 
 /********extern functions or variables********/
 extern Vysyx_23060219_top *top;
 /*********************************************/
 
-/* CSR不拉到顶层 */
-#define gpr       top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
-#define mstatus   top->rootp->ysyx_23060219_top__DOT__csr_reg_inst__DOT__mstatus
-#define mtvec     top->rootp->ysyx_23060219_top__DOT__csr_reg_inst__DOT__mtvec
-#define mepc      top->rootp->ysyx_23060219_top__DOT__csr_reg_inst__DOT__mepc
-#define mcause    top->rootp->ysyx_23060219_top__DOT__csr_reg_inst__DOT__mcause
+
+#define top_gprs      top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
+#define top_mstatus   top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mstatus
+#define top_mtvec     top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mtvec
+#define top_mepc      top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mepc
+#define top_mcause    top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mcause
 
 static const char *regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -23,71 +23,72 @@ static const char *regs[] = {
 
 void regs_display() 
 {
-    _Log(ANSI_FG_GREEN "RegName    H_data          D_data\n" ANSI_NONE);
+    _Log(ANSI_FG_RED "RegName  Hex_Value       Dec_Value\n" ANSI_NONE);
     _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\n", "pc", 
-         top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__pc);
+         top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg);
     for(int i = 0; i < 32; i++)
     {
         _Log(ANSI_FG_YELLOW "$%s\t " ANSI_NONE, regs[i]);
-        _Log("0x%08x\t %010u\n", gpr[i], gpr[i]);
+        _Log("0x%08x\t %010u\n", top_gprs[i], top_gprs[i]);
     }
 }
 
 void single_reg_display(char *reg_name) 
 {
     int i;
-    //show pc
-    _Log(ANSI_FG_RED "RegName    H_data       U-D_data       D_data\n\33[0m");
+    //pc
+    _Log(ANSI_FG_RED "RegName  Hex_Value       U-Dec_Value       Dec_Value\n\33[0m");
     if(strcmp(reg_name, "pc") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u %010d\n", "pc", 
-             top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__pc, top->rootp->ysyx_23060219_top__DOT__pc);
+             top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, 
+             top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg);
         return;
     }
 
-    //show reg $0
+    //reg $0
     if(strcmp(reg_name, regs[0]) == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", 
-             "$0", gpr[1], gpr[1], gpr[1]);
+             "$0", top_gprs[1], top_gprs[1], top_gprs[1]);
         return;
     }      
 
-    //others gprs
+    //other gprs
     for(i = 1; i < 32; i++)
         if(strcmp(reg_name, regs[i]) == 0)
         {
             _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", 
-                 regs[i], gpr[i], gpr[i], gpr[i]);
+                 regs[i], top_gprs[i], top_gprs[i], top_gprs[i]);
             return;
         }
-
+    
     // mstatus
     if(strcmp(reg_name, "mstatus") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s" ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mstatus", 
-            mstatus, mstatus, mstatus);
+            top_mstatus, top_mstatus, top_mstatus);
         return;
     }
     // mtvec;
     if(strcmp(reg_name, "mtvec") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s  "     ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mtvec", 
-            mtvec, mtvec, mtvec);
+            top_mtvec, top_mtvec, top_mtvec);
         return;
     }
     // mepc;
     if(strcmp(reg_name, "mepc") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s   "      ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mepc", 
-            mepc, mepc, mepc);
+            top_mepc, top_mepc, top_mepc);
         return;
     }
     // mcause;
     if(strcmp(reg_name, "mcause") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s " ANSI_NONE " 0x%08x\t %010u\t   %010d\n", "mcause", 
-            mcause, mcause, mcause);
+            top_mcause, top_mcause, top_mcause);
         return;
     }
 
@@ -99,16 +100,16 @@ word_t reg_str2val(const char *s, bool *success)
     int i;
     //pc
     if(strcmp(s, "pc") == 0)
-        return top->rootp->ysyx_23060219_top__DOT__pc; 
+        return top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg; 
         
     //reg $0
     if(strcmp(s, regs[0]) == 0)
-        return gpr[0];
+        return top_gprs[0];
         
     //others
     for(i = 1; i < 32; i++)
         if(strcmp(s, regs[i]) == 0)
-        return gpr[i];
+        return top_gprs[i];
 
     //no reg name matched
     *success = false;

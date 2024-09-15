@@ -22,7 +22,7 @@ typedef struct {
 }Func_Sym;
 
 #define Is_FUNC(info)  ((ELF32_ST_TYPE(info)) == STT_FUNC)
-#define MAX_func_size  32              //the max amount of FUNC symbols
+#define MAX_func_size 32               //the max amount of FUNC symbols
 static int func_amount = 0;            //FUNC symbol amount
 static Func_Sym sym_fun_group[MAX_func_size] = {0};
 
@@ -218,11 +218,11 @@ void display_iringbuf(void)
     _Log(ANSI_FG_BLUE "Display inst iringbuf:\n" ANSI_NONE);
     while(i != iringbuf.tail)
     {
-        printf(ANSI_FG_GREEN "[iringbuf] " ANSI_NONE "      %s\n", iringbuf.inst_buf[i]);
+        printf(ANSI_FG_YELLOW "[iringbuf] " ANSI_NONE "      %s\n", iringbuf.inst_buf[i]);
         log_write("[iringbuf]       %s\n", iringbuf.inst_buf[i]); 
         i = (i + 1) % MAX_iringbuf_size;
     }
-    printf(ANSI_FG_RED "[iringbuf] " ANSI_NONE ANSI_FG_RED "---->" ANSI_NONE " %s\n", 
+    printf(ANSI_FG_YELLOW "[iringbuf] " ANSI_NONE ANSI_FG_RED "---->" ANSI_NONE " %s\n", 
            iringbuf.inst_buf[iringbuf.tail]);
     log_write("[iringbuf] ----> %s\n", iringbuf.inst_buf[iringbuf.tail]); 
 }

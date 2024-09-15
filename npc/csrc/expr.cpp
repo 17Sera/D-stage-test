@@ -1,8 +1,8 @@
 #include "../include/common.h"
 #include "../include/debug.h"
-#include "../include/paddr.h"
 #include <assert.h>
 #include <regex.h>
+
 
 /********extern functions or variables********/
 extern uint8_t* guest_to_host(paddr_t paddr);
@@ -10,10 +10,12 @@ extern word_t   host_read(void *addr, int len);
 extern word_t   reg_str2val(const char *s, bool *success);
 /*********************************************/
 
+
 enum
 {
     TK_NOTYPE = 256,
     TK_EQ,
+    /* TODO: Add more token types */
     TK_INEQ,
     TK_AND,
     TK_HEX,
@@ -48,7 +50,9 @@ static struct rule
 
 static regex_t re[NR_REGEX] = {};
 
-
+/* Rules are used for many times.
+ * Therefore we compile them only once before any usage.
+ */
 void init_regex()
 {
     int i;
@@ -94,8 +98,8 @@ static bool make_token(char *e)
                 char *substr_start = e + position;
                 int substr_len = pmatch.rm_eo;
 
-                // _Log(ANSI_FG_BLUE "match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-                //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
+                _Log(ANSI_FG_BLUE "match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+                    i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
                 position += substr_len;
 
@@ -125,6 +129,7 @@ static bool make_token(char *e)
 
 static bool check_parentheses(int start, int end)
 {
+    //The first token is "(", otherwise returns false
     int num_Lparentheses = 1;   //The amount of "(" by now
     if((strcmp(tokens[start].str, "(") != 0) || (strcmp(tokens[end].str, ")") != 0))
         return false;
@@ -152,7 +157,7 @@ static bool check_parentheses(int start, int end)
                       ((type) == TK_AND)  || ((type) == TK_EQ) || \
                       ((type) == TK_INEQ))
 
-
+//check whether the "prime" is primer than the "token" 【eg. '+'= '-' > '*' = '/'】
 static bool check_precedence(int prime, int token)
 {
     int prime_num = 0, token_num = 0;
@@ -187,6 +192,7 @@ static bool check_precedence(int prime, int token)
 }
 
 
+// get the position of the prime operator
 static int get_prime(int start, int end)
 {
     int num_Lparentheses = 0;   //The amount of "(" by now
@@ -244,7 +250,10 @@ static uint32_t eval(int p, int q)
         assert(0);
     }
     else if (p == q) {
-
+        /* Single token.
+        * For now this token should be a number.
+        * Return the value of the number.
+        */
         if(tokens[p].type == TK_RNAME)    //$xx
         {
             bool success = true;
@@ -276,6 +285,9 @@ static uint32_t eval(int p, int q)
     }
     else if(check_parentheses(p, q) == true)
     {
+        /* The expression is surrounded by a matched pair of parentheses.
+        * If that is the case, just throw away the parentheses.
+        */
         return eval(p + 1, q - 1);
     }
     else if((tokens[p].type == TK_DEREF) && (p + 1 == q))  //dereference; register or number

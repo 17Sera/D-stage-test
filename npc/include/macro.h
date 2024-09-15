@@ -7,6 +7,8 @@
 #define str_temp(x) #x
 #define str(x) str_temp(x)
 
+// macro testing
+// See https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro
 // macro concatenation
 #define concat_temp(x, y) x ## y
 #define concat(x, y) concat_temp(x, y)

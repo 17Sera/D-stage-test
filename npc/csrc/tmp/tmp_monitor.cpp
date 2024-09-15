@@ -1,0 +1,146 @@
+// #include "../include/common.h"
+// #include "../include/debug.h"
+// #include "../include/paddr.h"
+// #include "../include/macro.h"
+// #include "../include/utils.h"
+// #include <getopt.h>
+
+
+// /********extern functions or variables********/
+// extern void     init_log(const char *log_file);
+// extern void     init_sdb();
+// extern void     init_mem(void);
+// extern void     sdb_set_batch_mode(void); 
+// extern uint8_t* guest_to_host(paddr_t paddr);
+
+// #ifdef CONFIG_FTRACE 
+// extern void load_elf(void);
+// #endif
+// /*********************************************/
+
+
+// static char *log_file = NULL;
+// static char *img_file = NULL;
+// char *elf_file = NULL;
+// char *diff_so_file = NULL;
+// int  difftest_port = 1234;
+// long img_size;
+// NPCState npc_state = { .state = NPC_STOP };
+
+
+
+// int is_exit_status_bad() 
+// {
+//     int good = (npc_state.state == NPC_END && npc_state.halt_ret == 0) || (npc_state.state == NPC_QUIT);
+//     return !good;
+// }
+
+// static void welcome()
+// {
+//     Log("ITrace:   %s", MUXDEF(CONFIG_ITRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("MTrace:   %s", MUXDEF(CONFIG_MTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("FTrace:   %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("ETrace:   %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("IRingBuf: %s", MUXDEF(CONFIG_IRINGBUF, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("DiffTest: %s", MUXDEF(CONFIG_DIFFTEST, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("WATCHPOINT: %s", MUXDEF(CONFIG_WATCHPOINT, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+//     Log("Device: %s", MUXDEF(CONFIG_DEVICE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+
+//     // IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
+//     //     "to record the trace. This may lead to a large log file. "
+//     //     "If it is not necessary, you can disable it in menuconfig"));
+//     Log("Build time: %s, %s", __TIME__, __DATE__);
+//     //这里的__TIME__，__DATA__是预定义的预处理器宏，用于获取编译时间和信息，在编译时由编译器自动填充，不是在运行中获取
+//     printf("Welcome to %s-NPC!\n", ANSI_FMT("riscv32e", ANSI_FG_YELLOW ANSI_BG_RED));
+//     // printf("For help, type \"help\"\n");
+// }
+
+
+// static long load_img() 
+// {
+//   if (img_file == NULL) {
+//     Log("No image is given. Use the default build-in image.");
+//     return 4096; // built-in image size
+//   }
+
+//   FILE *fp = fopen(img_file, "rb"); //使用fopen函数以二进制模式（“rb”）打开指定的图像文件。如果文件无法打开，就assert
+//   Assert(fp, "Can not open '%s'", img_file);
+
+//   fseek(fp, 0, SEEK_END); //将文件指针挪到文件末尾
+//   long size = ftell(fp); //返回文件指针的偏移量，即文件的大小（字节）
+
+//   Log("The image is %s, size = %ld", img_file, size); //记录日志，显示图像文件的名称和大小
+
+//   fseek(fp, 0, SEEK_SET); //将文件指针移动回文件开头
+//   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp); //从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
+//   assert(ret == 1);
+
+//   fclose(fp); //关闭文件，释放资源
+//   return size;
+// }
+
+// static int parse_args(int argc, char *argv[]) {
+//   const struct option table[] = {
+//     {"batch"    , no_argument      , NULL, 'b'},
+//     {"log"      , required_argument, NULL, 'l'},
+//     {"diff"     , required_argument, NULL, 'd'},
+//     {"port"     , required_argument, NULL, 'p'},
+//     {"help"     , no_argument      , NULL, 'h'},
+// 	{"elf"		, required_argument, NULL, 'e'},
+//     {0          , 0                , NULL,  0 }
+//   };
+//   int o;
+//   while ( (o = getopt_long(argc, argv, "-bhl:d:p:e:", table, NULL)) != -1) {
+//     switch (o) {
+//       case 'b': sdb_set_batch_mode(); break;
+//       case 'p': sscanf(optarg, "%d", &difftest_port); break;
+//       case 'l': log_file = optarg; break;
+//       case 'd': diff_so_file = optarg; break;
+// 	  case 'e': elf_file = optarg; break;
+//       case 1:   img_file = optarg; return 0; //处理镜像文件路径
+//       default:
+//         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
+//         printf("\t-b,--batch              run with batch mode\n");
+//         printf("\t-l,--log=FILE           output log to FILE\n");
+//         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+//         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
+// 		printf("\t-e,--elf=FILE			      parse the elf file\n");
+//         // printf("\t-i,--image=FILE         specify the image file\n"); //添加镜像文件提示信息
+//         //目前已经可以在命令行中传入镜像文件路径，并且程序能够正确解析和处理该参数了
+//         printf("\n");
+//         exit(0);
+//     }
+//   }
+//   return 0;
+// }
+
+
+
+// void init_monitor(int argc, char *argv[]) {
+//     /* Perform some global initialization. */
+
+//     /* Parse arguments. */
+//     parse_args(argc, argv); //解析参数
+
+//     /* Open the log file. */
+//     init_log(log_file);
+
+// #ifdef CONFIG_FTRACE 
+//     /* Load the ELF file of the image */
+//     load_elf();
+// #endif
+
+//     /* Initialize memory. */
+//     init_mem();
+
+//     /* Load the image to memory. This will overwrite the built-in image. */
+//     // long img_size = load_img();
+//     img_size = load_img();
+
+//     /* Initialize the simple debugger. */
+//     init_sdb();
+
+//     /* Display welcome message. */
+//     welcome();
+// }
+

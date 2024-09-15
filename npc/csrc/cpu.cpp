@@ -3,9 +3,9 @@
 #include "../include/debug.h"
 #include "../include/macro.h"
 #include "Vysyx_23060219_top.h"
+#include "Vysyx_23060219_top___024root.h"
 
-
-/*************extern functions or variables****************/
+/********extern functions or variables********/
 extern void single_cycle(void); 
 extern NPCState npc_state;
 extern Vysyx_23060219_top *top;
@@ -24,12 +24,7 @@ extern void display_iringbuf(void);
 #ifdef CONFIG_DIFFTEST 
 extern void difftest_step(vaddr_t pc, vaddr_t npc);
 #endif
-
-#ifdef CONFIG_WATCHPOINT
-extern void wp_difftest();
-#endif
-
-/*************************************************************/
+/*********************************************/
 
 
 #define MAX_INST_TO_PRINT 20
@@ -39,10 +34,10 @@ IFDEF(CONFIG_ITRACE, char logbuf[128]);
 
 
 static struct {
-  word_t pc;
-  word_t npc;
-  word_t inst;
-  word_t ninst;
+  word_t pc;        // current pc
+  word_t npc;       // next pc
+  word_t inst;      // current instruction
+  word_t ninst;     // next instruction
 } PCSet = {0, 0, 0, 0};
 
 
@@ -52,10 +47,11 @@ static void statistic() {
 
 static void execute_once() 
 {
-    //观察波形图可以发现，执行reset后第一条指令已经执行了1/3，即取指、译码部分已经完成，此时的pc为当前pc，执行剩下的2/3后pc为dnpc
-    PCSet.pc  = top->rootp->ysyx_23060219_top__DOT__pc;  PCSet.inst = top->rootp->ysyx_23060219_top__DOT__inst;
-    single_cycle();  //single_cycle();  single_cycle();      // take 3 cycles to excute one instruction
-    PCSet.npc = top->rootp->ysyx_23060219_top__DOT__pc;  PCSet.ninst = top->rootp->ysyx_23060219_top__DOT__inst;
+    PCSet.pc = top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg;  PCSet.inst = top->rootp->ysyx_23060219_top__DOT__ifu_inst__DOT__ifu_inst;
+    // take 5 cycles to excute one instruction
+    single_cycle(); single_cycle(); single_cycle(); single_cycle(); single_cycle();     
+    PCSet.npc = top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg;  PCSet.ninst = top->rootp->ysyx_23060219_top__DOT__ifu_inst__DOT__ifu_inst;
+    
 
 #ifdef CONFIG_ITRACE
     char *p = logbuf;
@@ -84,23 +80,26 @@ static void execute_once()
 
 static void trace_and_difftest() 
 {
+    // itrace
     #ifdef CONFIG_ITRACE
         log_write("%s\n", logbuf);
     #endif
     if(g_print_step) 
         IFDEF(CONFIG_ITRACE, puts(logbuf)); 
 
+    // difftest
     IFDEF(CONFIG_DIFFTEST, difftest_step(PCSet.pc, PCSet.npc));
-    IFDEF(CONFIG_WATCHPOINT, wp_difftest()); 
+
 }
 
 static void execute(uint64_t n) 
 {
-    for (;n > 0; n --) {    
+    for (;n > 0; n --) 
+    {    
         execute_once();
         g_nr_guest_inst ++;
         trace_and_difftest();
-        if (npc_state.state != NPC_RUNNING)         // 没有device
+        if (npc_state.state != NPC_RUNNING) 
             break;
     }
 }
@@ -109,7 +108,8 @@ static void execute(uint64_t n)
 void cpu_exec(uint64_t n) 
 {
     g_print_step = (n < MAX_INST_TO_PRINT);
-    switch (npc_state.state) {
+    switch (npc_state.state) 
+    {
         case NPC_END: case NPC_ABORT:
             printf("Program execution has ended. To restart the program, exit NPC and run again.\n");
             return;
@@ -118,20 +118,19 @@ void cpu_exec(uint64_t n)
 
     execute(n);
 
-    switch (npc_state.state) {
-        case NPC_RUNNING: 
-        npc_state.state = NPC_STOP; break;
+    switch (npc_state.state) 
+    {
+        case NPC_RUNNING: npc_state.state = NPC_STOP; break;
 
         case NPC_END: case NPC_ABORT:
-    #ifdef CONFIG_IRINGBUF 
+#ifdef CONFIG_IRINGBUF 
             display_iringbuf();
-    #endif
-        Log("NPC: %s at pc = 0x%08x",
-            (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-            (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
-                ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-            npc_state.halt_pc);
+#endif
+            Log("NPC: %s at pc = 0x%08x",
+                (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
+                (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
+                    ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
+                npc_state.halt_pc);
         case NPC_QUIT: statistic();
     }
 }
-
