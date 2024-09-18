@@ -171,14 +171,20 @@ waveform.vcd: ./obj_dir/V$(MODULE)
 
 IMG ?=      #loaded by AM Makefile (npc.mk)
 override ARGS ?= --log=./log/npc-log.txt
+ifdef CONFIG_DIFFTEST						###
 override ARGS += $(ARGS_DIFF)
+# ARGS += $(ARGS_DIFF)
+endif
 BINARY := ./obj_dir/V$(MODULE)
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
 
 
 .PHONY:run-env
+ifdef CONFIG_DIFFTEST						###
 run-env: $(BINARY) $(DIFF_REF_SO)
-
+else
+run-env: $(BINARY) #$(DIFF_REF_SO)
+endif
 
 .PHONY:run
 run: run-env

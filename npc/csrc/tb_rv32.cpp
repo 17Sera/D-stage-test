@@ -203,8 +203,9 @@ int main(int argc, char *argv[])
   init_verilator();
 
   /* Initialize differential testing. */
+#ifdef CONFIG_DIFFTEST
   init_difftest(diff_so_file, img_size, difftest_port);
-
+#endif
   /* Receive commands from user. */
   sdb_mainloop();
 
