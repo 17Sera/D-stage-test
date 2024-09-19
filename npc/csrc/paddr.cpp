@@ -4,7 +4,7 @@
 
 
 /********extern functions or variables********/
-extern Vysyx_23060219_top      *top;
+extern Vysyx_23060219_top *top;
 extern vluint64_t main_time;
 extern void close_tfp(void);
 /*********************************************/

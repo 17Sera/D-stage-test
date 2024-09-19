@@ -4,21 +4,21 @@
 //     input  wire             clk,
 //     input  wire             rst,
 //     /************ 读地址 ************/
-//     input  wire [31:0]   i_araddr,
+//     input  wire [31:0]      i_araddr,
 //     input  wire             i_arvalid, //写使能
 //     output wire             o_arready,
 //     /************ 读数据 ************/
-//     output reg  [31:0]   o_rdata,
+//     output reg  [31:0]      o_rdata,
 //     input  wire [2:0]       i_rstrb,  //读字节使能  读掩码
 //     output reg              o_rresp,
 //     output reg              o_rvalid,
 //     input  wire             i_rready,
 //     /************ 写地址 ************/
-//     input  wire [31:0]   i_awaddr,
+//     input  wire [31:0]      i_awaddr,
 //     input  wire             i_awvalid,
 //     output wire             o_awready,
 //     /************ 写数据 ************/
-//     input  wire [31:0]   i_wdata, 
+//     input  wire [31:0]      i_wdata, 
 //     input  wire [7:0]       i_wstrb,  // 写字节使能  写掩码
 //     input  wire             i_wvalid,
 //     output wire             o_wready,

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "Vysyx_23060219_top.h"
-#include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 #include "Vysyx_23060219_top__Dpi.h"
 #include "svdpi.h"
 #include "../include/common.h"
@@ -11,8 +11,8 @@
 #include "Vysyx_23060219_top___024root.h"
 
 
-Vysyx_23060219_top         *top = new Vysyx_23060219_top("top");
-VerilatedVcdC *tfp = new VerilatedVcdC(); //导出vcd波形需要加此语句
+Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
+VerilatedFstC *tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 vluint64_t    main_time = 0;  //initial 仿真时间
 
 
@@ -96,7 +96,7 @@ extern int imem_read(int raddr)
 }
 
 
-extern int dmem_read(int raddr) //用于从数据内存中读取数据
+extern int dmem_read(int raddr)
 {
   static int data = 0xdead000a;
 
@@ -181,10 +181,10 @@ static void reset(void)
 
 static void init_verilator(void)
 {
-  Verilated::traceEverOn(true); //导出vcd波形需要加此语句
+  Verilated::traceEverOn(true); //导出fst波形需要加此语句
 
   top->trace(tfp, 0);
-  tfp->open("waveform.vcd"); //打开vcd
+  tfp->open("waveform.fst"); //打开fst
 
   reset();  //复位
 }

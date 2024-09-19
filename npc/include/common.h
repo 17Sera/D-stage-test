@@ -54,7 +54,7 @@
 #define MAX_iringbuf_size  20
 
 // wave
-///////// #define CONFIG_WAVES       1
+// #define CONFIG_WAVES       1
 
 // device 
 #define CONFIG_DEVICE        1
