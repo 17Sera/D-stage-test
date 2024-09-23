@@ -37,16 +37,17 @@ int is_exit_status_bad()
 
 static void welcome()
 {
-    Log("itrace:   %s", MUXDEF(CONFIG_ITRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    Log("mtrace:   %s", MUXDEF(CONFIG_MTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    Log("ftrace:   %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    Log("etrace:   %s", MUXDEF(CONFIG_ETRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    Log("iringbuf: %s", MUXDEF(CONFIG_IRINGBUF, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    Log("difftest: %s", MUXDEF(CONFIG_DIFFTEST, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    // IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
-    //     "to record the trace. This may lead to a large log file. "
-    //     "If it is not necessary, you can disable it in menuconfig"));
+    Log("ITrace:   %s", MUXDEF(CONFIG_ITRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    Log("MTrace:   %s", MUXDEF(CONFIG_MTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    Log("FTrace:   %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    Log("ETrace:   %s", MUXDEF(CONFIG_ETRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    Log("IRingBuf: %s", MUXDEF(CONFIG_IRINGBUF, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    Log("DiffTest: %s", MUXDEF(CONFIG_DIFFTEST, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
+        "to record the trace. This may lead to a large log file. "
+        "If it is not necessary, you can disable it in menuconfig"));
     Log("Build time: %s, %s", __TIME__, __DATE__);
+    //这里的__TIME__，__DATA__是预定义的预处理器宏，用于获取编译时间和信息，在编译时由编译器自动填充，不是在运行中获取
     printf("Welcome to %s-NPC!\n", ANSI_FMT("riscv32e", ANSI_FG_YELLOW ANSI_BG_RED));
     printf("For help, type \"help\"\n");
 }
@@ -59,19 +60,19 @@ static long load_img()
     return 4096; // built-in image size
   }
 
-  FILE *fp = fopen(img_file, "rb");
+  FILE *fp = fopen(img_file, "rb");  //使用fopen函数以二进制模式（“rb”）打开指定的图像文件。如果文件无法打开，就assert
   Assert(fp, "Can not open '%s'", img_file);
 
-  fseek(fp, 0, SEEK_END);
-  long size = ftell(fp);
+  fseek(fp, 0, SEEK_END); //将文件指针挪到文件末尾
+  long size = ftell(fp); //返回文件指针的偏移量，即文件的大小（字节）
 
-  Log("The image is %s, size = %ld", img_file, size);
+  Log("The image is %s, size = %ld", img_file, size); //记录日志，显示图像文件的名称和大小
 
-  fseek(fp, 0, SEEK_SET);
-  int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
+  fseek(fp, 0, SEEK_SET); //将文件指针移动回文件开头
+  int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);//从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
   assert(ret == 1);
 
-  fclose(fp);
+  fclose(fp); //关闭文件，释放资源
   return size;
 }
 

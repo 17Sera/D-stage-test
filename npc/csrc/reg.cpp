@@ -2,6 +2,8 @@
 #include "../include/debug.h"
 #include "Vysyx_23060219_top.h"
 #include "Vysyx_23060219_top___024root.h"
+#include "Vysyx_23060219_top__Dpi.h"
+
 
 /********extern functions or variables********/
 extern Vysyx_23060219_top *top;
