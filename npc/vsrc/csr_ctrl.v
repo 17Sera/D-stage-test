@@ -1,4 +1,4 @@
-// // 只加握手
+// // // 都可
 
 // `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 // module csr_ctrl(
@@ -77,8 +77,9 @@
 
 // endmodule
 
-//=============================================================================================================
-// add sram ifu
+//===========================================================================================================================
+// add arbiter
+
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 module csr_ctrl(
     // system

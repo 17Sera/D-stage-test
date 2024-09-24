@@ -126,7 +126,8 @@
 
 // endmodule
 
-//==================================================================================
+//======================================================================
+//add arbiter
 
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 `define IFU_PKG_WDITH  (`CPU_Width+`CPU_Width)
@@ -149,12 +150,12 @@ module ifu(
     /************ 读地址 ************/
     output  reg  [31:0]   o_araddr,
     output  reg              o_arvalid, //写使能
-    input wire               i_arready,
+    input reg                i_arready,
     /************ 读数据 ************/
     input reg  [31:0]     i_rdata,
     input reg                i_rresp,
     input reg                i_rvalid,
-    output  wire             o_rready,
+    output  reg              o_rready,
     /************ 写地址 ************/
     output  wire [31:0]   o_awaddr,
     output  wire             o_awvalid,
@@ -172,10 +173,12 @@ module ifu(
 
     reg temp;
     reg [31:0] o_ifu_inst_temp, o_ifu_pc_temp;
+    reg [2:0] arvalid_counter;
     always@(posedge clk or posedge rst) begin
         if(rst) begin
             o_rready <= 1;
             temp <= 0;
+            //arvalid_counter <= 0;
         end else begin
             if(i_cycle_end) begin
                 o_araddr <= i_ifu_npc;

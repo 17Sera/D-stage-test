@@ -1,5 +1,4 @@
-// // // 只加握手
-
+// // 都可
 
 // `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 // `define EXU_PKG_WDITH  (`CPU_Width+1+1+3+`CPU_Width+`CPU_Width+`CPU_Width+`CPU_Width+12+1+1+1+`CPU_Width+`CPU_Width+1+1+1+5+1)
@@ -64,14 +63,6 @@
 // );
 
 //     import "DPI-C" function void TRAP(input int station, input byte unit);
-
-//     //exu_reg_wen  = i_pre_valid & o_pre_ready
-//     //o_post_valid = i_pre_valid 延迟一周期
-//     //o_pre_ready  = ~o_post_valid
-
-//     // i_pre_valid --> ⌈‾‾‾‾‾⌉ --> o_post_valid
-//     //                 | EXU |
-//     // o_pre_ready <-- ⌊_____⌋ <-- i_post_ready
 
 // /*--------------------------------------------------------------------------------------------------------------*/    
 //     // to LSU
@@ -168,9 +159,6 @@
 //             o_exu_gpr_wen, o_exu_csr_wid, o_exu_csr_rd, o_exu_csr_wen } = exu_valid_data_reg;
 
 
-//     // i_pre_valid --> ⌈‾‾‾‾‾⌉ --> o_post_valid
-//     //                 | EXU |
-//     // o_pre_ready <-- ⌊_____⌋ <-- i_post_ready
 
 //     //o_post_valid 表示EXU的数据包已经准备好传输，而 o_pre_ready 则表示EXU准备好接收新数据
 
@@ -187,8 +175,9 @@
 
 // endmodule
 
-//=============================================================================================================
-// add sram ifu
+//=================================================================================================================
+// add arbiter
+
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 `define EXU_PKG_WDITH  (`CPU_Width+1+1+3+`CPU_Width+`CPU_Width+`CPU_Width+`CPU_Width+12+1+1+1+`CPU_Width+`CPU_Width+1+1+1+5+1)
 
@@ -247,11 +236,12 @@ module exu(
     output wire            o_exu_gpr_wen,  
     output wire [`CSR_Bus] o_exu_csr_wid,
     output wire [31:0]  o_exu_csr_rd,
-    output wire            o_exu_csr_wen
+    output wire            o_exu_csr_wen,
+
+    output reg             o_exu_success
 );
 
     import "DPI-C" function void TRAP(input int station, input byte unit);
-
 
     /************ data package ************/
     // to LSU
@@ -354,7 +344,12 @@ module exu(
     end
     assign o_post_valid = post_valid_reg;
     assign o_pre_ready  = ~o_post_valid;
-
+    
+    //reg o_exu_success;
+    always@(posedge clk) begin
+        if(exu_reg_wen) o_exu_success <= exu_reg_wen;
+        else o_exu_success <= 0;
+    end
 
 
 endmodule

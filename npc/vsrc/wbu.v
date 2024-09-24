@@ -1,4 +1,4 @@
-// // // 只加握手
+// // // // 都可
 
 // `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
@@ -39,11 +39,6 @@
 //     output wire [31:0]     o_wbu_csr_rd     //传递给CSR Ctrl，代表当前指令的csr读取值
 // );
 
-//     // i_pre_valid --> ⌈‾‾‾‾‾⌉ --> o_cycle_end--> ⌈‾‾‾‾‾⌉ 
-//     //                 | WBU |                   | IFU |
-//     // o_pre_ready <-- ⌊_____⌋                    ⌊_____⌋
-
-
 //     reg pre_valid_reg;
 //     always @(posedge clk) begin
 //         if(rst == 1'b1) 
@@ -51,12 +46,12 @@
 //         else
 //             pre_valid_reg <= i_pre_valid;   
 //     end
-//     //复位时为1； 此外则是pre_valid_reg的上升沿检测。
+   
 //     always @(posedge clk) begin
 //         if(rst == 1'b1) 
 //             o_cycle_end <= 1'b1;
 //         else
-//             o_cycle_end <= i_pre_valid & ~pre_valid_reg;    //检测到pre_valid_reg的上升沿，置位o_cycle_end
+//             o_cycle_end <= i_pre_valid & ~pre_valid_reg;
 //     end
 
 //     // to IFU
@@ -76,9 +71,7 @@
 
 // endmodule
 
-//=============================================================================================================
-// add sram ifu
-
+//=======================================================================================================
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module wbu(
@@ -125,43 +118,95 @@ module wbu(
         else
             pre_valid_reg <= i_pre_valid;
     end
-    //复位时为1； 此外则是pre_valid_reg的上升沿检测。
-    always @(posedge clk) begin
-        if(rst == 1'b1) 
-            o_cycle_end <= 1'b1;
-        else
-            o_cycle_end <= i_pre_valid & ~pre_valid_reg;
-    end
 
-    // reg [1:0] count; // 计数器
-    // always @(posedge clk) begin
-    //     if (rst == 1'b1) begin
-    //         o_cycle_end <= 1'b0;
-    //         count <= 2'b00;
-    //     end else if (i_pre_valid & ~pre_valid_reg) begin
-    //         count <= 2'b10; // 设置计数器为2
-    //         o_cycle_end <= 1'b1; // 立即输出高电平
-    //     end else if (count > 0) begin
-    //         count <= count - 1; // 计数器递减
-    //         o_cycle_end <= 1'b1; // 保持高电平
-    //     end else begin
-    //         o_cycle_end <= 1'b0; // 输出低电平
-    //     end
-    // end    
+    reg delay_cycle_end_1, delay_cycle_end_2, delay_cycle_end_3;
+    reg delay_cycle_end_4, delay_cycle_end_5; // 新增两个寄存器
+    reg delay_cycle_end_6, delay_cycle_end_7, delay_cycle_end_8;
+    reg delay_cycle_end_9, delay_cycle_end_10;
+
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_1 <= 1'b0;
+    else 
+        delay_cycle_end_1 <= i_pre_valid & ~pre_valid_reg;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_2 <= 1'b0;
+    else 
+        delay_cycle_end_2 <= delay_cycle_end_1;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_3 <= 1'b0;
+    else 
+        delay_cycle_end_3 <= delay_cycle_end_2;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_4 <= 1'b0;
+    else 
+        delay_cycle_end_4 <= delay_cycle_end_3;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_5 <= 1'b0;
+    else 
+        delay_cycle_end_5 <= delay_cycle_end_4;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_6 <= 1'b0;
+    else 
+        delay_cycle_end_6 <= delay_cycle_end_5;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_7 <= 1'b0;
+    else 
+        delay_cycle_end_7 <= delay_cycle_end_6;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_8 <= 1'b0;
+    else 
+        delay_cycle_end_8 <= delay_cycle_end_7;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_9 <= 1'b0;
+    else 
+        delay_cycle_end_9 <= delay_cycle_end_8;
+end
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        delay_cycle_end_10 <= 1'b0;
+    else 
+        delay_cycle_end_10 <= delay_cycle_end_9;
+end
+
+
+always @(posedge clk) begin
+    if (rst == 1'b1) 
+        o_cycle_end <= 1'b1;
+    else 
+        o_cycle_end <= delay_cycle_end_8; // 使用第五个延迟信号
+        o_wbu_npc_wen <= delay_cycle_end_7;
+end
+
 
     // to IFU
     assign o_pre_ready     = ~o_cycle_end;
-    // to BRU
-    assign o_wbu_npc_wen   = i_pre_valid & ~pre_valid_reg;    //只有效一周期，防止反复写入npc_reg
-
-    // reg o_wbu_npc_wen_temp;
-    // always@(posedge clk) begin
-    //     o_wbu_npc_wen_temp <= o_wbu_npc_wen;
-    // end
-
-    // always@(posedge clk) begin
-    //     if(gpr_wen)
-    // end
 
     // to Register File
     assign o_wbu_rd        = i_wbu_rd;

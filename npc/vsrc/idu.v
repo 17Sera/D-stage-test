@@ -6,77 +6,74 @@
 
 // module idu(
 //     // system
-//     input  wire             clk,
-//     input  wire             rst,
-//     // shake hands -----------------------
-//     input  wire             i_pre_valid,   //来自IFU，代表IFU的数据有效
-//     output wire             o_pre_ready,   //传递给IFU，代表IDU准备好处理新数据了
-//     output wire             o_post_valid,  //传递给EXU，代表此时数据包寄存器的数据有效
-//     input  wire             i_post_ready,  //来自EXU，代表EXU准备好处理新数据了
-//     // from IFU --------------------------
-//     input  wire [31:0]      i_idu_pc,       // 来自IFU的PC值
-//     input  wire [31:0]      i_idu_inst,     // 来自IFU的指令
-//     // to Register File ------------------
-//     output wire [4:0]       o_idu_rs_id1,  // 源操作数1的寄存器ID
-//     output wire [4:0]       o_idu_rs_id2,  // 源操作数2的寄存器ID
-//     // to CSR Ctrl------------------------
-//     output wire [`CSR_Bus]  o_idu_csr_rid, // CSR读索引
-//     output wire             o_idu_csr_ren, // CSR读使能
-//     output wire             o_idu_is_mret, // 是否为mret指令
-//     output wire             o_idu_is_ecall, // 是否为ecall指令
-//     // to EXU------------------------------
-//     output wire [1:0]       o_idu_csr_type, // CSR操作类型
-//     output wire [`ALU_Bus]  o_idu_alu_type, // ALU操作类型
-//     output wire [1:0]       o_idu_num_sel,  // 操作数选择
-//     output wire [31:0]      o_idu_imm,      // 立即数
-//     // to LSU------------------------------
-//     output wire             o_idu_is_load,  // 是否为load加载指令
-//     output wire             o_idu_is_store, // 是否为store存储指令
-//     output wire [2:0]       o_idu_func3,    //func3字段
-//     // to BRU------------------------------
-//     output wire [31:0]      o_idu_pc,       // 跳转地址
-//     output wire             o_idu_is_jal,    // 是否为jal跳转指令
-//     output wire             o_idu_is_jalr,   // 是否为jalr跳转指令
-//     output wire             o_idu_is_brch,   // 是否为分支指令
-//     // to WBU------------------------------
-//     output wire [4:0]       o_idu_rd_id,      // 目的寄存器ID
-//     output wire             o_idu_gpr_wen     // 通用寄存器写使能
+//     input  wire            clk,
+//     input  wire            rst,
+//     // shake hands
+//     input  wire            i_pre_valid,   //来自IFU，代表IFU的数据有效
+//     output wire            o_pre_ready,   //传递给IFU，代表IDU准备好处理新数据了
+//     output wire            o_post_valid,  //传递给EXU，代表此时数据包寄存器的数据有效
+//     input  wire            i_post_ready,  //来自EXU，代表EXU准备好处理新数据了
+//     // from IFU
+//     input  wire [`CPU_Bus] i_idu_pc,
+//     input  wire [`CPU_Bus] i_idu_inst,
+//     // to Register File
+//     output wire [4:0]      o_idu_rs_id1,
+//     output wire [4:0]      o_idu_rs_id2,
+//     // to CSR Ctrl
+//     output wire [`CSR_Bus] o_idu_csr_rid, // read index
+//     output wire            o_idu_csr_ren,  
+//     output wire            o_idu_is_mret,
+//     output wire            o_idu_is_ecall,
+//     // to EXU
+//     output wire [1:0]      o_idu_csr_type,
+//     output wire [`ALU_Bus] o_idu_alu_type,
+//     output wire [1:0]      o_idu_num_sel,
+//     output wire [`CPU_Bus] o_idu_imm,
+//     // to LSU
+//     output wire            o_idu_is_load,
+//     output wire            o_idu_is_store,
+//     output wire [2:0]      o_idu_func3,
+//     // to BRU
+//     output wire [`CPU_Bus] o_idu_pc,
+//     output wire            o_idu_is_jal,
+//     output wire            o_idu_is_jalr,
+//     output wire            o_idu_is_brch,
+//     // to WEU
+//     output wire [4:0]      o_idu_rd_id,
+//     output wire            o_idu_gpr_wen
 // );
 
-//     import "DPI-C" function void TRAP(input int station, input byte unit);  //异常处理通过TRAP函数与调试接口交互
+//     import "DPI-C" function void TRAP(input int station, input byte unit);
 
-//     //idu_reg_wen  = i_pre_valid & o_pre_ready
-//     //o_post_valid = i_pre_valid 延迟一周期
-//     //o_pre_ready  = ~o_post_valid
 
 //     /************ data package ************/
 //     // to Register File
-//     wire [4:0]      idu_rs_id1;     //源寄存器1和源寄存器2的ID
+//     wire [4:0]      idu_rs_id1;
 //     wire [4:0]      idu_rs_id2;
 //     // to CSR Ctrl
-//     wire [`CSR_Bus] idu_csr_rid;    //CSR读取索引
-//     reg             idu_csr_ren;    //CSR读使能信号
-//     reg             idu_is_mret;    //是否为mret指令
-//     reg             idu_is_ecall;    //是否为ecall指令
+//     wire [`CSR_Bus] idu_csr_rid;  
+//     reg             idu_csr_ren;  // csr write and read enable
+//     reg             idu_is_mret;
+//     reg             idu_is_ecall;
 //     // to EXU
-//     reg  [1:0]      idu_csr_type;   //CSR操作类型
-//     reg  [`ALU_Bus] idu_alu_type;   //ALU操作类型
-//     reg  [1:0]      idu_num_sel;    //操作数选择
-//     reg  [31:0]     idu_imm;         //立即数
+//     reg  [1:0]      idu_csr_type;
+//     reg  [`ALU_Bus] idu_alu_type;
+//     reg  [1:0]      idu_num_sel;
+//     reg  [`CPU_Bus] idu_imm;
 //     // to LSU
-//     wire            idu_is_load;    //是否为load加载指令
-//     wire            idu_is_store;    //是否为store存储指令
-//     wire [2:0]      idu_func3;      //func3字段
+//     wire            idu_is_load;
+//     wire            idu_is_store;
+//     wire [2:0]      idu_func3;
 //     // to BRU
-//     wire [31:0]     idu_pc;         //跳转地址
-//     wire            idu_is_jal;     //是否为jal跳转指令
-//     wire            idu_is_jalr;    //是否为jalr跳转指令
-//     wire            idu_is_brch;    //是否为分支指令
+//     wire [`CPU_Bus] idu_pc;
+//     wire            idu_is_jal;
+//     wire            idu_is_jalr;
+//     wire            idu_is_brch;
 //     // to WEU
-//     wire [4:0]      idu_rd_id;       //目的寄存器ID
-//     reg             idu_gpr_wen;     //通用寄存器写使能信号
+//     wire [4:0]      idu_rd_id;
+//     reg             idu_gpr_wen;
 
-//     // decode  指令解码
+//     // decode
 //     wire [6:0] opcode = i_idu_inst[6:0];
 //     wire [4:0] rd_id  = i_idu_inst[11:7];
 //     wire [2:0] func3  = i_idu_inst[14:12];
@@ -104,16 +101,19 @@
 //                         else if (idu_csr_rid == `INST_EBREAK)
 //                             TRAP(`HIT_TRAP, `Unit_IDU1);     // ebreak调用异常处理函数
 //                         else
-//                             TRAP(`ABORT, `Unit_IDU2);       //否则，触发错误处理
+//                              TRAP(`ABORT, `Unit_IDU2);       //否则，触发错误处理             ####
+//                             //idu_is_mret = `TRUE;
 //                     end
 //                     `INST_CSRRW: begin idu_csr_type = `CSR_RW; idu_csr_ren = `Enable; end    // 处理CSR读写指令
 //                     `INST_CSRRS: begin idu_csr_type = `CSR_RS; idu_csr_ren = `Enable; end    // 处理CSR读指令
-//                     default: TRAP(`ABORT, `Unit_IDU3);
+//                     default:     begin TRAP(`ABORT, `Unit_IDU3);  end
+//                     //begin idu_csr_type = `CSR_RS; idu_csr_ren = `Enable; end       
 //                 endcase
 //             end
 //             `TYPE_R,`TYPE_I,`TYPE_I_LOAD,`TYPE_I_JALR,`TYPE_STORE,`TYPE_B,`TYPE_U_LUI,`TYPE_U_AUIPC,`TYPE_JAL:
-//                     idu_csr_type = `CSR_Nop;    //对于非系统指令，idu_csr_type设置为CSR_Nop（无操作）
-//             default:TRAP(`ABORT, `Unit_IDU4);
+//                       begin    idu_csr_type = `CSR_Nop;    end //对于非系统指令，idu_csr_type设置为CSR_Nop（无操作）
+//             default:  //begin  TRAP(`ABORT, `Unit_IDU4);     end
+//                         idu_csr_type = `CSR_Nop;
 //         endcase
 //     end
 
@@ -136,8 +136,9 @@
 //             `TYPE_U_AUIPC:  begin idu_num_sel = `PC_IMM;   idu_gpr_wen = `Enable;    idu_imm = {func7, rs_id2, rs_id1, func3, 12'd0};                                      end
 //             `TYPE_JAL:      begin idu_num_sel = `PC_4;     idu_gpr_wen = `Enable;    idu_imm = {{12{func7[6]}}, rs_id1, func3, rs_id2[0], func7[5:0], rs_id2[4:1], 1'b0};  end                                 
 //             // idu_gpr_wen: when is INST_CSRRW or INST_CSRRS, idu_gpr_wen equalls to idu_csr_ren logically
-//             `TYPE_SYS:      begin idu_num_sel = `RS1_RS2;  idu_gpr_wen =  idu_csr_ren; idu_imm = `CPU_Width'd0;                                                              end
-//             default:        TRAP(`ABORT, `Unit_IDU5);
+//             `TYPE_SYS:      begin idu_num_sel = `RS1_RS2;  idu_gpr_wen =  idu_csr_ren; idu_imm = `CPU_Width'd0;                                                             end
+//             default:        begin idu_num_sel = `RS1_RS2;  idu_gpr_wen = `Enable;      idu_imm = `CPU_Width'd0;                                                             end
+//                             //TRAP(`ABORT, `Unit_IDU5);                         //####
 //         endcase
 //     end
 
@@ -159,7 +160,8 @@
 //                     `INST_SRL_SRA:  idu_alu_type = (func7[5] == 1'b1) ? `ALU_SRA : `ALU_SRL;
 //                     `INST_OR:       idu_alu_type = `ALU_OR;
 //                     `INST_AND:      idu_alu_type = `ALU_AND;
-//                     default:        TRAP(`ABORT, `Unit_IDU6);
+//                     default:        //idu_alu_type = `ALU_AND;
+//                                     TRAP(`ABORT, `Unit_IDU6);
 //                 endcase
 //             end
 //             `TYPE_I: begin
@@ -172,7 +174,8 @@
 //                     `INST_SRLAI:    idu_alu_type = (func7[5] == 1'b1) ? `ALU_SRA : `ALU_SRL;
 //                     `INST_ORI:      idu_alu_type = `ALU_OR;
 //                     `INST_ANDI:     idu_alu_type = `ALU_AND;
-//                     default:        TRAP(`ABORT, `Unit_IDU7);
+//                     default:        //idu_alu_type = `ALU_AND;
+//                                     TRAP(`ABORT, `Unit_IDU7);
 //                 endcase
 //             end     
 //             `TYPE_B: begin
@@ -183,10 +186,12 @@
 //                     `INST_BGE:  idu_alu_type = `ALU_GE;
 //                     `INST_BLTU: idu_alu_type = `ALU_LTU;
 //                     `INST_BGEU: idu_alu_type = `ALU_GEU;
-//                     default:    TRAP(`ABORT, `Unit_IDU8);
+//                     default:    //idu_alu_type = `ALU_GEU;
+//                                 TRAP(`ABORT, `Unit_IDU8);
 //                 endcase
 //             end                             
-//             default: if(opcode != `TYPE_SYS)  TRAP(`ABORT, `Unit_IDU9); 
+//             default: if(opcode != `TYPE_SYS)  //TRAP(`ABORT, `Unit_IDU9); 
+//                                             idu_alu_type = `ALU_ADD;  
 //         endcase
 //     end
 
@@ -247,7 +252,8 @@
 // endmodule
 
 //=============================================================================================================
-// add sram ifu
+// // add arbiter
+
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 `define IDU_PKG_WDITH  (5+5+12+1+1+1+2+`ALU_Width+2+`CPU_Width+1+1+3+`CPU_Width+1+1+1+5+1)
 
@@ -478,6 +484,7 @@ module idu(
     end
     assign o_post_valid = post_valid_reg;
     assign o_pre_ready  = ~o_post_valid;
+
 
 
 endmodule

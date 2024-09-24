@@ -381,7 +381,7 @@
 
 
 //=============================================================================================================
-// add sram 
+// add arbiter
 `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
 
 module ysyx_23060219_top(
@@ -389,28 +389,28 @@ module ysyx_23060219_top(
   input  wire           rst
 );
 
-  reg [2:0] clk_cnt;
+  reg [3:0] clk_cnt;
   always @(posedge clk) begin
     if(rst == 1'b1) 
-      clk_cnt <= 3'h0;
-    else if(clk_cnt == 3'h7)
-      clk_cnt <= 3'h1;
+      clk_cnt <= 4'd0;
+    else if(clk_cnt == 4'd15)
+      clk_cnt <= 4'd1;
     else
-      clk_cnt <= clk_cnt + 3'h1;
+      clk_cnt <= clk_cnt + 3'd1;
   end
 
 
   // IFU --------------------------------------------------
-  wire            w_ifu_valid;
-  wire [`CPU_Bus] w_ifu_pc;
-  wire [`CPU_Bus] w_ifu_inst;
+  wire             w_ifu_valid;
+  wire  [`CPU_Bus] w_ifu_pc;
+  wire  [`CPU_Bus] w_ifu_inst;
 
-  reg  [`CPU_Bus] o_araddr;
-  reg             o_arvalid;
-  wire            i_arready;
-  reg  [`CPU_Bus] i_rdata;
-  reg             i_rvalid;
-  wire            o_rready;
+  wire  [`CPU_Bus] o_araddr_ifu;
+  wire             o_arvalid_ifu;
+  wire             i_arready_ifu;
+  wire  [`CPU_Bus] i_rdata_ifu;
+  wire             i_rvalid_ifu;
+  wire             o_rready_ifu;
 
   ifu ifu_inst(
     // system
@@ -426,14 +426,14 @@ module ysyx_23060219_top(
     .o_ifu_pc    (w_ifu_pc),
     .o_ifu_inst  (w_ifu_inst),
 
-    .o_araddr  ( o_araddr  ),
-    .o_arvalid ( o_arvalid ),
-    .i_arready ( i_arready ),
+    .o_araddr  ( o_araddr_ifu  ),
+    .o_arvalid ( o_arvalid_ifu ),
+    .i_arready ( i_arready_ifu ),
 
-    .i_rdata   ( i_rdata   ),
+    .i_rdata   ( i_rdata_ifu   ),
     .i_rresp   (           ),
-    .i_rvalid  ( i_rvalid  ),
-    .o_rready  ( o_rready  ),
+    .i_rvalid  ( i_rvalid_ifu  ),
+    .o_rready  ( o_rready_ifu  ),
 
     .o_awaddr  (  ),
     .o_awvalid (  ),
@@ -535,6 +535,7 @@ module ysyx_23060219_top(
     wire [`CSR_Bus] w_exu_csr_wid;
     wire [31:0]  w_exu_csr_rd;
     wire            w_exu_csr_wen;
+    wire            exu_success;
 
   exu exu_inst(
     // system
@@ -591,7 +592,9 @@ module ysyx_23060219_top(
     .o_exu_gpr_wen (w_exu_gpr_wen),
     .o_exu_csr_wid (w_exu_csr_wid),
     .o_exu_csr_rd  (w_exu_csr_rd),
-    .o_exu_csr_wen (w_exu_csr_wen)
+    .o_exu_csr_wen (w_exu_csr_wen),
+
+    .o_exu_success (exu_success)
 );
 
 
@@ -600,7 +603,7 @@ module ysyx_23060219_top(
   reg             w_lsu_valid;  
   wire [`CPU_Bus] w_lsu_imm;
   wire [`CPU_Bus] w_lsu_pc;
-  wire [31:0]     w_lsu_rs1;
+  wire [31:0]  w_lsu_rs1;
   wire            w_lsu_is_jal;
   wire            w_lsu_is_jalr;
   wire            w_lsu_brch;    
@@ -616,20 +619,20 @@ module ysyx_23060219_top(
   wire [31:0]  w_lsu_csr_rd;
 
   //读操作
-  reg  [`CPU_Bus] o_araddr_lsu;
-  reg             o_arvalid_lsu;
-  wire            i_arready_lsu;
-  reg  [`CPU_Bus] i_rdata_lsu;
-  reg             i_rvalid_lsu;
-  wire            o_rready_lsu;
+  wire  [`CPU_Bus] o_araddr_lsu;
+  wire             o_arvalid_lsu;
+  wire             i_arready_lsu;
+  wire  [`CPU_Bus] i_rdata_lsu;
+  wire             i_rvalid_lsu;
+  wire             o_rready_lsu;
   //写操作
-  reg  [`CPU_Bus] o_awaddr_lsu;
-  reg             o_awvalid_lsu;
-  wire            i_awready_lsu;
-  reg  [`CPU_Bus] o_wdata_lsu;
-  reg  [7:0]      o_wstrb_lsu;
-  reg             o_wvalid_lsu;
-  wire            i_wready_lsu;
+  wire  [`CPU_Bus] o_awaddr_lsu;
+  wire             o_awvalid_lsu;
+  wire             i_awready_lsu;
+  wire  [`CPU_Bus] o_wdata_lsu;
+  wire  [7:0]      o_wstrb_lsu;
+  wire             o_wvalid_lsu;
+  wire             i_wready_lsu;
 
   lsu lsu_inst( 
     // system
@@ -704,7 +707,9 @@ module ysyx_23060219_top(
 
     .i_bresp   (  ),
     .i_bvalid  (  ),
-    .o_bready  (  )
+    .o_bready  (  ),
+
+    .i_exu_success(exu_success)
 
   );
 
@@ -785,136 +790,122 @@ module ysyx_23060219_top(
   );
 
   // Arbiter --------------------------------------------------------
-  // arbiter arbiter(
-  //       // System
-  //       .clk              (clk),
-  //       .rst              (rst),
-
-  //       .i_ifu_araddr     (o_arbitr_araddr ),   //读地址
-  //       .i_ifu_arvalid    (o_arbitr_arvalid),
-  //       .o_ifu_arready    (i_arbitr_arready),
-
-  //       .o_ifu_rdata      (i_arbitr_rdata  ),    //读数据
-  //       .o_ifu_rresp      (i_arbitr_rresp  ),
-  //       .i_ifu_rready     (i_arbitr_rready ),
-  //       .o_ifu_rvalid     (o_arbitr_rvalid ),
-
-  //       .i_ifu_awaddr     (o_arbitr_awaddr ),   //写地址
-  //       .i_ifu_awvalid    (o_arbitr_awvalid),
-  //       .o_ifu_awready    (i_arbitr_awready),
-
-  //       .i_ifu_wdata      (o_arbitr_wdata  ),    //写数据
-  //       .i_ifu_wstrb      (o_arbitr_wstrb  ),
-  //       .i_ifu_wvalid     (o_arbitr_wvalid ),
-  //       .o_ifu_wready     (i_arbitr_wready ),
-
-  //       .o_ifu_bresp      (i_arbitr_bresp  ),   //写回复
-  //       .o_ifu_bvalid     (i_arbitr_bvalid ),
-  //       .i_ifu_bready     (o_arbitr_bready ),
-
-
-  //       .i_lsu_araddr     (o_arbitr_araddr ),   //读地址
-  //       .i_lsu_arvalid    (o_arbitr_arvalid),
-  //       .o_lsu_arready    (i_arbitr_arready),
-
-  //       .o_lsu_rdata      (i_arbitr_rdata  ),    //读数据
-  //       .o_lsu_rresp      (i_arbitr_rresp  ),
-  //       .i_lsu_rready     (i_arbitr_rvalid ),
-  //       .o_lsu_rvalid     (o_arbitr_rready ),
-
-  //       .i_lsu_awaddr     (o_arbitr_awaddr ),   //写地址
-  //       .i_lsu_awvalid    (o_arbitr_awvalid),
-  //       .o_lsu_awready    (i_arbitr_awready),
-
-  //       .i_lsu_wdata      (o_arbitr_wdata  ),    //写数据
-  //       .i_lsu_wstrb      (o_arbitr_wstrb  ),
-  //       .i_lsu_wvalid     (o_arbitr_wvalid ),
-  //       .o_lsu_wready     (i_arbitr_wready ),
-
-  //       .o_lsu_bresp      (i_arbitr_bresp  ),   //写回复
-  //       .o_lsu_bvalid     (i_arbitr_bvalid ),
-  //       .i_lsu_bready     (o_arbitr_bready ),
-
-  //       .o_sram_araddr    (i_araddr ),   //读地址
-  //       .o_sram_arvalid   (i_arvalid),
-  //       .i_sram_arready   (o_arready),
-
-  //       .i_sram_rdata     (o_rdata  ),    //读数据
-  //       .i_sram_rresp     (o_rresp  ),
-  //       .i_sram_rvalid    (o_rvalid ),
-  //       .o_sram_rready    (i_rready ),
-
-  //       .o_sram_awaddr    (i_awaddr ),   //写地址
-  //       .o_sram_awvalid   (i_awvalid),
-  //       .i_sram_awready   (o_awready),
-
-  //       .o_sram_wdata     (i_wdata  ),    //写数据
-  //       .o_sram_wstrb     (i_wstrb  ),
-  //       .o_sram_wvalid    (i_wvalid ),
-  //       .i_sram_wready    (o_wready ),
-
-  //       .i_sram_bresp     (o_bresp  ),   //写回复
-  //       .i_sram_bvalid    (o_bvalid ),
-  //       .o_sram_bready    (i_bready )
-  //   );
-
-  // SRAM -----------------------------------------------------------
-    SRAM SRAM(
-        // system
+  arbiter arbiter(
+        // System
         .clk              (clk),
         .rst              (rst),
-        // Read Address
-        .i_araddr         (o_araddr ),
-        .i_arvalid        (o_arvalid),
-        .o_arready        (i_arready),
-        // Read Data
-        .o_rdata          (i_rdata  ),
-        .o_rresp          (         ),
-        .o_rvalid         (i_rvalid ),
-        .i_rready         (o_rready ),
-        // Write Address
-        .i_awaddr         (  ),
-        .i_awvalid        (  ),
-        .o_awready        (  ),
-        // Write Data
-        .i_wdata          (  ),
-        .i_wstrb          (  ),
-        .i_wvalid         (  ),
-        .o_wready         (  ),
-        // Write Back
-        .o_bresp          (  ),
-        .o_bvalid         (  ),
-        .i_bready         (  )
+
+        .i_ifu_araddr     (o_araddr_ifu ),   //读地址
+        .i_ifu_arvalid    (o_arvalid_ifu),
+        .o_ifu_arready    (i_arready_ifu),
+
+        .o_ifu_rdata      (i_rdata_ifu  ),    //读数据
+        .o_ifu_rresp      (         ),
+        .i_ifu_rready     (o_rready_ifu ),
+        .o_ifu_rvalid     (i_rvalid_ifu ),
+
+        .i_ifu_awaddr     (   ),   //写地址
+        .i_ifu_awvalid    (   ),
+        .o_ifu_awready    (   ),
+
+        .i_ifu_wdata      (   ),    //写数据
+        .i_ifu_wstrb      (   ),
+        .i_ifu_wvalid     (   ),
+        .o_ifu_wready     (   ),
+
+        .o_ifu_bresp      (   ),   //写回复
+        .o_ifu_bvalid     (   ),
+        .i_ifu_bready     (   ),
+
+
+        .i_lsu_araddr     (o_araddr_lsu ),   //读地址
+        .i_lsu_arvalid    (o_arvalid_lsu),
+        .o_lsu_arready    (i_arready_lsu),
+
+        .o_lsu_rdata      (i_rdata_lsu  ),    //读数据
+        .o_lsu_rresp      (   ),
+        .i_lsu_rready     (o_rready_lsu ),
+        .o_lsu_rvalid     (i_rvalid_lsu ),
+
+        .i_lsu_awaddr     (o_awaddr_lsu  ),   //写地址
+        .i_lsu_awvalid    (o_awvalid_lsu ),
+        .o_lsu_awready    (i_awready_lsu ),
+/**/
+        .i_lsu_wdata      ( o_wdata_lsu  ),    //写数据
+        .i_lsu_wstrb      ( o_wstrb_lsu  ),
+        .i_lsu_wvalid     ( o_wvalid_lsu ),
+        .o_lsu_wready     ( i_wready_lsu ),
+
+        .o_lsu_bresp      (   ),   //写回复
+        .o_lsu_bvalid     (   ),
+        .i_lsu_bready     (   ),
+
+        .o_sram_araddr    (i_araddr ),   //读地址
+        .o_sram_arvalid   (i_arvalid),
+        .i_sram_arready   (o_arready),
+
+        .i_sram_rdata     (o_rdata  ),    //读数据
+        .i_sram_rresp     (    ),
+        .i_sram_rvalid    (o_rvalid ),
+        .o_sram_rready    (i_rready ),
+
+        .o_sram_awaddr    (i_awaddr ),   //写地址
+        .o_sram_awvalid   (i_awvalid),
+        .i_sram_awready   (o_awready),
+/**/
+        .o_sram_wdata     (i_wdata  ),    //写数据
+        .o_sram_wstrb     (i_wstrb  ),
+        .o_sram_wvalid    (i_wvalid ),
+        .i_sram_wready    (o_wready ),
+
+        .i_sram_bresp     (   ),   //写回复
+        .i_sram_bvalid    (   ),
+        .o_sram_bready    (   )
     );
 
-      SRAM SRAM_t(
-        // system
-        .clk              (clk),
-        .rst              (rst),
-        // Read Address
-        .i_araddr         (o_araddr_lsu),
-        .i_arvalid        (o_arvalid_lsu),
-        .o_arready        (i_arready_lsu),
-        // Read Data
-        .o_rdata          (i_rdata_lsu),
-        .o_rresp          (         ),
-        .o_rvalid         (i_rvalid_lsu ),
-        .i_rready         (o_rready_lsu ),
-        // Write Address
-        .i_awaddr         ( o_awaddr_lsu ),
-        .i_awvalid        ( o_awvalid_lsu ),
-        .o_awready        ( i_awready_lsu ),
-        // Write Data
-        .i_wdata          ( o_wdata_lsu ),
-        .i_wstrb          ( o_wstrb_lsu ),
-        .i_wvalid         ( o_wvalid_lsu ),
-        .o_wready         ( i_wready_lsu ),
-        // Write Back
-        .o_bresp          (  ),
-        .o_bvalid         (  ),
-        .i_bready         (  )
+  // SRAM -----------------------------------------------------------
+  wire [31:0]   i_araddr;
+  wire             i_arvalid;
+  wire             o_arready;
 
-    ); 
+  wire [31:0]   o_rdata;
+  wire             o_rvalid;
+  wire            i_rready;
+
+  reg [31:0]   i_awaddr;
+  reg             i_awvalid;
+  reg             o_awready;
+  reg  [31:0]  i_wdata; 
+  reg  [7:0]      i_wstrb; 
+  reg             i_wvalid;
+  reg             o_wready;
+  SRAM SRAM(
+    // system
+    .clk              (clk),
+    .rst              (rst),
+    // Read Address
+    .i_araddr         (i_araddr ),
+    .i_arvalid        (i_arvalid),
+    .o_arready        (o_arready),
+    // Read Data
+    .o_rdata          (o_rdata  ),
+    .o_rresp          (         ),
+    .o_rvalid         (o_rvalid ),
+    .i_rready         (i_rready ),
+    // Write Address
+    .i_awaddr         ( i_awaddr  ),
+    .i_awvalid        ( i_awvalid ),
+    .o_awready        ( o_awready ),
+    // Write Data
+    .i_wdata          ( i_wdata  ),
+    .i_wstrb          ( i_wstrb  ),
+    .i_wvalid         ( i_wvalid ),
+    .o_wready         ( o_wready ),
+    // Write Back
+    .o_bresp          (  ),
+    .o_bvalid         (  ),
+    .i_bready         (  )
+);
 
   // Register File --------------------------------------------------
   wire [31:0] w_rf_rs1;
@@ -962,4 +953,3 @@ module ysyx_23060219_top(
 );
 
 endmodule
-
