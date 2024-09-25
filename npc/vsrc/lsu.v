@@ -798,7 +798,8 @@ module lsu(
             post_valid_delay_3 <= 1'b0;
             post_valid_delay_4 <= 1'b0;
             post_valid_delay_5 <= 1'b0;
-        end else begin
+        end 
+        else begin
             // 更新 post_valid_reg
             post_valid_reg <= i_pre_valid;
 

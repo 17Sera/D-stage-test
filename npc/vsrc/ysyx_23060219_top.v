@@ -794,7 +794,7 @@ module ysyx_23060219_top(
         // System
         .clk              (clk),
         .rst              (rst),
-
+/**/
         .i_ifu_araddr     (o_araddr_ifu ),   //读地址
         .i_ifu_arvalid    (o_arvalid_ifu),
         .o_ifu_arready    (i_arready_ifu),
@@ -816,8 +816,7 @@ module ysyx_23060219_top(
         .o_ifu_bresp      (   ),   //写回复
         .o_ifu_bvalid     (   ),
         .i_ifu_bready     (   ),
-
-
+/**/
         .i_lsu_araddr     (o_araddr_lsu ),   //读地址
         .i_lsu_arvalid    (o_arvalid_lsu),
         .o_lsu_arready    (i_arready_lsu),
@@ -830,7 +829,7 @@ module ysyx_23060219_top(
         .i_lsu_awaddr     (o_awaddr_lsu  ),   //写地址
         .i_lsu_awvalid    (o_awvalid_lsu ),
         .o_lsu_awready    (i_awready_lsu ),
-/**/
+
         .i_lsu_wdata      ( o_wdata_lsu  ),    //写数据
         .i_lsu_wstrb      ( o_wstrb_lsu  ),
         .i_lsu_wvalid     ( o_wvalid_lsu ),
@@ -839,7 +838,7 @@ module ysyx_23060219_top(
         .o_lsu_bresp      (   ),   //写回复
         .o_lsu_bvalid     (   ),
         .i_lsu_bready     (   ),
-
+/**/
         .o_sram_araddr    (i_araddr ),   //读地址
         .o_sram_arvalid   (i_arvalid),
         .i_sram_arready   (o_arready),
@@ -852,7 +851,7 @@ module ysyx_23060219_top(
         .o_sram_awaddr    (i_awaddr ),   //写地址
         .o_sram_awvalid   (i_awvalid),
         .i_sram_awready   (o_awready),
-/**/
+
         .o_sram_wdata     (i_wdata  ),    //写数据
         .o_sram_wstrb     (i_wstrb  ),
         .o_sram_wvalid    (i_wvalid ),
@@ -860,7 +859,29 @@ module ysyx_23060219_top(
 
         .i_sram_bresp     (   ),   //写回复
         .i_sram_bvalid    (   ),
-        .o_sram_bready    (   )
+        .o_sram_bready    (   ),
+/**/
+        .o_uart_araddr    (),
+        .o_uart_arvalid   (),
+        .i_uart_arready   (),
+
+        .i_uart_rdata     (),
+        .i_uart_rresp     (),
+        .i_uart_rvalid    (),
+        .o_uart_rready    (),
+
+        .o_uart_awaddr    (),
+        .o_uart_awvalid   (),
+        .i_uart_awready   (),
+
+        .o_uart_wdata     (),
+        .o_uart_wstrb     (),
+        .o_uart_wvalid    (),
+        .i_uart_wready    (),
+
+        .i_uart_bresp     (),
+        .i_uart_bvalid    (),
+        .o_uart_bready    ()
     );
 
   // SRAM -----------------------------------------------------------
