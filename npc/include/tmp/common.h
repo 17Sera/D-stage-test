@@ -5,10 +5,10 @@
 // #include <stdint.h>
 // #include <string.h>
 // #include <stdlib.h>
-// #include <Vysyx_23060219_top___024root.h>
-// #include <Vysyx_23060219_top__Dpi.h>
-// #include <Vysyx_23060219_top.h>
-// #include <Vysyx_23060219_top__Syms.h>
+// #include <Vysyx_23060219___024root.h>
+// #include <Vysyx_23060219__Dpi.h>
+// #include <Vysyx_23060219.h>
+// #include <Vysyx_23060219__Syms.h>
 
 // #define PMEM_SIZE   0x8000000
 // #define PMEM_BASE   0x80000000

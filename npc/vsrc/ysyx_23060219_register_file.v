@@ -1,9 +1,9 @@
 // // //都可
 
 
-`include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+`include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 
-module register_file(
+module ysyx_23060219_register_file(
     // system
     input  wire           clk,
     input  wire           rst,

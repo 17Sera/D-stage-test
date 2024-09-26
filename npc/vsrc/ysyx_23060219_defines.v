@@ -129,9 +129,9 @@
 
 
 // memory
-`define WByte     8'b0000_0001
-`define WHalf     8'b0000_0011
-`define WWord     8'b0000_1111
+`define WByte     4'b0001
+`define WHalf     4'b0011
+`define WWord     4'b1111
 `define LoadW     3'd0
 `define LoadBU    3'd1
 `define LoadHU    3'd2

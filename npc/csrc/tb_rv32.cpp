@@ -3,17 +3,17 @@
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <assert.h>
-// #include "Vysyx_23060219_top.h"
+// #include "Vysyx_23060219.h"
 // #include "verilated_fst_c.h"
-// #include "Vysyx_23060219_top__Dpi.h"
+// #include "Vysyx_23060219__Dpi.h"
 // #include "svdpi.h"
 // #include "../include/common.h"
 // #include "../include/utils.h"
 // #include "../include/debug.h"
-// #include "Vysyx_23060219_top___024root.h"
+// #include "Vysyx_23060219___024root.h"
 
 
-// Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
+// Vysyx_23060219 *top = new Vysyx_23060219("top");
 // VerilatedFstC *tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 // vluint64_t    main_time = 0;  //initial 仿真时间
 
@@ -57,8 +57,8 @@
 //   // at the begining (main_time < start_time and before the reset), all gprs are zeros
 //   if(main_time >= start_time + 1)   
 //   {
-//     npc_state.halt_ret = top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs[10]; //a0
-//     npc_state.halt_pc = top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg;
+//     npc_state.halt_ret = top->rootp->ysyx_23060219__DOT__register_file_inst__DOT__regs[10]; //a0
+//     npc_state.halt_pc = top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg;
 
 //     assert( (unit == Unit_IDU1) || (unit == Unit_IDU2) || (unit == Unit_IDU3) || (unit == Unit_IDU4) || 
 //             (unit == Unit_IDU5) || (unit == Unit_IDU6) || (unit == Unit_IDU7) || (unit == Unit_IDU8) ||
@@ -67,7 +67,7 @@
 
 //     Log("TRAP takes place in the %s", unit_names[unit]);
 //     Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, 
-//          top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__ifu_inst__DOT__ifu_inst);
+//          top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__ifu_inst__DOT__ifu_inst);
 
 //     switch(station)
 //     {
@@ -103,7 +103,7 @@
 //   static int data = 0xdead000a;
 
 //   // 因为是周期CPU，所以理论上来说应该轮到LSU工作的时候才读/写dmem
-//   // if(main_time < start_time || top->rootp->ysyx_23060219_top__DOT__clk_cnt != 3)
+//   // if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)
 //   if(main_time < start_time )
 //     return data;
 
@@ -127,7 +127,7 @@
 
 // void pmem_write(int waddr, int wdata, char wmask){
 //   // 因为是周期CPU，所以理论上来说应该轮到LSU工作的时候才读/写dmem
-//   if(main_time < start_time || top->rootp->ysyx_23060219_top__DOT__clk_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
+//   if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
 //     // if(main_time < start_time )
 //     return;
 
@@ -224,17 +224,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "Vysyx_23060219_top.h"
+#include "Vysyx_23060219.h"
 #include "verilated_fst_c.h"
-#include "Vysyx_23060219_top__Dpi.h"
+#include "Vysyx_23060219__Dpi.h"
 #include "svdpi.h"
 #include "../include/common.h"
 #include "../include/utils.h"
 #include "../include/debug.h"
-#include "Vysyx_23060219_top___024root.h"
+#include "Vysyx_23060219___024root.h"
 
 
-Vysyx_23060219_top *top = new Vysyx_23060219_top("top");
+Vysyx_23060219 *top = new Vysyx_23060219("top");
 VerilatedFstC *tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 vluint64_t    main_time = 0;  //initial 仿真时间
 
@@ -278,8 +278,8 @@ extern void TRAP(int station, char unit)
   // at the begining (main_time < start_time and before the reset), all gprs are zeros
   if(main_time >= start_time + 1)   
   {
-    npc_state.halt_ret = top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs[10]; //a0
-    npc_state.halt_pc = top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg;
+    npc_state.halt_ret = top->rootp->ysyx_23060219__DOT__register_file_inst__DOT__regs[10]; //a0
+    npc_state.halt_pc = top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg;
 
     assert( (unit == Unit_IDU1) || (unit == Unit_IDU2) || (unit == Unit_IDU3) || (unit == Unit_IDU4) || 
             (unit == Unit_IDU5) || (unit == Unit_IDU6) || (unit == Unit_IDU7) || (unit == Unit_IDU8) ||
@@ -288,9 +288,9 @@ extern void TRAP(int station, char unit)
 
     Log("TRAP takes place in the %s", unit_names[unit]);
     // Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, 
-    //      top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__i_rdata);
+    //      top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__i_rdata);
     Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, 
-         top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__w_ifu_inst);
+         top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__w_ifu_inst);
 
 
     switch(station)
@@ -326,7 +326,7 @@ extern int dmem_read(int raddr)
 {
   static int data = 0xdead000a;
 
-  // if(main_time < start_time || top->rootp->ysyx_23060219_top__DOT__clk_cnt != 3)
+  // if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)
   if(main_time < start_time ){
     return data;
   }
@@ -350,7 +350,7 @@ extern int dmem_read(int raddr)
 
 
 void pmem_write(int waddr, int wdata, char wmask){
-  // if(main_time < start_time || top->rootp->ysyx_23060219_top__DOT__clk_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
+  // if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
     if(main_time < start_time ){
       return;
     }
@@ -384,13 +384,13 @@ void single_cycle(void)
 {
   if(!Verilated::gotFinish())
   { 
-    top->clk = 0; top->eval(); 
+    top->clock = 0; top->eval(); 
 #ifdef CONFIG_WAVES
     tfp->dump(main_time);  
 #endif
     main_time++; //推动仿真时间
 
-    top->clk = 1; top->eval(); 
+    top->clock = 1; top->eval(); 
 #ifdef CONFIG_WAVES
     tfp->dump(main_time);  
 #endif
@@ -400,9 +400,9 @@ void single_cycle(void)
 
 static void reset(void)
 {
-  top->rst = 0; single_cycle();
-  top->rst = 1; single_cycle();
-  top->rst = 0; single_cycle();
+  top->reset = 0; single_cycle();
+  top->reset = 1; single_cycle();
+  top->reset = 0; single_cycle();
 }
 
 static void init_verilator(void)

@@ -1,10 +1,10 @@
 // // // 只加握手
 
 
-`include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+`include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 `define IDU_PKG_WDITH  (5+5+12+1+1+1+2+`ALU_Width+2+`CPU_Width+1+1+3+`CPU_Width+1+1+1+5+1)  //IDU数据包的宽度
 
-module idu(
+module ysyx_23060219_idu(
     // system
     input  wire            clk,
     input  wire            rst,
@@ -254,7 +254,7 @@ endmodule
 //=============================================================================================================
 // // add arbiter
 
-// `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+// `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 // `define IDU_PKG_WDITH  (5+5+12+1+1+1+2+`ALU_Width+2+`CPU_Width+1+1+3+`CPU_Width+1+1+1+5+1)
 
 // module idu(

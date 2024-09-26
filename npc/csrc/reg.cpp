@@ -1,20 +1,20 @@
 #include "../include/common.h"
 #include "../include/debug.h"
-#include "Vysyx_23060219_top.h"
-#include "Vysyx_23060219_top___024root.h"
-#include "Vysyx_23060219_top__Dpi.h"
+#include "Vysyx_23060219.h"
+#include "Vysyx_23060219___024root.h"
+#include "Vysyx_23060219__Dpi.h"
 
 
 /********extern functions or variables********/
-extern Vysyx_23060219_top *top;
+extern Vysyx_23060219 *top;
 /*********************************************/
 
 
-#define top_gprs      top->rootp->ysyx_23060219_top__DOT__register_file_inst__DOT__regs
-#define top_mstatus   top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mstatus
-#define top_mtvec     top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mtvec
-#define top_mepc      top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mepc
-#define top_mcause    top->rootp->ysyx_23060219_top__DOT__csr_ctrl_inst__DOT__mcause
+#define top_gprs      top->rootp->ysyx_23060219__DOT__register_file_inst__DOT__regs
+#define top_mstatus   top->rootp->ysyx_23060219__DOT__csr_ctrl_inst__DOT__mstatus
+#define top_mtvec     top->rootp->ysyx_23060219__DOT__csr_ctrl_inst__DOT__mtvec
+#define top_mepc      top->rootp->ysyx_23060219__DOT__csr_ctrl_inst__DOT__mepc
+#define top_mcause    top->rootp->ysyx_23060219__DOT__csr_ctrl_inst__DOT__mcause
 
 static const char *regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -27,7 +27,7 @@ void regs_display()
 {
     _Log(ANSI_FG_RED "RegName  Hex_Value       Dec_Value\n" ANSI_NONE);
     _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u\n", "pc", 
-         top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg);
+         top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg);
     for(int i = 0; i < 32; i++)
     {
         _Log(ANSI_FG_YELLOW "$%s\t " ANSI_NONE, regs[i]);
@@ -43,8 +43,8 @@ void single_reg_display(char *reg_name)
     if(strcmp(reg_name, "pc") == 0)
     {
         _Log(ANSI_FG_YELLOW "$%s\t" ANSI_NONE " 0x%08x\t %010u %010d\n", "pc", 
-             top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg, 
-             top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg);
+             top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, 
+             top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg);
         return;
     }
 
@@ -102,7 +102,7 @@ word_t reg_str2val(const char *s, bool *success)
     int i;
     //pc
     if(strcmp(s, "pc") == 0)
-        return top->rootp->ysyx_23060219_top__DOT__bru_inst__DOT__npc_reg; 
+        return top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg; 
         
     //reg $0
     if(strcmp(s, regs[0]) == 0)

@@ -1,6 +1,6 @@
 // 选择器模板内部实现
 // NR_KEY = 2 ^ KEY_LEN
-module MuxKeyInternal #(NR_KEY = 2, KEY_LEN = 1, DATA_LEN = 1, HAS_DEFAULT = 0) (
+module ysyx_23060219_MuxKeyInternal #(NR_KEY = 2, KEY_LEN = 1, DATA_LEN = 1, HAS_DEFAULT = 0) (
     output reg  [DATA_LEN-1 : 0]                        out,
     input  wire [KEY_LEN -1 : 0]                        key,
     input  wire [DATA_LEN - 1 :0]                       default_out,
@@ -44,12 +44,12 @@ endmodule
 
 // 不带默认值的选择器模板
 // NR_KEY = 2 ^ KEY_LEN
-module MuxKey #(NR_KEY = 2, KEY_LEN = 1, DATA_LEN = 1) (
+module ysyx_23060219_MuxKey #(NR_KEY = 2, KEY_LEN = 1, DATA_LEN = 1) (
     output [DATA_LEN-1:0] out,
     input [KEY_LEN-1:0] key,
     input [NR_KEY*(KEY_LEN + DATA_LEN)-1:0] lut
 );
-    MuxKeyInternal #(NR_KEY, KEY_LEN, DATA_LEN, 0) i0(out, key, {DATA_LEN{1'b0}}, lut);
+    ysyx_23060219_MuxKeyInternal #(NR_KEY, KEY_LEN, DATA_LEN, 0) i0(out, key, {DATA_LEN{1'b0}}, lut);
 endmodule
 
 

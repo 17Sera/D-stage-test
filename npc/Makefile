@@ -1,4 +1,4 @@
-MODULE=ysyx_23060219_top
+MODULE=ysyx_23060219
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")		#只会查找 ./vsrc 目录中的.v文件
 VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")	#递归地查找 ./vsrc 目录下所有子目录中的.v文件
@@ -128,7 +128,7 @@ clean:
 
 # ==================================================================================
 
-# MODULE=ysyx_23060219_top
+# MODULE=ysyx_23060219
 # CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 # VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
 # VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")

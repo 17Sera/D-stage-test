@@ -1,6 +1,6 @@
 // // // 都可
 
-// `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+// `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 // module csr_ctrl(
 //     // system
 //     input  wire             clk,
@@ -80,8 +80,8 @@
 //===========================================================================================================================
 // add arbiter
 
-`include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
-module csr_ctrl(
+`include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
+module ysyx_23060219_csr_ctrl(
     // system
     input  wire            clk,
     input  wire            rst,

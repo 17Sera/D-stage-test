@@ -1,6 +1,6 @@
 // // 都可
 
-// `include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+// `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 // `define EXU_PKG_WDITH  (`CPU_Width+1+1+3+`CPU_Width+`CPU_Width+`CPU_Width+`CPU_Width+12+1+1+1+`CPU_Width+`CPU_Width+1+1+1+5+1)
 // //EXU_PKG_WDITH 计算了一个数据包的总位宽度,若CPU_Width 是32位，则EXU_PKG_WDITH 为253
 
@@ -90,21 +90,21 @@
 // /*--------------------------------------------------------------------------------------------------------------*/
 
 //     // 选择ALU操作数
-//     MuxKey #(4, 2, `CPU_Width) mux1(num1, i_exu_num_sel, {  //ALU操作数选择num1
+//     ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux1(num1, i_exu_num_sel, {  //ALU操作数选择num1
 //         `RS1_RS2, i_exu_rs1,
 //         `RS1_IMM, i_exu_rs1,
 //         `PC_IMM,  i_exu_pc,
 //         `PC_4,    i_exu_pc}       
 //     );
 
-//     MuxKey #(4, 2, `CPU_Width) mux2(num2, i_exu_num_sel, {  //ALU操作数选择num2
+//     ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux2(num2, i_exu_num_sel, {  //ALU操作数选择num2
 //         `RS1_RS2, i_exu_rs2,
 //         `RS1_IMM, i_exu_imm,
 //         `PC_IMM,  i_exu_imm,
 //         `PC_4,    `CPU_Width'd4}       
 //     );
 
-//     MuxKey #(4, 2, `CPU_Width) mux3(exu_csr_rd, i_exu_csr_type, {
+//     ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux3(exu_csr_rd, i_exu_csr_type, {
 //         `CSR_Nop, `CPU_Width'd0,
 //         `CSR_RW,  i_exu_rs1,                    // 把rs1的值写入CSR
 //         `CSR_RS,  i_exu_rs1 | i_exu_csr_src,    // 把rs1或上csr_src的值写入CSR
@@ -178,10 +178,10 @@
 //=================================================================================================================
 // add arbiter
 
-`include "/home/zhong/ysyx-workbench/npc/vsrc/defines.v"
+`include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 `define EXU_PKG_WDITH  (`CPU_Width+1+1+3+`CPU_Width+`CPU_Width+`CPU_Width+`CPU_Width+12+1+1+1+`CPU_Width+`CPU_Width+1+1+1+5+1)
 
-module exu(
+module ysyx_23060219_exu(
     // system
     input  wire            clk,
     input  wire            rst,
@@ -267,21 +267,21 @@ module exu(
     wire [`CPU_Bus] exu_csr_rd;
     wire            exu_csr_wen  = i_exu_csr_ren; // 读和写同一个id
 
-    MuxKey #(4, 2, `CPU_Width) mux1(num1, i_exu_num_sel, {
+    ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux1(num1, i_exu_num_sel, {
         `RS1_RS2, i_exu_rs1,
         `RS1_IMM, i_exu_rs1,
         `PC_IMM,  i_exu_pc,
         `PC_4,    i_exu_pc}       
     );
 
-    MuxKey #(4, 2, `CPU_Width) mux2(num2, i_exu_num_sel, {
+    ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux2(num2, i_exu_num_sel, {
         `RS1_RS2, i_exu_rs2,
         `RS1_IMM, i_exu_imm,
         `PC_IMM,  i_exu_imm,
         `PC_4,    `CPU_Width'd4}       
     );
 
-    MuxKey #(4, 2, `CPU_Width) mux3(exu_csr_rd, i_exu_csr_type, {
+    ysyx_23060219_MuxKey #(4, 2, `CPU_Width) mux3(exu_csr_rd, i_exu_csr_type, {
         `CSR_Nop, `CPU_Width'd0,
         `CSR_RW,  i_exu_rs1,
         `CSR_RS,  i_exu_rs1 | i_exu_csr_src,
