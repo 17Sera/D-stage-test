@@ -60,23 +60,23 @@
 
 module ysyx_23060219_bru(
     // system
-    input  wire            clk,
-    input  wire            rst,
-    // from from from from IFU
-    input  wire [`CPU_Bus] i_bru_pc,
-    // from from from LSU
-    input  wire [`CPU_Bus] i_bru_imm,
-    input  wire            i_bru_is_jal,
-    input  wire            i_bru_is_jalr,
-    input  wire            i_bru_brch,
-    input  wire            i_bru_ejump,
-    input  wire [`CPU_Bus] i_bru_csr_npc,
-    // from from from Register File
-    input  wire [31:0]  i_bru_rs1,
+    input  wire             clk,
+    input  wire             rst,
+    // from IFU
+    input  wire [`CPU_Bus]  i_bru_pc,
+    // from LSU
+    input  wire [`CPU_Bus]  i_bru_imm,
+    input  wire             i_bru_is_jal,
+    input  wire             i_bru_is_jalr,
+    input  wire             i_bru_brch,
+    input  wire             i_bru_ejump,
+    input  wire [`CPU_Bus]  i_bru_csr_npc,
+    // from Register File
+    input  wire [31:0]      i_bru_rs1,
     // from WBU
-    input  wire            i_bru_npc_wen,
+    input  wire             i_bru_npc_wen,
     // to IFU
-    output wire [`CPU_Bus] o_bru_npc
+    output wire [`CPU_Bus]  o_bru_npc
 );
     
     wire [`CPU_Bus] pc_jorb;
@@ -101,7 +101,8 @@ module ysyx_23060219_bru(
     reg [`CPU_Bus] npc_reg;
     always @(posedge clk) begin
         if(rst == 1'b1) 
-            npc_reg <= `RESET_VECTOR;
+            npc_reg <= `RESET_MROM;           /////////////////////
+            // npc_reg <= `RESET_VECTOR;
         else if(i_bru_npc_wen == 1'b1)
             npc_reg <= npc_t2;
     end

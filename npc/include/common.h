@@ -11,6 +11,10 @@
 #define PMEM_BASE   0x80000000
 #define PG_ALIGN    __attribute((aligned(4096)))
 
+#define MROM_BASE   0x20000000
+#define MROM_SIZE   0x00000fff
+
+
 
 #define paddr_t   uint32_t
 #define word_t    uint32_t
@@ -54,7 +58,7 @@
 #define MAX_iringbuf_size  20
 
 // wave
-// #define CONFIG_WAVES       1
+#define CONFIG_WAVES       1
 
 // device 
 #define CONFIG_DEVICE        1

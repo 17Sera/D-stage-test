@@ -719,7 +719,7 @@ module ysyx_23060219_lsu(
             o_rready <= 1;
             o_arvalid <= 0;
         end else begin
-            if(i_lsu_is_load == `TRUE && /*pulse_read*/i_exu_success && !o_arvalid) begin
+            if(i_lsu_is_load == `TRUE && i_exu_success && !o_arvalid) begin
                 o_araddr <= dmem_raddr;
                 o_arvalid <= 1;
                 o_rready <= 0;
@@ -761,7 +761,7 @@ module ysyx_23060219_lsu(
                 `INST_SB: wmask = `WByte;
                 `INST_SH: wmask = `WHalf;
                 `INST_SW: wmask = `WWord;
-                default:  TRAP(`ABORT, `Unit_LSU2);  //uae
+                default:  TRAP(`ABORT, `Unit_LSU2);
             endcase
         end
     end
@@ -771,9 +771,9 @@ module ysyx_23060219_lsu(
             o_awvalid <= 1'b0;
             o_wvalid <= 1'b0;
         end else begin
-            if(i_lsu_is_store == `TRUE && !o_awvalid) begin
+            if(i_lsu_is_store == `TRUE && i_exu_success && !o_awvalid) begin
                 o_awvalid <= 1'b1;
-                o_awaddr = dmem_waddr;
+                o_awaddr <= dmem_waddr;
             end
             if(i_awready) begin
                 o_wvalid <= 1'b1;
@@ -781,8 +781,9 @@ module ysyx_23060219_lsu(
                 o_wstrb <= wmask;
                 o_awvalid <= 1'b0;
             end
-            if(i_wready) begin
+            if(i_wready && o_wvalid) begin
                 o_wvalid <= 1'b0;
+                // o_awvalid <= 1'b0;
             end
         end
     end

@@ -260,10 +260,48 @@ extern void   pmem_write(int waddr, int wdata, char wmask);
 // extern void   etrace(int inst);                                     
 extern uint64_t get_time();                               
 extern void   difftest_skip_ref();
+extern uint8_t* guest_to_host(paddr_t paddr);
+
+//---------Load binary data into mrom array--------------------------------------------------------------------
+static uint8_t mrom[MROM_SIZE] = {};
+static const char* binary = "test/char-test-riscv32e-npc.bin";
+
 
 extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
-extern "C" void mrom_read(int32_t addr, int32_t *data) { assert(0); }
-/*********************************************/
+extern "C" void mrom_read(int32_t addr, int32_t *data)
+{ 
+    assert(data != NULL); // 确保 data 指针不为空
+    assert(addr >= MROM_BASE && addr < MROM_BASE + MROM_SIZE); // 地址合法性检查
+
+    uint32_t offset = ((addr & 0xfffffffc) - MROM_BASE);
+    *data = *((uint32_t *)(mrom + offset));
+
+    // fprintf(stderr, "Error: Address %d out of bounds\n", addr);
+    // *data = 0x00100073;   // 测试mrom，输入ebreak指令
+ }
+
+
+static long load_binary_to_mrom() {
+  if (binary == NULL) {
+    Log("No binary image is given. Use the default built-in binary.");
+    return 4096; // built-in binary size
+  }
+  FILE *fp = fopen(binary, "rb");
+  Assert(fp, "Cannot open '%s'", binary);
+
+  fseek(fp, 0, SEEK_END);
+  long size = ftell(fp);
+
+  Log("Loading binary image %s, size = %ld", binary, size);
+
+  fseek(fp, 0, SEEK_SET);
+  int ret = fread(mrom, size, 1, fp); 
+  assert(ret == 1);
+
+  fclose(fp);
+  return size;
+}
+/*----------------------------------------------------------------------------------------*/
 
 static uint32_t rtc_port_base[2] = {0, 0};
 static const char *unit_names[14] = {
@@ -432,6 +470,9 @@ int main(int argc, char *argv[])
   /* Initialize the verilator. */
   Verilated::commandArgs(argc, argv);
   init_verilator();
+
+  /* Load binary data into mrom array */
+  long bin_size = load_binary_to_mrom();
 
   /* Initialize differential testing. */
 #ifdef CONFIG_DIFFTEST

@@ -1,7 +1,6 @@
 // reset
 `define RST_VAL 1'b1
 
-
 // R type instruction  //全有
 `define TYPE_R        7'b011_0011
 `define INST_ADD_SUB  3'b000
@@ -121,6 +120,8 @@
 // PC
 `define RESET_VECTOR 32'h8000_0000
 `define PC_INCREMENT 32'd4
+
+`define RESET_MROM  32'h2000_0000
 
 
 // RegisterFile

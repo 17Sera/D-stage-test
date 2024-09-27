@@ -113,7 +113,7 @@ verilate: .zhong.verilate
 .zhong.verilate: $(VSRCS) $(CSRCS)	#####
 	@echo
 	@echo "### VERILATING ###"
-	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --timescale "1ns/1ns" --no-timing --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH)
+	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --timescale "1ns/1ns" --no-timing --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH) --prof-c --prof-cfuncs --prof-exec --autoflush
 	@echo "LIBS +=$(LIBS)" >> ./obj_dir/V$(MODULE).mk    # to link readline and dlfcn library
 # @echo "CXXFLAGS +=$(CXXFLAGS)" >> ./obj_dir/V$(MODULE).mk 
 	@touch .zhong.verilate
