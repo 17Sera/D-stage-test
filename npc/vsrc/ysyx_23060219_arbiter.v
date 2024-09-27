@@ -3,7 +3,6 @@
 module ysyx_23060219_arbiter (
     input  wire             clk,
     input  wire             rst,
-    
     // to IFU  
     /*---------------- 读地址 ----------------*/
     input  reg [`CPU_Bus]   i_ifu_araddr,  
@@ -78,39 +77,39 @@ module ysyx_23060219_arbiter (
 
     // from SRAM  
     /*---------------- 读地址 ----------------*/
-    output  reg [`CPU_Bus]  o_sram_araddr,    
-    output  reg             o_sram_arvalid,
-    input   reg             i_sram_arready,
-    output  reg  [3:0]      o_sram_arid,     //0 ###
-    output  reg  [7:0]      o_sram_arlen,
-    output  reg  [2:0]      o_sram_arsize,
-    output  reg  [1:0]      o_sram_arburst,
+    output  reg [`CPU_Bus]  io_master_araddr,    
+    output  reg             io_master_arvalid,
+    input   reg             io_master_arready,
+    output  reg  [3:0]      io_master_arid,     //0 ###
+    output  reg  [7:0]      io_master_arlen,
+    output  reg  [2:0]      io_master_arsize,
+    output  reg  [1:0]      io_master_arburst,
     /*---------------- 读数据 ----------------*/
-    input  reg [`CPU_Bus]   i_sram_rdata,     
-    input  reg  [1:0]       i_sram_rresp,
-    input  reg              i_sram_rvalid,
-    output reg              o_sram_rready,
-    input  reg              i_sram_rlast,    //悬空 ###
-    input  reg  [3:0]       i_sram_rid,
+    input  reg [`CPU_Bus]   io_master_rdata,     
+    input  reg  [1:0]       io_master_rresp,
+    input  reg              io_master_rvalid,
+    output reg              io_master_rready,
+    input  reg              io_master_rlast,    //悬空 ###
+    input  reg  [3:0]       io_master_rid,
     /*---------------- 写地址 ----------------*/
-    output  wire [`CPU_Bus] o_sram_awaddr,    
-    output  wire            o_sram_awvalid,
-    input   wire            i_sram_awready,
-    output  wire [3:0]      o_sram_awid,     // ###
-    output  wire [7:0]      o_sram_awlen,
-    output  wire [2:0]      o_sram_awsize,
-    output  wire [1:0]      o_sram_awburst,
+    output  wire [`CPU_Bus] io_master_awaddr,    
+    output  wire            io_master_awvalid,
+    input   wire            io_master_awready,
+    output  wire [3:0]      io_master_awid,     // ###
+    output  wire [7:0]      io_master_awlen,
+    output  wire [2:0]      io_master_awsize,
+    output  wire [1:0]      io_master_awburst,
     /*---------------- 写数据 ----------------*/
-    output wire [`CPU_Bus]  o_sram_wdata,     
-    output wire [3:0]       o_sram_wstrb,
-    output wire             o_sram_wvalid,
-    input  wire             i_sram_wready,
-    output wire             o_sram_wlast,    //0 ###
+    output wire [`CPU_Bus]  io_master_wdata,     
+    output wire [3:0]       io_master_wstrb,
+    output wire             io_master_wvalid,
+    input  wire             io_master_wready,
+    output wire             io_master_wlast,    //0 ###
     /*---------------- 写回复 ----------------*/
-    input  reg  [1:0]       i_sram_bresp,    
-    input  reg              i_sram_bvalid,
-    output wire             o_sram_bready,
-    input  reg  [3:0]       i_sram_bid,
+    input  reg  [1:0]       io_master_bresp,    
+    input  reg              io_master_bvalid,
+    output wire             io_master_bready,
+    input  reg  [3:0]       io_master_bid,
 
     // from UART  
     /*---------------- 读地址 ----------------*/
@@ -194,15 +193,15 @@ module ysyx_23060219_arbiter (
     assign o_lsu_rid = 0;
     assign o_lsu_bid = 0;
 
-    assign o_sram_arid = 0;
-    assign o_sram_arlen = 0;
-    assign o_sram_arsize = 0;
-    assign o_sram_arburst = 0;
-    assign o_sram_awid = 0;
-    assign o_sram_awlen = 0;
-    assign o_sram_awsize = 0;
-    assign o_sram_awburst = 0;
-    assign o_sram_wlast = 0;
+    assign io_master_arid = 0;
+    assign io_master_arlen = 0;
+    assign io_master_arsize = 0;
+    assign io_master_arburst = 0;
+    assign io_master_awid = 0;
+    assign io_master_awlen = 0;
+    assign io_master_awsize = 0;
+    assign io_master_awburst = 0;
+    assign io_master_wlast = 0;
 
     assign o_uart_arid = 0;
     assign o_uart_arlen = 0;
@@ -233,18 +232,18 @@ module ysyx_23060219_arbiter (
     // // 读操作
     // always@(*) begin
     //     if(i_ifu_arvalid && !i_lsu_arvalid) begin
-    //         o_sram_araddr = i_ifu_araddr;
-    //         o_sram_arvalid = i_ifu_arvalid;
-    //         o_sram_rready = i_ifu_rready;
+    //         io_master_araddr = i_ifu_araddr;
+    //         io_master_arvalid = i_ifu_arvalid;
+    //         io_master_rready = i_ifu_rready;
     //         IFU = 1;
     //     end
-    //     if(i_sram_rvalid && IFU) begin
-    //         o_ifu_rdata = i_sram_rdata;
-    //         o_ifu_rvalid = i_sram_rvalid;
+    //     if(io_master_rvalid && IFU) begin
+    //         o_ifu_rdata = io_master_rdata;
+    //         o_ifu_rvalid = io_master_rvalid;
     //     end
     //     if(i_ifu_rready && IFU) begin
-    //         o_sram_rready = i_ifu_rready;
-    //         o_sram_arvalid = i_ifu_arvalid;
+    //         io_master_rready = i_ifu_rready;
+    //         io_master_arvalid = i_ifu_arvalid;
     //         IFU = 0;
     //     end
     // end
@@ -252,20 +251,20 @@ module ysyx_23060219_arbiter (
     // // 写操作
     // always@(*) begin
     //     if(i_lsu_awvalid && !i_ifu_awvalid) begin
-    //         o_sram_awvalid = i_lsu_awvalid;
-    //         o_sram_awaddr = i_lsu_awaddr;
+    //         io_master_awvalid = i_lsu_awvalid;
+    //         io_master_awaddr = i_lsu_awaddr;
     //         LSU = 1;
     //     end
-    //     if(i_sram_awready && LSU) begin
-    //         o_lsu_awready = i_sram_awready;
+    //     if(io_master_awready && LSU) begin
+    //         o_lsu_awready = io_master_awready;
     //     end
     //     if(i_lsu_wvalid && LSU) begin
-    //         o_sram_wvalid = i_lsu_wvalid;
-    //         o_sram_wdata = i_lsu_wdata;
-    //         o_sram_wstrb = i_lsu_wstrb;
+    //         io_master_wvalid = i_lsu_wvalid;
+    //         io_master_wdata = i_lsu_wdata;
+    //         io_master_wstrb = i_lsu_wstrb;
     //     end
-    //     if(i_sram_wready && LSU) begin
-    //         o_lsu_wready = i_sram_wready;
+    //     if(io_master_wready && LSU) begin
+    //         o_lsu_wready = io_master_wready;
     //     end
     // end
 
@@ -302,35 +301,35 @@ module ysyx_23060219_arbiter (
     reg uart_request_granted;
 
     // Read Address and Valid Signals
-    assign o_sram_araddr = (ifu_request_granted) ? i_ifu_araddr : i_lsu_araddr;
-    assign o_sram_arvalid = (ifu_request_granted) ? i_ifu_arvalid : i_lsu_arvalid;
-    assign o_sram_rready = (ifu_request_granted) ? i_ifu_rready : i_lsu_rready;
+    assign io_master_araddr = (ifu_request_granted) ? i_ifu_araddr : i_lsu_araddr;
+    assign io_master_arvalid = (ifu_request_granted) ? i_ifu_arvalid : i_lsu_arvalid;
+    assign io_master_rready = (ifu_request_granted) ? i_ifu_rready : i_lsu_rready;
 
-    assign i_ifu_arready = (ifu_request_granted && i_sram_arready);
+    assign i_ifu_arready = (ifu_request_granted && io_master_arready);
 
-    assign o_lsu_arready = (lsu_request_granted && i_sram_arready);
+    assign o_lsu_arready = (lsu_request_granted && io_master_arready);
     
-    assign o_ifu_rdata = (ifu_request_granted && i_sram_rvalid) ? i_sram_rdata : 0;
-    assign o_lsu_rdata = (lsu_request_granted && i_sram_rvalid) ? i_sram_rdata : 0;
+    assign o_ifu_rdata = (ifu_request_granted && io_master_rvalid) ? io_master_rdata : 0;
+    assign o_lsu_rdata = (lsu_request_granted && io_master_rvalid) ? io_master_rdata : 0;
 
-    //assign o_ifu_rresp = (ifu_request_granted && i_sram_rresp) ? 0 : 0;
-    //assign o_lsu_rresp = (lsu_request_granted && i_sram_rresp) ? 0 : 0;
+    //assign o_ifu_rresp = (ifu_request_granted && io_master_rresp) ? 0 : 0;
+    //assign o_lsu_rresp = (lsu_request_granted && io_master_rresp) ? 0 : 0;
 
-    assign o_ifu_rvalid = (ifu_request_granted) ? i_sram_rvalid : 0;
-    assign o_lsu_rvalid = (lsu_request_granted) ? i_sram_rvalid : 0; 
+    assign o_ifu_rvalid = (ifu_request_granted) ? io_master_rvalid : 0;
+    assign o_lsu_rvalid = (lsu_request_granted) ? io_master_rvalid : 0; 
 
     // Write Address, Data, and Control Signals
-    assign o_sram_awaddr = (lsu_request_granted && !uart_request_granted) ? i_lsu_awaddr : 0;
-    assign o_sram_awvalid = (lsu_request_granted && !uart_request_granted) ? i_lsu_awvalid : 0;
-    assign o_sram_wdata = (lsu_request_granted && !uart_request_granted) ? i_lsu_wdata : 0;
-    assign o_sram_wstrb = (lsu_request_granted && !uart_request_granted) ? i_lsu_wstrb : 0;
-    assign o_sram_wvalid = (lsu_request_granted && !uart_request_granted) ? i_lsu_wvalid : 0;
+    assign io_master_awaddr = (lsu_request_granted && !uart_request_granted) ? i_lsu_awaddr : 0;
+    assign io_master_awvalid = (lsu_request_granted && !uart_request_granted) ? i_lsu_awvalid : 0;
+    assign io_master_wdata = (lsu_request_granted && !uart_request_granted) ? i_lsu_wdata : 0;
+    assign io_master_wstrb = (lsu_request_granted && !uart_request_granted) ? i_lsu_wstrb : 0;
+    assign io_master_wvalid = (lsu_request_granted && !uart_request_granted) ? i_lsu_wvalid : 0;
 
-    // //assign o_ifu_awready = (ifu_request_granted) ? i_sram_awready : 0;
-    assign o_lsu_awready = ((lsu_request_granted || uart_request_granted) && i_sram_awready);
+    // //assign o_ifu_awready = (ifu_request_granted) ? io_master_awready : 0;
+    assign o_lsu_awready = ((lsu_request_granted || uart_request_granted) && io_master_awready);
 
-    // //assign o_ifu_wready = (ifu_request_granted && i_sram_wready);
-    assign o_lsu_wready = ((lsu_request_granted || uart_request_granted) && i_sram_wready);
+    // //assign o_ifu_wready = (ifu_request_granted && io_master_wready);
+    assign o_lsu_wready = ((lsu_request_granted || uart_request_granted) && io_master_wready);
 
 
 
@@ -340,9 +339,9 @@ module ysyx_23060219_arbiter (
     assign o_uart_wstrb = (lsu_request_granted && uart_request_granted) ? i_lsu_wstrb : 0;
     assign o_uart_wvalid = (lsu_request_granted && uart_request_granted) ? i_lsu_wvalid : 0;
 
-    assign o_lsu_awready = ((lsu_request_granted || uart_request_granted) && i_sram_awready);
+    assign o_lsu_awready = ((lsu_request_granted || uart_request_granted) && io_master_awready);
 
-    assign o_lsu_wready = ((lsu_request_granted || uart_request_granted) && i_sram_wready);
+    assign o_lsu_wready = ((lsu_request_granted || uart_request_granted) && io_master_wready);
 
     // Pririty Logic
     always @(*) begin

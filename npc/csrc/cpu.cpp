@@ -142,15 +142,16 @@
 #include "../include/utils.h"
 #include "../include/debug.h"
 #include "../include/macro.h"
-#include "Vysyx_23060219.h"
-#include "Vysyx_23060219___024root.h"
-#include "Vysyx_23060219__Dpi.h"
-
+#include "VysyxSoCFull___024root.h"
+#include "VysyxSoCFull___024unit.h"
+#include "VysyxSoCFull__Dpi.h"
+#include "VysyxSoCFull__Syms.h"
+#include "VysyxSoCFull.h"
 
 /********extern functions or variables********/
 extern void single_cycle(void); 
 extern NPCState npc_state;
-extern Vysyx_23060219 *top;
+extern VysyxSoCFull *top;
 
 #ifdef CONFIG_FTRACE 
 extern void RET_Log(uint32_t pc, uint32_t npc);
@@ -190,10 +191,10 @@ static void statistic() {
 
 static void execute_once() 
 {
-    PCSet.pc = top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg;  PCSet.inst = top->rootp->ysyx_23060219__DOT__w_ifu_inst;
+    PCSet.pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;  PCSet.inst = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
     // take 5 cycles to excute one instruction
     single_cycle(); single_cycle(); single_cycle(); single_cycle(); single_cycle(); single_cycle();
-    PCSet.npc = top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg;  PCSet.ninst = top->rootp->ysyx_23060219__DOT__w_ifu_inst;
+    PCSet.npc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;  PCSet.ninst = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
     
 
 #ifdef CONFIG_ITRACE

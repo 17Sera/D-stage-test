@@ -224,17 +224,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "Vysyx_23060219.h"
 #include "verilated_fst_c.h"
-#include "Vysyx_23060219__Dpi.h"
 #include "svdpi.h"
 #include "../include/common.h"
 #include "../include/utils.h"
 #include "../include/debug.h"
-#include "Vysyx_23060219___024root.h"
+#include "VysyxSoCFull___024root.h"
+#include "VysyxSoCFull___024unit.h"
+#include "VysyxSoCFull__Dpi.h"
+#include "VysyxSoCFull__Syms.h"
+#include "VysyxSoCFull.h"
 
-
-Vysyx_23060219 *top = new Vysyx_23060219("top");
+VysyxSoCFull *top = new VysyxSoCFull("top");
 VerilatedFstC *tfp = new VerilatedFstC(); //导出fst波形需要加此语句
 vluint64_t    main_time = 0;  //initial 仿真时间
 
@@ -259,6 +260,9 @@ extern void   pmem_write(int waddr, int wdata, char wmask);
 // extern void   etrace(int inst);                                     
 extern uint64_t get_time();                               
 extern void   difftest_skip_ref();
+
+extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
+extern "C" void mrom_read(int32_t addr, int32_t *data) { assert(0); }
 /*********************************************/
 
 static uint32_t rtc_port_base[2] = {0, 0};
@@ -278,8 +282,8 @@ extern void TRAP(int station, char unit)
   // at the begining (main_time < start_time and before the reset), all gprs are zeros
   if(main_time >= start_time + 1)   
   {
-    npc_state.halt_ret = top->rootp->ysyx_23060219__DOT__register_file_inst__DOT__regs[10]; //a0
-    npc_state.halt_pc = top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg;
+    npc_state.halt_ret = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__register_file_inst__DOT__regs[10]; //a0
+    npc_state.halt_pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;
 
     assert( (unit == Unit_IDU1) || (unit == Unit_IDU2) || (unit == Unit_IDU3) || (unit == Unit_IDU4) || 
             (unit == Unit_IDU5) || (unit == Unit_IDU6) || (unit == Unit_IDU7) || (unit == Unit_IDU8) ||
@@ -288,9 +292,9 @@ extern void TRAP(int station, char unit)
 
     Log("TRAP takes place in the %s", unit_names[unit]);
     // Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, 
-    //      top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__i_rdata);
+    //      top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__i_rdata);
     Log("maintime = %ld, state = %d, pc = 0x%08x, inst = 0x%08x", main_time, npc_state.state, 
-         top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyx_23060219__DOT__w_ifu_inst);
+         top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst);
 
 
     switch(station)
@@ -326,7 +330,7 @@ extern int dmem_read(int raddr)
 {
   static int data = 0xdead000a;
 
-  // if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)
+  // if(main_time < start_time || top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__clock_cnt != 3)
   if(main_time < start_time ){
     return data;
   }
@@ -350,7 +354,7 @@ extern int dmem_read(int raddr)
 
 
 void pmem_write(int waddr, int wdata, char wmask){
-  // if(main_time < start_time || top->rootp->ysyx_23060219__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
+  // if(main_time < start_time || top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
     if(main_time < start_time ){
       return;
     }
@@ -426,6 +430,7 @@ int main(int argc, char *argv[])
   init_monitor(argc, argv);
 
   /* Initialize the verilator. */
+  Verilated::commandArgs(argc, argv);
   init_verilator();
 
   /* Initialize differential testing. */

@@ -241,27 +241,27 @@
 
 //     // to SRAM
 //     /************ 读地址 ************/
-//     output  reg  [31:0]   io_master_araddr,
-//     output  reg              io_master_arvalid, //写使能
-//     input wire               io_master_arready,
+//     output  reg  [31:0]   o_araddr,
+//     output  reg              o_arvalid, //写使能
+//     input wire               i_arready,
 //     /************ 读数据 ************/
-//     input reg  [31:0]     io_master_rdata,
-//     input reg                io_master_rresp,
-//     input reg                io_master_rvalid,
-//     output  wire             io_master_rready,
+//     input reg  [31:0]     i_rdata,
+//     input reg                i_rresp,
+//     input reg                i_rvalid,
+//     output  wire             o_rready,
 //     /************ 写地址 ************/
-//     output  reg  [31:0]   io_master_awaddr,
-//     output  reg              io_master_awvalid,
-//     input  wire              io_master_awready,
+//     output  reg  [31:0]   o_awaddr,
+//     output  reg              o_awvalid,
+//     input  wire              i_awready,
 //     /************ 写数据 ************/
-//     output  reg  [31:0]   io_master_wdata, 
-//     output  reg  [3:0]       io_master_wstrb,  // 写字节使能  写掩码
-//     output  reg              io_master_wvalid,
-//     input  wire              io_master_wready,
+//     output  reg  [31:0]   o_wdata, 
+//     output  reg  [3:0]       o_wstrb,  // 写字节使能  写掩码
+//     output  reg              o_wvalid,
+//     input  wire              i_wready,
 //     /************ 写回复 ************/
-//     input reg                io_master_bresp,
-//     input reg                io_master_bvalid,
-//     output  wire             io_master_bready
+//     input reg                i_bresp,
+//     input reg                i_bvalid,
+//     output  wire             o_bready
 // );
 
 //     import "DPI-C" function int  dmem_read(input int raddr);
@@ -298,19 +298,19 @@
 
 //     always@(posedge clk or posedge rst) begin
 //         if(rst) begin
-//             io_master_rready <= 1;
+//             o_rready <= 1;
 //         end else begin
 //             if(i_lsu_is_load == `TRUE) begin
-//                 io_master_araddr <= dmem_raddr;
-//                 io_master_arvalid <= 1;
-//                 io_master_rready <= 0;
+//                 o_araddr <= dmem_raddr;
+//                 o_arvalid <= 1;
+//                 o_rready <= 0;
 //             end else begin
 //                 dmem_rdata_t <= 32'h00000001;
 //             end
-//             if(io_master_rvalid) begin
-//                 dmem_rdata_t <= io_master_rdata;
-//                 io_master_rready <= 1;
-//                 io_master_arvalid <= 0;
+//             if(i_rvalid) begin
+//                 dmem_rdata_t <= i_rdata;
+//                 o_rready <= 1;
+//                 o_arvalid <= 0;
 //             end
 //         end
 //     end    
@@ -355,21 +355,21 @@
 
 //     always@(posedge clk or posedge rst) begin
 //         if(rst) begin
-//             io_master_awvalid <= 1'b0;
-//             io_master_wvalid <= 1'b0;
+//             o_awvalid <= 1'b0;
+//             o_wvalid <= 1'b0;
 //         end else begin
 //             if(i_lsu_is_store == `TRUE) begin
-//                 io_master_awvalid <= 1'b1;
-//                 io_master_awaddr = dmem_waddr;
+//                 o_awvalid <= 1'b1;
+//                 o_awaddr = dmem_waddr;
 //             end
-//             if(io_master_awready) begin
-//                 io_master_wvalid <= 1'b1;
-//                 io_master_wdata <= dmem_wdata;
-//                 io_master_wstrb <= wmask;
-//                 io_master_awvalid <= 1'b0;
+//             if(i_awready) begin
+//                 o_wvalid <= 1'b1;
+//                 o_wdata <= dmem_wdata;
+//                 o_wstrb <= wmask;
+//                 o_awvalid <= 1'b0;
 //             end
-//             if(io_master_wready) begin
-//                 io_master_wvalid <= 1'b0;
+//             if(i_wready) begin
+//                 o_wvalid <= 1'b0;
 //             end
 //         end
 //     end
@@ -503,24 +503,24 @@
 //     output wire [31:0]     o_lsu_csr_rd,
 
 //     // to SRAM
-//     output reg  [31:0]     io_master_araddr,
-//     output reg             io_master_arvalid,
-//     input  wire            io_master_arready,
-//     input  wire [31:0]     io_master_rdata,
-//     input  reg             io_master_rresp,
-//     input  wire            io_master_rvalid,
-//     output wire            io_master_rready,
-//     output reg  [31:0]     io_master_awaddr,
-//     output reg             io_master_awvalid,
-//     input  wire            io_master_awready,
-//     output reg  [31:0]     io_master_wdata, 
-//     output reg  [3:0]      io_master_wstrb,
-//     output reg             io_master_wvalid,
-//     input  wire            io_master_wready,
+//     output reg  [31:0]     o_araddr,
+//     output reg             o_arvalid,
+//     input  wire            i_arready,
+//     input  wire [31:0]     i_rdata,
+//     input  reg             i_rresp,
+//     input  wire            i_rvalid,
+//     output wire            o_rready,
+//     output reg  [31:0]     o_awaddr,
+//     output reg             o_awvalid,
+//     input  wire            i_awready,
+//     output reg  [31:0]     o_wdata, 
+//     output reg  [3:0]      o_wstrb,
+//     output reg             o_wvalid,
+//     input  wire            i_wready,
 //     /************ 写回复 ************/
-//     input reg                io_master_bresp,
-//     input reg                io_master_bvalid,
-//     output  wire             io_master_bready
+//     input reg                i_bresp,
+//     input reg                i_bvalid,
+//     output  wire             o_bready
 // );
 
 //     /************ 数据处理 ************/
@@ -534,28 +534,28 @@
 
 //     always @(posedge clk or posedge rst) begin
 //         if (rst) begin
-//             io_master_arvalid <= 1'b0;
-//             io_master_awvalid <= 1'b0;
-//             io_master_wvalid <= 1'b0;
+//             o_arvalid <= 1'b0;
+//             o_awvalid <= 1'b0;
+//             o_wvalid <= 1'b0;
 //             o_post_valid <= 1'b0;
 //         end else begin
 //             if (i_lsu_is_load) begin
-//                 io_master_araddr <= dmem_raddr;
-//                 io_master_arvalid <= 1'b1;
-//                 if (io_master_rvalid) begin
-//                     io_master_arvalid <= 1'b0;
+//                 o_araddr <= dmem_raddr;
+//                 o_arvalid <= 1'b1;
+//                 if (i_rvalid) begin
+//                     o_arvalid <= 1'b0;
 //                     o_post_valid <= 1'b1;  // 数据有效
 //                 end
 //             end else if (i_lsu_is_store) begin
-//                 io_master_awaddr <= dmem_waddr;
-//                 io_master_awvalid <= 1'b1;
-//                 if (io_master_awready) begin
-//                     io_master_wdata <= dmem_wdata;
-//                     io_master_wstrb <= wmask;
-//                     io_master_awvalid <= 1'b0;
-//                     io_master_wvalid <= 1'b1;
-//                     if (io_master_wready) begin
-//                         io_master_wvalid <= 1'b0;
+//                 o_awaddr <= dmem_waddr;
+//                 o_awvalid <= 1'b1;
+//                 if (i_awready) begin
+//                     o_wdata <= dmem_wdata;
+//                     o_wstrb <= wmask;
+//                     o_awvalid <= 1'b0;
+//                     o_wvalid <= 1'b1;
+//                     if (i_wready) begin
+//                         o_wvalid <= 1'b0;
 //                         o_post_valid <= 1'b1;  // 数据有效
 //                     end
 //                 end
@@ -565,7 +565,7 @@
 //         end
 //     end
 
-//     assign o_lsu_rd = (i_lsu_is_load) ? io_master_rdata : i_lsu_exu_res;
+//     assign o_lsu_rd = (i_lsu_is_load) ? i_rdata : i_lsu_exu_res;
 
 //     /************ 握手信号 ************/
 //     assign o_pre_ready = ~o_post_valid;  // 当 WBU 准备好时，LSU 才可以发送数据
@@ -631,39 +631,39 @@ module ysyx_23060219_lsu(
     output wire [31:0]      o_lsu_csr_rd,
     // to SRAM
     /*---------------- 读地址 ----------------*/
-    output  reg  [31:0]     io_master_araddr,
-    output  reg             io_master_arvalid, //写使能
-    input   reg             io_master_arready,
-    output  reg  [3:0]      io_master_arid,     //0 ###
-    output  reg  [7:0]      io_master_arlen,
-    output  reg  [2:0]      io_master_arsize,
-    output  reg  [1:0]      io_master_arburst,
+    output  reg  [31:0]     o_araddr,
+    output  reg             o_arvalid, //写使能
+    input   reg             i_arready,
+    output  reg  [3:0]      o_arid,     //0 ###
+    output  reg  [7:0]      o_arlen,
+    output  reg  [2:0]      o_arsize,
+    output  reg  [1:0]      o_arburst,
     /*---------------- 读数据 ----------------*/
-    input   reg  [31:0]     io_master_rdata,
-    input   reg  [1:0]      io_master_rresp,
-    input   reg             io_master_rvalid,
-    output  reg             io_master_rready,
-    input   reg             io_master_rlast,    //悬空 ###
-    input   reg  [3:0]      io_master_rid,
+    input   reg  [31:0]     i_rdata,
+    input   reg  [1:0]      i_rresp,
+    input   reg             i_rvalid,
+    output  reg             o_rready,
+    input   reg             i_rlast,    //悬空 ###
+    input   reg  [3:0]      i_rid,
     /*---------------- 写地址 ----------------*/
-    output  reg  [31:0]     io_master_awaddr,
-    output  reg             io_master_awvalid,
-    input   reg             io_master_awready,
-    output  wire [3:0]      io_master_awid,     // 0 ###
-    output  wire [7:0]      io_master_awlen,
-    output  wire [2:0]      io_master_awsize,
-    output  wire [1:0]      io_master_awburst,
+    output  reg  [31:0]     o_awaddr,
+    output  reg             o_awvalid,
+    input   reg             i_awready,
+    output  wire [3:0]      o_awid,     // 0 ###
+    output  wire [7:0]      o_awlen,
+    output  wire [2:0]      o_awsize,
+    output  wire [1:0]      o_awburst,
     /*---------------- 写数据 ----------------*/
-    output  reg  [31:0]     io_master_wdata, 
-    output  reg  [3:0]      io_master_wstrb,  // 写字节使能  写掩码
-    output  reg             io_master_wvalid,
-    input   reg             io_master_wready,
-    output  wire            io_master_wlast,    //0 ###
+    output  reg  [31:0]     o_wdata, 
+    output  reg  [3:0]      o_wstrb,  // 写字节使能  写掩码
+    output  reg             o_wvalid,
+    input   reg             i_wready,
+    output  wire            o_wlast,    //0 ###
     /*---------------- 写回复 ----------------*/
-    input   reg  [1:0]      io_master_bresp,
-    input   reg             io_master_bvalid,
-    output  reg             io_master_bready,
-    input   reg  [3:0]      io_master_bid,
+    input   reg  [1:0]      i_bresp,
+    input   reg             i_bvalid,
+    output  reg             o_bready,
+    input   reg  [3:0]      i_bid,
 
     input   reg             i_exu_success
 );
@@ -673,17 +673,17 @@ module ysyx_23060219_lsu(
     import "DPI-C" function void TRAP(input int station, input byte unit);
 
 /*-------------- output set 0 --------------- */
-    assign io_master_arid = 0;
-    assign io_master_arlen = 0;
-    assign io_master_arsize = 0;
-    assign io_master_arburst = 0;
+    assign o_arid = 0;
+    assign o_arlen = 0;
+    assign o_arsize = 0;
+    assign o_arburst = 0;
 
-    assign io_master_awid = 0;
-    assign io_master_awlen = 0;
-    assign io_master_awsize = 0;
-    assign io_master_awburst = 0;
+    assign o_awid = 0;
+    assign o_awlen = 0;
+    assign o_awsize = 0;
+    assign o_awburst = 0;
 
-    assign io_master_wlast = 0;
+    assign o_wlast = 0;
 /*-------------------------------------------*/
 
 
@@ -716,18 +716,18 @@ module ysyx_23060219_lsu(
 
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-            io_master_rready <= 1;
-            io_master_arvalid <= 0;
+            o_rready <= 1;
+            o_arvalid <= 0;
         end else begin
-            if(i_lsu_is_load == `TRUE && /*pulse_read*/i_exu_success && !io_master_arvalid) begin
-                io_master_araddr <= dmem_raddr;
-                io_master_arvalid <= 1;
-                io_master_rready <= 0;
+            if(i_lsu_is_load == `TRUE && /*pulse_read*/i_exu_success && !o_arvalid) begin
+                o_araddr <= dmem_raddr;
+                o_arvalid <= 1;
+                o_rready <= 0;
             end
-            if(io_master_rvalid) begin
-                dmem_rdata_t <= io_master_rdata;
-                io_master_rready <= 1;
-                io_master_arvalid <= 0;
+            if(i_rvalid) begin
+                dmem_rdata_t <= i_rdata;
+                o_rready <= 1;
+                o_arvalid <= 0;
             end
         end
     end    
@@ -768,21 +768,21 @@ module ysyx_23060219_lsu(
 
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-            io_master_awvalid <= 1'b0;
-            io_master_wvalid <= 1'b0;
+            o_awvalid <= 1'b0;
+            o_wvalid <= 1'b0;
         end else begin
-            if(i_lsu_is_store == `TRUE && !io_master_awvalid) begin
-                io_master_awvalid <= 1'b1;
-                io_master_awaddr = dmem_waddr;
+            if(i_lsu_is_store == `TRUE && !o_awvalid) begin
+                o_awvalid <= 1'b1;
+                o_awaddr = dmem_waddr;
             end
-            if(io_master_awready) begin
-                io_master_wvalid <= 1'b1;
-                io_master_wdata <= dmem_wdata;
-                io_master_wstrb <= wmask;
-                io_master_awvalid <= 1'b0;
+            if(i_awready) begin
+                o_wvalid <= 1'b1;
+                o_wdata <= dmem_wdata;
+                o_wstrb <= wmask;
+                o_awvalid <= 1'b0;
             end
-            if(io_master_wready) begin
-                io_master_wvalid <= 1'b0;
+            if(i_wready) begin
+                o_wvalid <= 1'b0;
             end
         end
     end

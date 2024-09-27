@@ -386,7 +386,77 @@
 
 module ysyx_23060219(
   input  wire           clock,
-  input  wire           reset
+  input  wire           reset,
+  input                 io_interrupt,
+  // Master
+  input    wire         io_master_awready, //准备好接收地址和控制信息
+  output   wire         io_master_awvalid, //表明写地址有效
+  output   wire [31:0]  io_master_awaddr, //用于写数据
+  output   wire [3:0]   io_master_awid, //唯一标识符，用于区分多个写请求
+  output   wire [7:0]   io_master_awlen,  //表示传输长度，通常是一次传输的字节数
+  output   wire [2:0]   io_master_awsize, //表示每个传输的数据宽度
+  output   wire [1:0]   io_master_awburst, //表示突发传输类型，可以是固定、递增或包装模式
+
+  input    wire         io_master_wready, //指示写数据通道准备好接收数据
+  output   wire         io_master_wvalid, //表明写数据有效
+  output   wire [31:0]  io_master_wdata, //用于写入目标地址的数据
+  output   wire [3:0]   io_master_wstrb, //写掩码
+  output   wire         io_master_wlast, //表示这是最后一个写数据传输的信号
+
+  output   wire         io_master_bready, //准备好接收写相应
+  input    wire         io_master_bvalid, //表明写响应有效
+  input    wire [1:0]   io_master_bresp, //从设备返回的写响应状态，表示成功或错误
+  input    wire [3:0]   io_master_bid,  //唯一标识符，用于确认响应
+
+  input    wire         io_master_arready, //指示读地址通道准备好接收地址和控制信息
+  output   wire         io_master_arvalid, //表明读地址有效
+  output   wire [31:0]  io_master_araddr, //主设备发送的目标地址，用于读取数据
+  output   wire [3:0]   io_master_arid, //唯一标识符，用于区分多个读请求
+  output   wire [7:0]   io_master_arlen, //表示传输的长度，通常是一次传输的字节数
+  output   wire [2:0]   io_master_arsize, //每个传输的数据宽度
+  output   wire [1:0]   io_master_arburst, //表示突发传输的类型，固定、递增或包装模式
+
+  output   wire         io_master_rready, //指示准备好接收读数据
+  input    wire         io_master_rvalid, //表明读数据有效
+  input    wire [1:0]   io_master_rresp, //从设备返回的读响应状态，表示成功或错误
+  input    wire [31:0]  io_master_rdata, //从设备发送的数据，供主设备读取
+  input    wire         io_master_rlast, //表示这是最后一个读数据传输的信号
+  input    wire [3:0]   io_master_rid, //唯一标识符，用于确认响应
+
+  // Slave
+  output   wire          io_slave_awready,
+  input    wire          io_slave_awvalid,
+  input    wire [31:0]   io_slave_awaddr,
+  input    wire [3:0]    io_slave_awid,   
+  input    wire [7:0]    io_slave_awlen,  
+  input    wire [2:0]    io_slave_awsize, 
+  input    wire [1:0]    io_slave_awburst,
+
+  output   wire          io_slave_wready, 
+  input    wire          io_slave_wvalid, 
+  input    wire [31:0]   io_slave_wdata,  
+  input    wire [3:0]    io_slave_wstrb, 
+  input    wire          io_slave_wlast, 
+
+  input    wire          io_slave_bready, 
+  output   wire          io_slave_bvalid, 
+  output   wire  [1:0]   io_slave_bresp,  
+  output   wire  [3:0]   io_slave_bid,
+
+  output   wire          io_slave_arready,
+  input    wire          io_slave_arvalid,
+  input    wire [31:0]   io_slave_araddr,
+  input    wire [3:0]    io_slave_arid,
+  input    wire [7:0]    io_slave_arlen,
+  input    wire [2:0]    io_slave_arsize, 
+  input    wire [1:0]    io_slave_arburst,
+
+  input    wire          io_slave_rready,
+  output   wire          io_slave_rvalid, 
+  output   wire  [1:0]   io_slave_rresp, 
+  output   wire  [31:0]  io_slave_rdata, 
+  output   wire          io_slave_rlast,  
+  output   wire  [3:0]   io_slave_rid       
 );
 
   // IFU --------------------------------------------------
@@ -415,39 +485,39 @@ module ysyx_23060219(
     .o_ifu_pc    (w_ifu_pc),
     .o_ifu_inst  (w_ifu_inst),
 
-    .io_master_araddr  ( o_araddr_ifu  ),
-    .io_master_arvalid ( o_arvalid_ifu ),
-    .io_master_arready ( i_arready_ifu ),
-    .io_master_arid    (  ),
-    .io_master_arlen   (  ),
-    .io_master_arsize  (  ),
-    .io_master_arburst (  ),
+    .o_araddr  ( o_araddr_ifu  ),
+    .o_arvalid ( o_arvalid_ifu ),
+    .i_arready ( i_arready_ifu ),
+    .o_arid    (  ),
+    .o_arlen   (  ),
+    .o_arsize  (  ),
+    .o_arburst (  ),
 
-    .io_master_rdata   ( i_rdata_ifu   ),
-    .io_master_rresp   (           ),
-    .io_master_rvalid  ( i_rvalid_ifu  ),
-    .io_master_rready  ( o_rready_ifu  ),
-    .io_master_rlast   (  ),
-    .io_master_rid     (  ),
+    .i_rdata   ( i_rdata_ifu   ),
+    .i_rresp   (           ),
+    .i_rvalid  ( i_rvalid_ifu  ),
+    .o_rready  ( o_rready_ifu  ),
+    .i_rlast   (  ),
+    .i_rid     (  ),
 
-    .io_master_awaddr  (  ),
-    .io_master_awvalid (  ),
-    .io_master_awready (  ),
-    .io_master_awid    (  ),
-    .io_master_awlen   (  ),
-    .io_master_awsize  (  ),
-    .io_master_awburst (  ),
+    .o_awaddr  (  ),
+    .o_awvalid (  ),
+    .i_awready (  ),
+    .o_awid    (  ),
+    .o_awlen   (  ),
+    .o_awsize  (  ),
+    .o_awburst (  ),
 
-    .io_master_wdata   (  ),
-    .io_master_wstrb   (  ),
-    .io_master_wvalid  (  ),
-    .io_master_wready  (  ),
-    .io_master_wlast   (  ),
+    .o_wdata   (  ),
+    .o_wstrb   (  ),
+    .o_wvalid  (  ),
+    .i_wready  (  ),
+    .o_wlast   (  ),
 
-    .io_master_bresp   (  ),
-    .io_master_bvalid  (  ),
-    .io_master_bready  (  ),
-    .io_master_bid     (  )
+    .i_bresp   (  ),
+    .i_bvalid  (  ),
+    .o_bready  (  ),
+    .i_bid     (  )
   );
 
 
@@ -688,40 +758,40 @@ module ysyx_23060219(
     .o_lsu_csr_rd  (w_lsu_csr_rd),
 
   //读操作
-    .io_master_araddr  ( o_araddr_lsu  ),
-    .io_master_arvalid ( o_arvalid_lsu ),
-    .io_master_arready ( i_arready_lsu ),
-    .io_master_arid    (  ),
-    .io_master_arlen   (  ),
-    .io_master_arsize  (  ),
-    .io_master_arburst (  ),
+    .o_araddr  ( o_araddr_lsu  ),
+    .o_arvalid ( o_arvalid_lsu ),
+    .i_arready ( i_arready_lsu ),
+    .o_arid    (  ),
+    .o_arlen   (  ),
+    .o_arsize  (  ),
+    .o_arburst (  ),
 
-    .io_master_rdata   ( i_rdata_lsu   ),
-    .io_master_rresp   (           ),
-    .io_master_rvalid  ( i_rvalid_lsu  ),
-    .io_master_rready  ( o_rready_lsu  ),
-    .io_master_rlast   (  ),
-    .io_master_rid     (  ),
+    .i_rdata   ( i_rdata_lsu   ),
+    .i_rresp   (           ),
+    .i_rvalid  ( i_rvalid_lsu  ),
+    .o_rready  ( o_rready_lsu  ),
+    .i_rlast   (  ),
+    .i_rid     (  ),
 
 //写操作
-    .io_master_awaddr  ( o_awaddr_lsu ),
-    .io_master_awvalid ( o_awvalid_lsu ),
-    .io_master_awready ( i_awready_lsu ),
-    .io_master_awid    (  ),
-    .io_master_awlen   (  ),
-    .io_master_awsize  (  ),
-    .io_master_awburst (  ),
+    .o_awaddr  ( o_awaddr_lsu ),
+    .o_awvalid ( o_awvalid_lsu ),
+    .i_awready ( i_awready_lsu ),
+    .o_awid    (  ),
+    .o_awlen   (  ),
+    .o_awsize  (  ),
+    .o_awburst (  ),
 
-    .io_master_wdata   ( o_wdata_lsu ),
-    .io_master_wstrb   ( o_wstrb_lsu ),
-    .io_master_wvalid  ( o_wvalid_lsu ),
-    .io_master_wready  ( i_wready_lsu ),
-    .io_master_wlast   (  ),
+    .o_wdata   ( o_wdata_lsu ),
+    .o_wstrb   ( o_wstrb_lsu ),
+    .o_wvalid  ( o_wvalid_lsu ),
+    .i_wready  ( i_wready_lsu ),
+    .o_wlast   (  ),
 
-    .io_master_bresp   (  ),
-    .io_master_bvalid  (  ),
-    .io_master_bready  (  ),
-    .io_master_bid     (  ),
+    .i_bresp   (  ),
+    .i_bvalid  (  ),
+    .o_bready  (  ),
+    .i_bid     (  ),
 
     .i_exu_success(exu_success)
 
@@ -878,41 +948,76 @@ module ysyx_23060219(
         .o_lsu_bvalid     (   ),
         .i_lsu_bready     (   ),
         .o_lsu_bid        (   ),
+    /*------------------------ soc -----------------------*/
+        .io_master_awready   ( io_master_awready ),
+        .io_master_awvalid   ( io_master_awvalid ),
+        .io_master_awaddr    ( io_master_awaddr  ),
+        .io_master_awid      ( io_master_awid    ),
+        .io_master_awlen     ( io_master_awlen   ),
+        .io_master_awsize    ( io_master_awsize  ),
+        .io_master_awburst   ( io_master_awburst ),
+ 
+        .io_master_wready    ( io_master_wready  ),
+        .io_master_wvalid    ( io_master_wvalid  ),
+        .io_master_wdata     ( io_master_wdata  ),
+        .io_master_wstrb     ( io_master_wstrb  ),
+        .io_master_wlast     ( io_master_wlast  ),
+
+        .io_master_bready    ( io_master_bready ),
+        .io_master_bvalid    ( io_master_bvalid  ), 
+        .io_master_bresp     ( io_master_bresp   ),
+        .io_master_bid       ( io_master_bid     ),
+
+        .io_master_arready   ( io_master_arready ),
+        .io_master_arvalid   ( io_master_arvalid ),
+        .io_master_araddr    ( io_master_araddr  ),
+        .io_master_arid      ( io_master_arid    ),
+        .io_master_arlen     ( io_master_arlen  ),
+        .io_master_arsize    ( io_master_arsize ),
+        .io_master_arburst   ( io_master_arburst),
+
+        .io_master_rready    ( io_master_rready ),
+        .io_master_rvalid    ( io_master_rvalid ),
+        .io_master_rresp    ( io_master_rresp  ), 
+        .io_master_rdata    ( io_master_rdata  ),
+        .io_master_rlast    ( io_master_rlast  ),
+        .io_master_rid      ( io_master_rid    ),
+
     /*------------------------ sram -----------------------*/
-    // Read Address
-        .o_sram_araddr    (io_slave_araddr ),
-        .o_sram_arvalid   (io_slave_arvalid),
-        .i_sram_arready   (io_slave_arready),
-        .o_sram_arid      (   ),
-        .o_sram_arlen     (   ),
-        .o_sram_arsize    (   ),
-        .o_sram_arburst   (   ),
-    // Read Data
-        .i_sram_rdata     (io_slave_rdata  ),
-        .i_sram_rresp     (    ),
-        .i_sram_rvalid    (io_slave_rvalid ),
-        .o_sram_rready    (io_slave_rready ),
-        .i_sram_rlast     (   ),
-        .i_sram_rid       (   ),
-    // Write Address
-        .o_sram_awaddr    (io_slave_awaddr ), 
-        .o_sram_awvalid   (io_slave_awvalid),
-        .i_sram_awready   (io_slave_awready),
-        .o_sram_awid      (   ),
-        .o_sram_awlen     (   ),
-        .o_sram_awsize    (   ),
-        .o_sram_awburst   (   ),
-    // Write Data
-        .o_sram_wdata     (io_slave_wdata  ),
-        .o_sram_wstrb     (io_slave_wstrb  ),
-        .o_sram_wvalid    (io_slave_wvalid ),
-        .i_sram_wready    (io_slave_wready ),
-        .o_sram_wlast     (   ),
-    // Write Back
-        .i_sram_bresp     (   ), 
-        .i_sram_bvalid    (   ),
-        .o_sram_bready    (   ),
-        .i_sram_bid       (   ),
+        // .io_master_awready   (o_awready),
+        // .io_master_awvalid   (i_awvalid),
+        // .io_master_awaddr    (i_awaddr ),
+        // .io_master_awid      (i_awid   ),
+        // .io_master_awlen     (i_awlen  ),
+        // .io_master_awsize    (i_awsize ),
+        // .io_master_awburst   (i_awburst),
+ 
+        // .io_master_wready    (o_wready ),
+        // .io_master_wvalid    (i_wvalid ),
+        // .io_master_wdata     (i_wdata ),
+        // .io_master_wstrb     (i_wstrb ),
+        // .io_master_wlast     (i_wlast ),
+
+        // .io_master_bready    (i_bready),
+        // .io_master_bvalid    (o_bvalid), 
+        // .io_master_bresp     (o_bresp ),
+        // .io_master_bid       (o_bid   ),
+
+        // .io_master_arready   (o_arready ),
+        // .io_master_arvalid   (i_arvalid ),
+        // .io_master_araddr    (i_araddr  ),
+        // .io_master_arid      (i_arid    ),
+        // .io_master_arlen     (i_arlen  ),
+        // .io_master_arsize    (i_arsize ),
+        // .io_master_arburst   (i_arburst),
+
+        // .io_master_rready    (i_rready),
+        // .io_master_rvalid    (o_rvalid),
+        // .io_master_rresp     (o_rresp ), 
+        // .io_master_rdata     (o_rdata ),
+        // .io_master_rlast     (o_rlast ),
+        // .io_master_rid       (o_rid   ),
+
     /*------------------------ uart -----------------------*/
     // Read Address
         .o_uart_araddr    (),
@@ -985,62 +1090,79 @@ module ysyx_23060219(
         .i_clint_bid       ()
     );
 
-  // SRAM -----------------------------------------------------------
-  wire [31:0]     io_slave_araddr;
-  wire            io_slave_arvalid;
-  wire            io_slave_arready;
+//   // SRAM -----------------------------------------------------------
+//     wire            o_awready;
+//     wire            i_awvalid;
+//     wire    [31:0]  i_awaddr;
+//     wire    [3:0]   i_awid;
+//     wire    [7:0]   i_awlen;
+//     wire    [2:0]   i_awsize ;
+//     wire    [1:0]   i_awburst;
 
-  wire [31:0]     io_slave_rdata;
-  wire            io_slave_rvalid;
-  wire            io_slave_rready;
+//     wire            o_wready;
+//     wire            i_wvalid;
+//     wire    [31:0]  i_wdata;
+//     wire    [3:0]   i_wstrb;
+//     wire            i_wlast;
 
-  reg  [31:0]     io_slave_awaddr;
-  reg             io_slave_awvalid;
-  reg             io_slave_awready;
-  reg  [31:0]     io_slave_wdata; 
-  reg  [3:0]      io_slave_wstrb; 
-  reg             io_slave_wvalid;
-  reg             io_slave_wready;
+//     wire            i_bready;
+//     wire            o_bvalid;
+//     wire    [1:0]   o_bresp;
+//     wire    [3:0]   o_bid;
 
-  ysyx_23060219_SRAM SRAM(
-    // system
-    .clk              (clock),
-    .rst              (reset),
-    // Read Address
-    .io_slave_araddr         (io_slave_araddr ),
-    .io_slave_arvalid        (io_slave_arvalid),
-    .io_slave_arready        (io_slave_arready),
-    .io_slave_arid           (  ),
-    .io_slave_arlen          (  ),
-    .io_slave_arsize         (  ),
-    .io_slave_arburst        (  ),
-    // Read Data
-    .io_slave_rdata          (io_slave_rdata  ),
-    .io_slave_rresp          (  ),
-    .io_slave_rvalid         (io_slave_rvalid ),
-    .io_slave_rready         (io_slave_rready ),
-    .io_slave_rlast          (  ),
-    .io_slave_rid            (  ),
-    // Write Address
-    .io_slave_awaddr         ( io_slave_awaddr  ),
-    .io_slave_awvalid        ( io_slave_awvalid ),
-    .io_slave_awready        ( io_slave_awready ),
-    .io_slave_awid           (  ),
-    .io_slave_awlen          (  ),
-    .io_slave_awsize         (  ),
-    .io_slave_awburst        (  ),
-    // Write Data
-    .io_slave_wdata          ( io_slave_wdata  ),
-    .io_slave_wstrb          ( io_slave_wstrb  ),
-    .io_slave_wvalid         ( io_slave_wvalid ),
-    .io_slave_wready         ( io_slave_wready ),
-    .io_slave_wlast          (  ),
-    // Write Back
-    .io_slave_bresp          (  ),
-    .io_slave_bvalid         (  ),
-    .io_slave_bready         (  ),
-    .io_slave_bid            (  )
-);
+//     wire            o_arready;
+//     wire            i_arvalid;
+//     wire    [31:0]  i_araddr;
+//     wire    [3:0]   i_arid   ;
+//     wire    [7:0]   i_arlen  ;
+//     wire    [2:0]   i_arsize ;
+//     wire    [1:0]   i_arburst;
+
+//     wire            i_rready;
+//     wire            o_rvalid;
+//     wire    [1:0]   o_rresp;
+//     wire    [31:0]  o_rdata;
+//     wire            o_rlast;
+//     wire    [3:0]   o_rid;
+
+//   ysyx_23060219_SRAM SRAM(
+//     .clk              (clock),
+//     .rst              (reset),
+
+//     .o_awready        (o_awready),
+//     .i_awvalid        (i_awvalid),
+//     .i_awaddr         (i_awaddr),
+//     .i_awid           (i_awid),
+//     .i_awlen          (i_awlen),
+//     .i_awsize         (i_awsize ),
+//     .i_awburst        (i_awburst),
+
+//     .o_wready         (o_wready),
+//     .i_wvalid         (i_wvalid),
+//     .i_wdata          (i_wdata),
+//     .i_wstrb          (i_wstrb),
+//     .i_wlast          (i_wlast),
+
+//     .i_bready         (i_bready),
+//     .o_bvalid         (o_bvalid),
+//     .o_bresp          (o_bresp),
+//     .o_bid            (o_bid),
+
+//     .o_arready        (o_arready),
+//     .i_arvalid        (i_arvalid),
+//     .i_araddr         (i_araddr),
+//     .i_arid           (i_arid   ),
+//     .i_arlen          (i_arlen  ),
+//     .i_arsize         (i_arsize ),
+//     .i_arburst        (i_arburst),
+
+//     .i_rready         (i_rready),
+//     .o_rvalid         (o_rvalid),
+//     .o_rresp          (o_rresp),
+//     .o_rdata          (o_rdata),
+//     .o_rlast          (o_rlast),
+//     .o_rid            (o_rid)
+// );
 
   // Register File --------------------------------------------------
   wire [31:0] w_rf_rs1;

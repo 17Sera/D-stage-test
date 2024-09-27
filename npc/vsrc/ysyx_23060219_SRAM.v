@@ -4,49 +4,49 @@ module ysyx_23060219_SRAM (
     input  wire             clk,
     input  wire             rst,
     /*---------------- 读地址 ----------------*/
-    input  reg  [31:0]      io_slave_araddr,
-    input  reg              io_slave_arvalid,   //写使能
-    output reg              io_slave_arready,
-    input  reg  [3:0]       io_slave_arid,      //以下悬空
-    input  reg  [7:0]       io_slave_arlen,
-    input  reg  [2:0]       io_slave_arsize,
-    input  reg  [1:0]       io_slave_arburst,
+    input  reg  [31:0]      i_araddr,
+    input  reg              i_arvalid,   //写使能
+    output reg              o_arready,
+    input  reg  [3:0]       i_arid,      //以下悬空
+    input  reg  [7:0]       i_arlen,
+    input  reg  [2:0]       i_arsize,
+    input  reg  [1:0]       i_arburst,
     /*---------------- 读数据 ----------------*/
-    output reg  [31:0]      io_slave_rdata,
-    output reg  [1:0]       io_slave_rresp,     //0
-    output reg              io_slave_rvalid,
-    input  reg              io_slave_rready,
-    output reg              io_slave_rlast,     //0
-    output reg  [3:0]       io_slave_rid,       //0
+    output reg  [31:0]      o_rdata,
+    output reg  [1:0]       o_rresp,     //0
+    output reg              o_rvalid,
+    input  reg              i_rready,
+    output reg              o_rlast,     //0
+    output reg  [3:0]       o_rid,       //0
     /*---------------- 写地址 ----------------*/
-    input  reg  [31:0]      io_slave_awaddr,
-    input  reg              io_slave_awvalid,
-    output reg              io_slave_awready,
-    input  reg  [3:0]       io_slave_awid,      //以下悬空
-    input  reg  [7:0]       io_slave_awlen,
-    input  reg  [2:0]       io_slave_awsize,
-    input  reg  [1:0]       io_slave_awburst,
+    input  reg  [31:0]      i_awaddr,
+    input  reg              i_awvalid,
+    output reg              o_awready,
+    input  reg  [3:0]       i_awid,      //以下悬空
+    input  reg  [7:0]       i_awlen,
+    input  reg  [2:0]       i_awsize,
+    input  reg  [1:0]       i_awburst,
     /*---------------- 写数据 ----------------*/
-    input  reg  [31:0]      io_slave_wdata, 
-    input  reg  [3:0]       io_slave_wstrb,     //写字节使能  写掩码
-    input  reg              io_slave_wvalid,
-    output reg              io_slave_wready,
-    input  reg              io_slave_wlast,     //悬空
+    input  reg  [31:0]      i_wdata, 
+    input  reg  [3:0]       i_wstrb,     //写字节使能  写掩码
+    input  reg              i_wvalid,
+    output reg              o_wready,
+    input  reg              i_wlast,     //悬空
     /*---------------- 写回复 ----------------*/
-    output reg  [1:0]       io_slave_bresp,
-    output reg              io_slave_bvalid,
-    input  wire             io_slave_bready,
-    output wire [3:0]       io_slave_bid        //0
+    output reg  [1:0]       o_bresp,
+    output reg              o_bvalid,
+    input  wire             i_bready,
+    output wire [3:0]       o_bid        //0
 );
 
-    import "DPI-C" function int  dmem_read(input int io_slave_araddr); //用于利用从软件读取指令、数据
-    import "DPI-C" function void pmem_write(input int io_slave_awaddr, input int io_slave_wdata, input byte wmask); //用于将数据写入软件
+    import "DPI-C" function int  dmem_read(input int i_araddr); //用于利用从软件读取指令、数据
+    import "DPI-C" function void pmem_write(input int i_awaddr, input int i_wdata, input byte wmask); //用于将数据写入软件
 
 /*---------- output set 0 ---------- */
-    assign io_slave_rresp = 0;
-    assign io_slave_rlast = 0;
-    assign io_slave_rid = 0;
-    assign io_slave_bid = 0;
+    assign o_rresp = 0;
+    assign o_rlast = 0;
+    assign o_rid = 0;
+    assign o_bid = 0;
 /*----------------------------------*/
 
 
@@ -70,18 +70,18 @@ module ysyx_23060219_SRAM (
     // 读操作（无问题）
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-            io_slave_arready <= 1'b1;
-            io_slave_rvalid <= 1'b0;
+            o_arready <= 1'b1;
+            o_rvalid <= 1'b0;
         end else begin
-            if(io_slave_arvalid && io_slave_arready) begin
-                io_slave_arready <= 1'b0;
-                io_slave_rdata <= dmem_read(io_slave_araddr);
-                //$display("AAA: %08x %08x\n",io_slave_araddr, io_slave_rdata);
-                io_slave_rvalid <= 1'b1;
+            if(i_arvalid && o_arready) begin
+                o_arready <= 1'b0;
+                o_rdata <= dmem_read(i_araddr);
+                //$display("AAA: %08x %08x\n",i_araddr, o_rdata);
+                o_rvalid <= 1'b1;
             end 
-            else if (io_slave_rready /*&& io_slave_rvalid*/) begin
-                io_slave_arready <= 1'b1;
-                io_slave_rvalid <= 1'b0;
+            else if (i_rready /*&& o_rvalid*/) begin
+                o_arready <= 1'b1;
+                o_rvalid <= 1'b0;
             end
         end
     end
@@ -90,28 +90,28 @@ module ysyx_23060219_SRAM (
     reg valid_issued; // 标记是否已发出o_rvalid
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            io_slave_arready <= 1'b1;
-            io_slave_rvalid <= 1'b0;
+            o_arready <= 1'b1;
+            o_rvalid <= 1'b0;
             delay_counter <= 0;
             valid_issued <= 1'b0; // 初始状态未发出有效信号
         end else begin
-            if (io_slave_arvalid && io_slave_arready) begin
-                io_slave_arready <= 1'b0;
-                io_slave_rdata <= dmem_read(io_slave_araddr);
+            if (i_arvalid && o_arready) begin
+                o_arready <= 1'b0;
+                o_rdata <= dmem_read(i_araddr);
                 delay_counter <= lfsr_out ? 4'd5 : 4'd10; // 初始化延迟计数器
                 valid_issued <= 1'b1; // 标记已发出请求
             end else if (valid_issued) begin
                 if (delay_counter > 0) begin
                     delay_counter <= delay_counter - 1; // 递减延迟计数器
                 end else begin
-                    if (!io_slave_rvalid) begin
-                        io_slave_rvalid <= 1'b1; // 在延迟结束后拉高o_rvalid
+                    if (!o_rvalid) begin
+                        o_rvalid <= 1'b1; // 在延迟结束后拉高o_rvalid
                     end
 
                     // 当收到i_rready时，准备重置状态
-                    if (io_slave_rready) begin
-                        io_slave_arready <= 1'b1; // 拉高o_arready
-                        io_slave_rvalid <= 1'b0; // 拉低o_rvalid
+                    if (i_rready) begin
+                        o_arready <= 1'b1; // 拉高o_arready
+                        o_rvalid <= 1'b0; // 拉低o_rvalid
                         valid_issued <= 1'b0; // 重置标记
                     end
                 end
@@ -125,20 +125,20 @@ module ysyx_23060219_SRAM (
     //reg write_in_progress;
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-            io_slave_awready <= 1'b0;
-            io_slave_wready <= 1'b1;
+            o_awready <= 1'b0;
+            o_wready <= 1'b1;
         end else begin
-            if(io_slave_awvalid && !io_slave_awready) begin
-                io_slave_awready <= 1'b1;
-                waddr_temp <= io_slave_awaddr;
-                io_slave_wready <= 0;
-                //io_slave_awready <= 1;
+            if(i_awvalid && !o_awready) begin
+                o_awready <= 1'b1;
+                waddr_temp <= i_awaddr;
+                o_wready <= 0;
+                //o_awready <= 1;
             end
-            if(io_slave_wvalid && io_slave_awready) begin
-                pmem_write(waddr_temp, io_slave_wdata, {4'b0,io_slave_wstrb});
-                //$display("AAA: %x %x %x\n",waddr_temp, io_slave_wdata, io_slave_wstrb);
-                io_slave_wready <= 1'b1;
-                io_slave_awready <= 1'b0;
+            if(i_wvalid && o_awready) begin
+                pmem_write(waddr_temp, i_wdata, {4'b0,i_wstrb});
+                //$display("AAA: %x %x %x\n",waddr_temp, i_wdata, i_wstrb);
+                o_wready <= 1'b1;
+                o_awready <= 1'b0;
             end
         end
     end

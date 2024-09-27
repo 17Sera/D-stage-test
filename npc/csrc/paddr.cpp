@@ -120,13 +120,15 @@
 //=====================================================================================================
 
 #include "../include/paddr.h"
-#include "Vysyx_23060219.h"
-#include "Vysyx_23060219___024root.h"
-#include "Vysyx_23060219__Dpi.h"
+#include "VysyxSoCFull___024root.h"
+#include "VysyxSoCFull___024unit.h"
+#include "VysyxSoCFull__Dpi.h"
+#include "VysyxSoCFull__Syms.h"
+#include "VysyxSoCFull.h"
 
 
 /********extern functions or variables********/
-extern Vysyx_23060219      *top;
+extern VysyxSoCFull      *top;
 extern vluint64_t main_time;
 extern void close_tfp(void);
 /*********************************************/
@@ -188,7 +190,7 @@ static inline void out_of_bound(paddr_t addr) {
   close_tfp();
   //npc_state.state = NPC_END;
   panic("address = 0x%08x is out of bound of pmem [0x%08x, 0x%08x] at pc = 0x%08x  time = %ld", 
-         addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyx_23060219__DOT__bru_inst__DOT__npc_reg, main_time);
+         addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, main_time);
 }
 
 word_t pmem_r(paddr_t addr, int len) 

@@ -1,7 +1,16 @@
-MODULE=ysyx_23060219
+# MODULE=ysyx_23060219								#####
+MODULE = ysyxSoCFull
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")		#只会查找 ./vsrc 目录中的.v文件
-VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")	#递归地查找 ./vsrc 目录下所有子目录中的.v文件
+### VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")	#递归地查找 ./vsrc 目录下所有子目录中的.v文件
+VSRCS += $(shell find $(abspath ../ysyxSoC/build) -name "*.v")		#只会查找 ./vsrc 目录中的.v文件
+VSRCS += $(shell find $(abspath ../ysyxSoC/perip/*) -name "*.v")	#递归地查找 ./ysyxSoC/perip 目录下所有子目录中的.v文件		#####
+
+YSYXSOC_PATH = $(NPC_HOME)/../ysyxSoC
+YSYXSOC_PERIP_PATH = $(YSYXSOC_PATH)/perip
+YSYXSOC_UART_PATH = $(YSYXSOC_PERIP_PATH)/uart16550/rtl/
+YSYXSOC_SPI_PATH = $(YSYXSOC_PERIP_PATH)/spi/rtl/
+
 INC_PATH = $(NPC_HOME)/include/			#指定包含文件路径，用-I选项传递给verilator
 LIBS = -lreadline   # 链接的库文件 link the <readline> lib
 LIBS += -ldl        # 链接的库文件 link the <dlfcn> lib
@@ -19,7 +28,7 @@ ARGS_DIFF = --diff=$(DIFF_REF_SO)
 # 	$(MAKE) -s -C $(DIFF_REF_PATH) 
 
 # endif
- 
+
 
 .PHONY:gtkw
 gtkw: wave.gtkw			#zhong.gtkw
@@ -100,11 +109,11 @@ verilate: .zhong.verilate
 # # -Wno-STMTDLY 避免弹出所有warning
 # # -Wno-MODDUP 避免“Duplicate declaration”报错
 # # --top-module $(MODULE) 确定底层模块，否则会将$(VSRCS)中的第一个文件前缀当成顶层模块
-#----------------------------------------------------------------------------------
-.zhong.verilate: $(VSRCS) $(CSRCS)
+#----------------------------------------------------------------------------------						#####
+.zhong.verilate: $(VSRCS) $(CSRCS)	#####
 	@echo
 	@echo "### VERILATING ###"
-	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH)
+	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --timescale "1ns/1ns" --no-timing --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH)
 	@echo "LIBS +=$(LIBS)" >> ./obj_dir/V$(MODULE).mk    # to link readline and dlfcn library
 # @echo "CXXFLAGS +=$(CXXFLAGS)" >> ./obj_dir/V$(MODULE).mk 
 	@touch .zhong.verilate
