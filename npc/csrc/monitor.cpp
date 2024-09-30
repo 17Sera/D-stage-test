@@ -12,6 +12,7 @@ extern void     init_sdb();
 extern void     init_mem(void);
 extern void     sdb_set_batch_mode(void); 
 extern uint8_t* guest_to_host(paddr_t paddr);
+extern long load_binary_to_mrom();
 
 #ifdef CONFIG_FTRACE 
 extern void load_elf(void);
@@ -125,6 +126,9 @@ void init_monitor(int argc, char *argv[]) {
 
     /* Initialize memory. */
     init_mem();
+
+  /* Load binary data into mrom array */
+    long bin_size = load_binary_to_mrom();
 
     /* Load the image to memory. This will overwrite the built-in image. */
     // long img_size = load_img();

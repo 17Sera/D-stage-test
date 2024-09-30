@@ -17,6 +17,19 @@ LIBS += -ldl        # 链接的库文件 link the <dlfcn> lib
 LIBS += $(shell llvm-config-11 --libs)		#确保程序能够链接到 LLVM 的核心库和支持库
 CXXFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
 
+# LDFLAGS += "-lSDL2 -lLLVM-11 -ldl"	#指定链接器
+
+VERILATOR_FLAGS += -Wno-STMTDLY -Wno-MODDUP	# -O3 # 忽略某些语句的延迟警告，忽略重复模块重复定义的警告
+VERILATOR_FLAGS += --trace-fst
+VERILATOR_FLAGS += --timescale "1ns/1ns"
+VERILATOR_FLAGS += --no-timing
+VERILATOR_FLAGS += --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS)
+VERILATOR_FLAGS += -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH)
+VERILATOR_FLAGS += --prof-c --prof-cfuncs --prof-exec # 启用C代码性能分析
+VERILATOR_FLAGS += --autoflush	#自动刷新输出缓冲区
+# VERILATOR_FLAGS += --x-assign fast --x-initial fast	# 提高仿真速度
+# VERILATOR_FLAGS += +define+USING_DPI_C
+
 
 # ifdef CONFIG_DIFFTEST			#差分测试的路径			###有这个会报错 ref_so_file为空 difftest.cpp报错
 DIFF_REF_PATH = $(NEMU_HOME)
@@ -113,7 +126,9 @@ verilate: .zhong.verilate
 .zhong.verilate: $(VSRCS) $(CSRCS)	#####
 	@echo
 	@echo "### VERILATING ###"
-	verilator -Wno-STMTDLY -Wno-MODDUP --trace-fst --timescale "1ns/1ns" --no-timing --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS) -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH) --prof-c --prof-cfuncs --prof-exec --autoflush
+# 不加自动生成依赖项 $^ error:Duplicate declaration of task: 'flash_read' from DPI-C
+	verilator  $(VERILATOR_FLAGS) #-LDFLAGS $(LDFLAGS)
+
 	@echo "LIBS +=$(LIBS)" >> ./obj_dir/V$(MODULE).mk    # to link readline and dlfcn library
 # @echo "CXXFLAGS +=$(CXXFLAGS)" >> ./obj_dir/V$(MODULE).mk 
 	@touch .zhong.verilate
@@ -124,7 +139,7 @@ verilate: .zhong.verilate
 #----------------------------------------------------------------------------------
 .PHONY:lint
 lint: $(MODULE).v
-	#-lint-only- 告诉 Verilator 进行 lint 但不生成任何仿真输出
+#-lint-only- 告诉 Verilator 进行 lint 但不生成任何仿真输出
 	verilator --lint-only $(MODULE).v
 
 
@@ -133,6 +148,7 @@ clean:
 	rm -rf .zhong.*;
 	rm -rf ./obj_dir
 	rm -rf waveform.fst
+	rm waveform.fst.hier
 	rm ./log/*
 
 # ==================================================================================

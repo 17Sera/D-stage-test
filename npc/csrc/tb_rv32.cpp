@@ -264,8 +264,8 @@ extern uint8_t* guest_to_host(paddr_t paddr);
 
 //---------Load binary data into mrom array--------------------------------------------------------------------
 static uint8_t mrom[MROM_SIZE] = {};
-static const char* binary = "test/char-test-riscv32e-npc.bin";
 
+const char* binary = "/home/zhong/ysyx-workbench/am-kernels/tests/cpu-tests/build/char-test-riscv32e-npc.bin";
 
 extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
 extern "C" void mrom_read(int32_t addr, int32_t *data)
@@ -281,7 +281,7 @@ extern "C" void mrom_read(int32_t addr, int32_t *data)
  }
 
 
-static long load_binary_to_mrom() {
+long load_binary_to_mrom() {
   if (binary == NULL) {
     Log("No binary image is given. Use the default built-in binary.");
     return 4096; // built-in binary size
@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
   init_verilator();
 
   /* Load binary data into mrom array */
-  long bin_size = load_binary_to_mrom();
+  // long bin_size = load_binary_to_mrom();
 
   /* Initialize differential testing. */
 #ifdef CONFIG_DIFFTEST
