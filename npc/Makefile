@@ -1,3 +1,5 @@
+# ### SOC
+
 # MODULE=ysyx_23060219								#####
 MODULE = ysyxSoCFull
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
@@ -153,7 +155,7 @@ clean:
 
 # ==================================================================================
 
-# MODULE=ysyx_23060219
+# MODULE=ysyx_23060219_top
 # CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 # VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
 # VSRCS += $(shell find $(abspath ./vsrc/*) -name "*.v")

@@ -39,7 +39,7 @@
 //     {"0x([0-9A-Fa-f])+", TK_HEX},          // hex unsigned int, 0x...
 //     {"[0-9]+", TK_DEC},                    // dec unsigned int, 0x...
 //     {"\\$([$a-z0-9])+", TK_RNAME},         // reg name
-//     {"m(epc|status|status|tvec)", TK_CSR}, // csr name
+//     {"m(epc|cause|status|tvec)", TK_CSR}, // csr name
 //     {"\\(", '('},                          // left parenthesis
 //     {"\\)", ')'},                          // right parenthesis
 // };

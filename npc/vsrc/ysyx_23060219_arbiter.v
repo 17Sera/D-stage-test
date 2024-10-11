@@ -1,4 +1,4 @@
-// `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
+`include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 
 module ysyx_23060219_arbiter (
     input  wire             clk,
@@ -34,7 +34,7 @@ module ysyx_23060219_arbiter (
     output reg              o_ifu_wready,
     input  reg              i_ifu_wlast,     //悬空
     /*---------------- 写回复 ----------------*/
-    output reg              o_ifu_bresp,
+    output reg  [1:0]       o_ifu_bresp,
     output reg              o_ifu_bvalid,
     input  wire             i_ifu_bready,
     output wire [3:0]       o_ifu_bid,        //0
@@ -270,7 +270,6 @@ module ysyx_23060219_arbiter (
     always @(*) begin
         if ((i_ifu_arvalid && !i_lsu_arvalid) | (i_ifu_awvalid && !i_lsu_awvalid)) begin
             pririty_arb = 2'b01; // IFU Pririty
-        // end else if(((!i_ifu_arvalid && i_lsu_arvalid) | (!i_ifu_awvalid && i_lsu_awvalid)) && (i_lsu_araddr == 32'ha00003f8)) begin    //串口内存地址
         end else if(((!i_ifu_arvalid && i_lsu_arvalid) | (!i_ifu_awvalid && i_lsu_awvalid)) && (i_lsu_awaddr == 32'ha00003f8)) begin    //串口内存地址
             pririty_arb = 2'b11;
         end else if ((!i_ifu_arvalid && i_lsu_arvalid) | (!i_ifu_awvalid && i_lsu_awvalid)) begin
@@ -341,134 +340,188 @@ endmodule
 // module ysyx_23060219_arbiter(
 
 // //####################    IFU    #########################// 
-//     input wire           i_ifu_req,
+//     input wire              i_ifu_req,
 
-//     input wire  [31:0]   i_ifu_araddr,
-//     input wire           i_ifu_arvalid,
-//     output reg           i_ifu_arready,
+//     input wire  [31:0]      i_ifu_araddr,
+//     input wire              i_ifu_arvalid,
+//     output reg              i_ifu_arready,
 //     input  reg  [3:0]       i_ifu_arid,      //以下悬空
 //     input  reg  [7:0]       i_ifu_arlen,
 //     input  reg  [2:0]       i_ifu_arsize,
 //     input  reg  [1:0]       i_ifu_arburst,
 
-//     output reg  [31:0]   o_ifu_rdata,
-//     output reg  [1:0]    o_ifu_rresp,
-//     output reg           o_ifu_rvalid,
-//     input wire           i_ifu_rready,
+//     output reg  [31:0]      o_ifu_rdata,
+//     output reg  [1:0]       o_ifu_rresp,
+//     output reg              o_ifu_rvalid,
+//     input wire              i_ifu_rready,
 //     output reg              o_ifu_rlast,     //0
 //     output reg  [3:0]       o_ifu_rid,       //0
 
-//     input wire  [31:0]   i_ifu_awaddr,
-//     input wire           i_ifu_awvalid,
-//     output reg           o_ifu_awready,
+//     input wire  [31:0]      i_ifu_awaddr,
+//     input wire              i_ifu_awvalid,
+//     output reg              o_ifu_awready,
 //     input  reg  [3:0]       i_ifu_awid,      //以下悬空
 //     input  reg  [7:0]       i_ifu_awlen,
 //     input  reg  [2:0]       i_ifu_awsize,
 //     input  reg  [1:0]       i_ifu_awburst,
 
-//     input wire  [31:0]   i_ifu_wdata,
-//     input wire  [3:0]    i_ifu_wstrb,
-//     input wire           i_ifu_wvalid,
-//     output reg           o_ifu_wready,
+//     input wire  [31:0]      i_ifu_wdata,
+//     input wire  [3:0]       i_ifu_wstrb,
+//     input wire              i_ifu_wvalid,
+//     output reg              o_ifu_wready,
 //     input  reg              i_ifu_wlast,     //悬空
 
-//     output reg  [1:0]    o_ifu_bresp,
-//     output reg           o_ifu_bvalid,
-//     input wire           i_ifu_bready,
+//     output reg  [1:0]       o_ifu_bresp,
+//     output reg              o_ifu_bvalid,
+//     input wire              i_ifu_bready,
 //     output wire [3:0]       o_ifu_bid,        //0
-// //####################    LSU    #########################//
-//     input wire           i_lsu_req,               //###
 
-//     input wire  [31:0]   i_lsu_araddr,
-//     input wire           i_lsu_arvalid,
-//     output reg           o_lsu_arready,
+// //####################    LSU    #########################//
+//     input wire              i_lsu_req,               //###
+
+//     input wire  [31:0]      i_lsu_araddr,
+//     input wire              i_lsu_arvalid,
+//     output reg              o_lsu_arready,
 //     input  reg  [3:0]       i_lsu_arid,      //以下悬空
 //     input  reg  [7:0]       i_lsu_arlen,
 //     input  reg  [2:0]       i_lsu_arsize,
 //     input  reg  [1:0]       i_lsu_arburst,
 
-//     output reg  [31:0]   o_lsu_rdata,
-//     output reg  [1:0]    o_lsu_rresp,
-//     output reg           o_lsu_rvalid,
-//     input wire           i_lsu_rready,
+//     output reg  [31:0]      o_lsu_rdata,
+//     output reg  [1:0]       o_lsu_rresp,
+//     output reg              o_lsu_rvalid,
+//     input wire              i_lsu_rready,
 //     output reg              o_lsu_rlast,     //0
 //     output reg  [3:0]       o_lsu_rid,       //0
 
-//     input wire  [31:0]   i_lsu_awaddr,
-//     input wire           i_lsu_awvalid,
-//     output reg           o_lsu_awready,
+//     input wire  [31:0]      i_lsu_awaddr,
+//     input wire              i_lsu_awvalid,
+//     output reg              o_lsu_awready,
 //     input  reg  [3:0]       i_lsu_awid,      //以下悬空
 //     input  reg  [7:0]       i_lsu_awlen,
 //     input  reg  [2:0]       i_lsu_awsize,
 //     input  reg  [1:0]       i_lsu_awburst,
 
-//     input wire  [31:0]   i_lsu_wdata,
-//     input wire  [3:0]    i_lsu_wstrb,
-//     input wire           i_lsu_wvalid,
-//     output reg           o_lsu_wready,
+//     input wire  [31:0]      i_lsu_wdata,
+//     input wire  [3:0]       i_lsu_wstrb,
+//     input wire              i_lsu_wvalid,
+//     output reg              o_lsu_wready,
 //     input  reg              i_lsu_wlast,     //悬空
 
-//     output reg  [1:0]    o_lsu_bresp,
-//     output reg           o_lsu_bvalid,
-//     input wire           i_lsu_bready,
+//     output reg  [1:0]       o_lsu_bresp,
+//     output reg              o_lsu_bvalid,
+//     input wire              i_lsu_bready,
 //     output wire [3:0]       o_lsu_bid,        //0
 
+
+// //####################    UART    #########################//
+//     // from UART  
+//     /*---------------- 读地址 ----------------*/
+//     output reg [`CPU_Bus]   o_uart_araddr,    
+//     output reg              o_uart_arvalid,
+//     input  reg              i_uart_arready,
+//     output reg  [3:0]       o_uart_arid,     //0 ###
+//     output reg  [7:0]       o_uart_arlen,
+//     output reg  [2:0]       o_uart_arsize,
+//     output reg  [1:0]       o_uart_arburst,
+//     /*---------------- 读数据 ----------------*/
+//     input  reg [`CPU_Bus]   i_uart_rdata,     
+//     input  reg  [1:0]       i_uart_rresp,
+//     input  reg              i_uart_rvalid,
+//     output reg              o_uart_rready,
+//     input  reg              i_uart_rlast,    //悬空 ###
+//     input  reg  [3:0]       i_uart_rid,
+//     /*---------------- 写地址 ----------------*/
+//     output wire [`CPU_Bus]  o_uart_awaddr,    
+//     output wire             o_uart_awvalid,
+//     input  wire             i_uart_awready,
+//     output wire [3:0]       o_uart_awid,     // 0 ###
+//     output wire [7:0]       o_uart_awlen,
+//     output wire [2:0]       o_uart_awsize,
+//     output wire [1:0]       o_uart_awburst,
+//     /*---------------- 写数据 ----------------*/
+//     output wire [`CPU_Bus]  o_uart_wdata,     
+//     output wire [3:0]       o_uart_wstrb,
+//     output wire             o_uart_wvalid,
+//     input  wire             i_uart_wready,
+//     output wire             o_uart_wlast,    //0 ###
+//     /*---------------- 写回复 ----------------*/
+//     input  reg  [1:0]       i_uart_bresp,    
+//     input  reg              i_uart_bvalid,
+//     output wire             o_uart_bready,
+//     input  reg  [3:0]       i_uart_bid,
+
+
 // //####################    CLINT    #########################//
-//     // output reg   [31:0]  o_clint_awaddr,
-//     // output reg           o_clint_awvalid,
-//     // input                i_clint_awready,
-
-//     // output reg   [31:0]  o_clint_wdata,
-//     // output reg   [3:0]   o_clint_wstrb,
-//     // output reg           o_clint_wvalid,
-//     // input                i_clint_wready,
-
-//     // output reg   [31:0]  o_clint_araddr,
-//     // output reg           o_clint_arvalid,
-//     // input                i_clint_arready,
-
-//     // input        [31:0]  i_clint_rdata,
-//     // input        [1:0]   i_clint_rresp,
-//     // input                i_clint_rvalid,
-//     // output reg           o_clint_rready,
-
-//     // input        [1:0]   i_clint_bresp,
-//     // input                i_clint_bvalid,
-//     // output reg           o_clint_bready,
+//     // from CLINT  
+//     /*---------------- 读地址 ----------------*/
+//     output reg [`CPU_Bus]   o_clint_araddr,    
+//     output reg              o_clint_arvalid,
+//     input  reg              i_clint_arready,
+//     output reg  [3:0]       o_clint_arid,     //0 ###
+//     output reg  [7:0]       o_clint_arlen,
+//     output reg  [2:0]       o_clint_arsize,
+//     output reg  [1:0]       o_clint_arburst,
+//     /*---------------- 读数据 ----------------*/
+//     input  reg [`CPU_Bus]   i_clint_rdata,     
+//     input  reg   [1:0]      i_clint_rresp,
+//     input  reg              i_clint_rvalid,
+//     output reg              o_clint_rready,
+//     input  reg              i_clint_rlast,    //悬空 ###
+//     input  reg  [3:0]       i_clint_rid,
+//     /*---------------- 写地址 ----------------*/
+//     output wire [`CPU_Bus]  o_clint_awaddr,    
+//     output wire             o_clint_awvalid,
+//     input  wire             i_clint_awready,
+//     output wire [3:0]       o_clint_awid,     // 0 ###
+//     output wire [7:0]       o_clint_awlen,
+//     output wire [2:0]       o_clint_awsize,
+//     output wire [1:0]       o_clint_awburst,
+//     /*---------------- 写数据 ----------------*/
+//     output wire [`CPU_Bus]  o_clint_wdata,     
+//     output wire [3:0]       o_clint_wstrb,
+//     output wire             o_clint_wvalid,
+//     input  wire             i_clint_wready,
+//     output wire             o_clint_wlast,    //0 ###
+//     /*---------------- 写回复 ----------------*/
+//     input  reg  [1:0]       i_clint_bresp,    
+//     input  reg              i_clint_bvalid,
+//     output wire             o_clint_bready,
+//     input  reg  [3:0]       i_clint_bid,
 
 // //####################    Soc    #########################//
-//     input                io_master_awready,
-//     output reg           io_master_awvalid,
-//     output reg [31:0]    io_master_awaddr,
+//     input                   io_master_awready,
+//     output reg              io_master_awvalid,
+//     output reg [31:0]       io_master_awaddr,
 //     output  wire [3:0]      io_master_awid,     // ###
 //     output  wire [7:0]      io_master_awlen,
 //     output  wire [2:0]      io_master_awsize,
 //     output  wire [1:0]      io_master_awburst,
 
-//     input                io_master_wready,
-//     output reg           io_master_wvalid,
-//     output reg [31:0]    io_master_wdata,
-//     output reg [3:0]     io_master_wstrb,
+//     input                   io_master_wready,
+//     output reg              io_master_wvalid,
+//     output reg [31:0]       io_master_wdata,
+//     output reg [3:0]        io_master_wstrb,
 //     output wire             io_master_wlast,    //0 ###
 
-//     input                io_master_arready,
-//     output reg           io_master_arvalid,
-//     output reg [31:0]    io_master_araddr,
+//     input                   io_master_arready,
+//     output reg              io_master_arvalid,
+//     output reg [31:0]       io_master_araddr,
 //     output  reg  [3:0]      io_master_arid,     //0 ###
 //     output  reg  [7:0]      io_master_arlen,
 //     output  reg  [2:0]      io_master_arsize,
 //     output  reg  [1:0]      io_master_arburst,
 
-//     output reg           io_master_rready,
-//     input                io_master_rvalid,
-//     input  [1:0]         io_master_rresp,
-//     input  [31:0]        io_master_rdata,
+//     output reg              io_master_rready,
+//     input                   io_master_rvalid,
+//     input  [1:0]            io_master_rresp,
+//     input  [31:0]           io_master_rdata,
 //     input  reg              io_master_rlast,    //悬空 ###
 //     input  reg  [3:0]       io_master_rid,
 
-//     output reg           io_master_bready,
-//     input                io_master_bvalid,
-//     input  [1:0]         io_master_bresp,
+//     output reg              io_master_bready,
+//     input                   io_master_bvalid,
+//     input  [1:0]            io_master_bresp,
 //     input  reg  [3:0]       io_master_bid
 // );
 
@@ -482,15 +535,15 @@ endmodule
 
 // /*---------- output set 0 ---------- */
 // always @(*) begin
-//     // o_clint_araddr = 32'b0;
-//     // o_clint_arvalid = 1'b0;
-//     // o_clint_awaddr = 32'b0;
-//     // o_clint_awvalid = 1'b0;
-//     // o_clint_wdata = 32'b0;
-//     // o_clint_wstrb = 4'b0;
-//     // o_clint_wvalid = 1'b0;
-//     // o_clint_rready = 1'b0;
-//     // o_clint_bready = 1'b1;
+//     o_clint_araddr = 32'b0;
+//     o_clint_arvalid = 1'b0;
+//     o_clint_awaddr = 32'b0;
+//     o_clint_awvalid = 1'b0;
+//     o_clint_wdata = 32'b0;
+//     o_clint_wstrb = 4'b0;
+//     o_clint_wvalid = 1'b0;
+//     o_clint_rready = 1'b0;
+//     o_clint_bready = 1'b1;
 
 //     io_master_arid = 0;
 //     io_master_arlen = 0;
@@ -511,9 +564,9 @@ endmodule
 //     io_master_rready = 1'b0;
 //     io_master_bready = 1'b1;
 
-//     o_ifu_rlast = 0;
-//     o_ifu_rid = 0;
-//     o_ifu_bid = 0;
+//     o_ifu_rlast = 1'b0;
+//     o_ifu_rid = 4'b0;
+//     o_ifu_bid = 4'b0;
 //     o_ifu_rdata = 32'b0;
 //     o_ifu_rresp = 2'b0;
 //     o_ifu_rvalid = 1'b0;
@@ -523,9 +576,9 @@ endmodule
 //     o_ifu_awready = 1'b1;
 //     o_ifu_wready = 1'b0;
     
-//     o_lsu_rlast = 0;
-//     o_lsu_rid = 0;
-//     o_lsu_bid = 0;
+//     o_lsu_rlast = 1'b0;
+//     o_lsu_rid = 4'b0;
+//     o_lsu_bid = 4'b0;
 //     o_lsu_rdata = 32'b0;
 //     o_lsu_rresp = 2'b0;
 //     o_lsu_rvalid = 1'b0;

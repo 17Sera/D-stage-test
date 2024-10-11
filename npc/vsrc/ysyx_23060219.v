@@ -88,6 +88,15 @@ module ysyx_23060219(
   wire  [`CPU_Bus] i_rdata_ifu;
   wire             i_rvalid_ifu;
   wire             o_rready_ifu;
+  wire  [1:0]      i_rresp_ifu;
+  wire             i_rlast_ifu;
+  wire  [3:0]      i_rid_ifu;
+  wire             i_awready_ifu;
+  wire             i_wready_ifu;
+  wire             i_bvalid_ifu;
+  wire  [1:0]      i_bresp_ifu;
+  wire  [3:0]      i_bid_ifu;
+
 
   ysyx_23060219_ifu ifu_inst(
     // system
@@ -112,15 +121,15 @@ module ysyx_23060219(
     .o_arburst (  ),
 
     .i_rdata   ( i_rdata_ifu   ),
-    .i_rresp   (           ),
+    .i_rresp   ( i_rresp_ifu   ),
     .i_rvalid  ( i_rvalid_ifu  ),
     .o_rready  ( o_rready_ifu  ),
-    .i_rlast   (  ),
-    .i_rid     (  ),
+    .i_rlast   ( i_rlast_ifu   ),
+    .i_rid     ( i_rid_ifu     ),
 
     .o_awaddr  (  ),
     .o_awvalid (  ),
-    .i_awready (  ),
+    .i_awready (i_awready_ifu),
     .o_awid    (  ),
     .o_awlen   (  ),
     .o_awsize  (  ),
@@ -129,13 +138,13 @@ module ysyx_23060219(
     .o_wdata   (  ),
     .o_wstrb   (  ),
     .o_wvalid  (  ),
-    .i_wready  (  ),
+    .i_wready  (i_wready_ifu),
     .o_wlast   (  ),
 
-    .i_bresp   (  ),
-    .i_bvalid  (  ),
+    .i_bresp   (i_bresp_ifu),
+    .i_bvalid  (i_bvalid_ifu),
     .o_bready  (  ),
-    .i_bid     (  )
+    .i_bid     (i_bid_ifu)
   );
 
 
@@ -292,7 +301,7 @@ module ysyx_23060219(
   reg             w_lsu_valid;  
   wire [`CPU_Bus] w_lsu_imm;
   wire [`CPU_Bus] w_lsu_pc;
-  wire [31:0]  w_lsu_rs1;
+  wire [31:0]     w_lsu_rs1;
   wire            w_lsu_is_jal;
   wire            w_lsu_is_jalr;
   wire            w_lsu_brch;    
@@ -305,16 +314,16 @@ module ysyx_23060219(
   wire            w_lsu_is_mret;
   wire            w_lsu_is_ecall;
   wire [`CSR_Bus] w_lsu_csr_wid;
-  wire [31:0]  w_lsu_csr_rd;
+  wire [31:0]     w_lsu_csr_rd;
 
-  //读操作
+
   wire  [`CPU_Bus] o_araddr_lsu;
   wire             o_arvalid_lsu;
   wire             i_arready_lsu;
   wire  [`CPU_Bus] i_rdata_lsu;
   wire             i_rvalid_lsu;
   wire             o_rready_lsu;
-  //写操作
+
   wire  [`CPU_Bus] o_awaddr_lsu;
   wire             o_awvalid_lsu;
   wire             i_awready_lsu;
@@ -322,6 +331,15 @@ module ysyx_23060219(
   wire  [3:0]      o_wstrb_lsu;
   wire             o_wvalid_lsu;
   wire             i_wready_lsu;
+  wire  [1:0]      i_rresp_lsu;
+  wire             i_rlast_lsu;
+  wire  [3:0]      i_rid_lsu;
+  wire  [1:0]      i_bresp_lsu;
+  wire             i_bvalid_lsu;
+  wire  [3:0]      i_bid_lsu;
+
+
+
 
   ysyx_23060219_lsu lsu_inst( 
     // system
@@ -332,9 +350,9 @@ module ysyx_23060219(
     .o_pre_ready   (w_lsu_ready),  
     .o_post_valid  (w_lsu_valid),
     .i_post_ready  (w_wbu_ready),  
-    // from from from IFU
+    // from IFU
     .i_lsu_pc      (w_exu_pc),
-    // from from IDU
+    // from IDU
     .i_lsu_is_load (w_exu_is_load),
     .i_lsu_is_store(w_exu_is_store),
     .i_lsu_func3   (w_exu_func3),
@@ -344,10 +362,10 @@ module ysyx_23060219(
     .i_lsu_brch    (w_exu_brch),
     .i_lsu_rd_id   (w_exu_rd_id),
     .i_lsu_gpr_wen (w_exu_gpr_wen),  
-    // from from Register File
+    // from Register File
     .i_lsu_rs1     (w_exu_rs1),
     .i_lsu_rs2     (w_exu_rs2),
-    // from from CSR Ctrl
+    // from CSR Ctrl
     .i_lsu_csr_npc (w_exu_csr_npc),
     .i_lsu_csr_wid (w_exu_csr_wid),
     .i_lsu_csr_rd  (w_exu_csr_rd),
@@ -385,11 +403,11 @@ module ysyx_23060219(
     .o_arburst (  ),
 
     .i_rdata   ( i_rdata_lsu   ),
-    .i_rresp   (           ),
+    .i_rresp   ( i_rresp_lsu   ),
     .i_rvalid  ( i_rvalid_lsu  ),
     .o_rready  ( o_rready_lsu  ),
-    .i_rlast   (  ),
-    .i_rid     (  ),
+    .i_rlast   ( i_rlast_lsu   ),
+    .i_rid     ( i_rid_lsu     ),
 
 //写操作
     .o_awaddr  ( o_awaddr_lsu ),
@@ -406,10 +424,10 @@ module ysyx_23060219(
     .i_wready  ( i_wready_lsu ),
     .o_wlast   (  ),
 
-    .i_bresp   (  ),
-    .i_bvalid  (  ),
+    .i_bresp   ( i_bresp_lsu ),
+    .i_bvalid  ( i_bvalid_lsu ),
     .o_bready  (  ),
-    .i_bid     (  ),
+    .i_bid     ( i_bid_lsu ),
 
     .i_exu_success(exu_success)
 
@@ -509,15 +527,15 @@ module ysyx_23060219(
         .i_ifu_arburst    (  ),
     // Read Data  IFU
         .o_ifu_rdata      (i_rdata_ifu  ),
-        .o_ifu_rresp      (   ),
+        .o_ifu_rresp      (i_rresp_ifu),
         .i_ifu_rready     (o_rready_ifu ),
         .o_ifu_rvalid     (i_rvalid_ifu ),
-        .o_ifu_rlast      (  ),
-        .o_ifu_rid        (  ),
+        .o_ifu_rlast      (i_rlast_ifu),
+        .o_ifu_rid        (i_rid_ifu),
     // Write Address  IFU
         .i_ifu_awaddr     (   ),
         .i_ifu_awvalid    (   ),
-        .o_ifu_awready    (   ),
+        .o_ifu_awready    (i_awready_ifu),
         .i_ifu_awid       (   ),
         .i_ifu_awlen      (   ),
         .i_ifu_awsize     (   ),
@@ -526,13 +544,13 @@ module ysyx_23060219(
         .i_ifu_wdata      (   ), 
         .i_ifu_wstrb      (   ),
         .i_ifu_wvalid     (   ),
-        .o_ifu_wready     (   ),
+        .o_ifu_wready     (i_wready_ifu),
         .i_ifu_wlast      (   ),
     // Write Back IFU
-        .o_ifu_bresp      (   ),
-        .o_ifu_bvalid     (   ),
+        .o_ifu_bresp      (i_bresp_ifu),
+        .o_ifu_bvalid     (i_bvalid_ifu),
         .i_ifu_bready     (   ),
-        .o_ifu_bid        (   ),
+        .o_ifu_bid        (i_bid_ifu),
     /*------------------------ lsu -----------------------*/
     // Read Address
         // .i_lsu_req        (    ),
@@ -546,11 +564,11 @@ module ysyx_23060219(
         .i_lsu_arburst    (   ),
     // Read Data
         .o_lsu_rdata      (i_rdata_lsu  ),
-        .o_lsu_rresp      (   ),
+        .o_lsu_rresp      (i_rresp_lsu),
         .i_lsu_rready     (o_rready_lsu ),
         .o_lsu_rvalid     (i_rvalid_lsu ),
-        .o_lsu_rlast      (   ),
-        .o_lsu_rid        (   ),
+        .o_lsu_rlast      (i_rlast_lsu),
+        .o_lsu_rid        (i_rid_lsu),
     // Write Address
         .i_lsu_awaddr     (o_awaddr_lsu  ),
         .i_lsu_awvalid    (o_awvalid_lsu ),
@@ -566,10 +584,10 @@ module ysyx_23060219(
         .o_lsu_wready     ( i_wready_lsu ),
         .i_lsu_wlast      (   ),
     // Write Back
-        .o_lsu_bresp      (   ), 
-        .o_lsu_bvalid     (   ),
+        .o_lsu_bresp      ( i_bresp_lsu  ), 
+        .o_lsu_bvalid     ( i_bvalid_lsu ),
         .i_lsu_bready     (   ),
-        .o_lsu_bid        (   ),
+        .o_lsu_bid        ( i_bid_lsu  ),
     /*------------------------ soc -----------------------*/
         .io_master_awready   ( io_master_awready ),
         .io_master_awvalid   ( io_master_awvalid ),

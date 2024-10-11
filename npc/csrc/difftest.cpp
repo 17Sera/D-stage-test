@@ -5,6 +5,10 @@
 #include "VysyxSoCFull__Dpi.h"
 #include "VysyxSoCFull__Syms.h"
 #include "VysyxSoCFull.h"
+// #include "../include/difftest.h"
+// #include <dlfcn.h>
+// #include "Vysyx_23060219_top.h"
+// #include "Vysyx_23060219_top___024root.h"
 
 /********extern functions or variables********/
 extern VysyxSoCFull *top;
