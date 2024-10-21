@@ -28,7 +28,7 @@ VERILATOR_FLAGS += --no-timing
 VERILATOR_FLAGS += --top-module $(MODULE) -cc $(VSRCS) --exe $(CSRCS)
 VERILATOR_FLAGS += -I$(INC_PATH) -I$(YSYXSOC_UART_PATH) -I$(YSYXSOC_SPI_PATH)
 VERILATOR_FLAGS += --prof-c --prof-cfuncs --prof-exec # 启用C代码性能分析
-VERILATOR_FLAGS += --autoflush	#自动刷新输出缓冲区
+# VERILATOR_FLAGS += --autoflush	#自动刷新输出缓冲区
 # VERILATOR_FLAGS += --x-assign fast --x-initial fast	# 提高仿真速度
 # VERILATOR_FLAGS += +define+USING_DPI_C
 

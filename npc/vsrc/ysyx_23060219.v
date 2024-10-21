@@ -7,37 +7,37 @@ module ysyx_23060219(
   input  wire           reset,
   input                 io_interrupt,
   // Master
-  input    wire         io_master_awready, //准备好接收地址和控制信息
-  output   wire         io_master_awvalid, //表明写地址有效
-  output   wire [31:0]  io_master_awaddr, //用于写数据
+  input    wire         io_master_awready, 
+  output   wire         io_master_awvalid, 
+  output   wire [31:0]  io_master_awaddr, 
   output   wire [3:0]   io_master_awid, //唯一标识符，用于区分多个写请求
   output   wire [7:0]   io_master_awlen,  //表示传输长度，通常是一次传输的字节数
   output   wire [2:0]   io_master_awsize, //表示每个传输的数据宽度
   output   wire [1:0]   io_master_awburst, //表示突发传输类型，可以是固定、递增或包装模式
 
-  input    wire         io_master_wready, //指示写数据通道准备好接收数据
-  output   wire         io_master_wvalid, //表明写数据有效
-  output   wire [31:0]  io_master_wdata, //用于写入目标地址的数据
+  input    wire         io_master_wready, 
+  output   wire         io_master_wvalid, 
+  output   wire [31:0]  io_master_wdata, 
   output   wire [3:0]   io_master_wstrb, //写掩码
   output   wire         io_master_wlast, //表示这是最后一个写数据传输的信号
 
-  output   wire         io_master_bready, //准备好接收写相应
-  input    wire         io_master_bvalid, //表明写响应有效
+  output   wire         io_master_bready, 
+  input    wire         io_master_bvalid, 
   input    wire [1:0]   io_master_bresp, //从设备返回的写响应状态，表示成功或错误
   input    wire [3:0]   io_master_bid,  //唯一标识符，用于确认响应
 
-  input    wire         io_master_arready, //指示读地址通道准备好接收地址和控制信息
-  output   wire         io_master_arvalid, //表明读地址有效
-  output   wire [31:0]  io_master_araddr, //主设备发送的目标地址，用于读取数据
+  input    wire         io_master_arready, 
+  output   wire         io_master_arvalid, 
+  output   wire [31:0]  io_master_araddr, 
   output   wire [3:0]   io_master_arid, //唯一标识符，用于区分多个读请求
   output   wire [7:0]   io_master_arlen, //表示传输的长度，通常是一次传输的字节数
   output   wire [2:0]   io_master_arsize, //每个传输的数据宽度
   output   wire [1:0]   io_master_arburst, //表示突发传输的类型，固定、递增或包装模式
 
-  output   wire         io_master_rready, //指示准备好接收读数据
-  input    wire         io_master_rvalid, //表明读数据有效
+  output   wire         io_master_rready, 
+  input    wire         io_master_rvalid, 
   input    wire [1:0]   io_master_rresp, //从设备返回的读响应状态，表示成功或错误
-  input    wire [31:0]  io_master_rdata, //从设备发送的数据，供主设备读取
+  input    wire [31:0]  io_master_rdata, 
   input    wire         io_master_rlast, //表示这是最后一个读数据传输的信号
   input    wire [3:0]   io_master_rid, //唯一标识符，用于确认响应
 
