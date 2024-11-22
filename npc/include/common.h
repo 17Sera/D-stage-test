@@ -12,7 +12,7 @@
 #define PG_ALIGN    __attribute((aligned(4096)))
 
 #define MROM_BASE   0x20000000
-#define MROM_SIZE   0x00000fff
+#define MROM_SIZE   0x00002000
 
 
 
@@ -48,7 +48,7 @@
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 // trace
-// #define CONFIG_ITRACE      1
+#define CONFIG_ITRACE      1
 // #define CONFIG_MTRACE      1
 // #define CONFIG_FTRACE      1
 // #define CONFIG_ETRACE      1

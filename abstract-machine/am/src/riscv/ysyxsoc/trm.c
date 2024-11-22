@@ -1,10 +1,14 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
 #include <am.h>
 #include <klib-macros.h>
 #include "../riscv.h"
 
 #define npc_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))   ///////////
 
-extern char _heap_start;
+extern char _heap_start,_heap_end;
 
 int main(const char *args);
 
@@ -22,9 +26,21 @@ void putch(char ch) {
   outb(SERIAL_PORT, ch);
 }
 
+// void putch(char ch)
+// {
+//   while ((inb(UART16550_LSR) & (0x1 << 5)) == 0x0)
+//     ;
+//   outb(UART16550_TX, ch);
+// }
+
+// void halt(int code) {
+//   npc_trap(code);
+//   // should not reach here
+//   while (1);
+// }
+
 void halt(int code) {
-  npc_trap(code);
-  // should not reach here
+  asm volatile("mv a0, %0; ebreak" : :"r"(code));
   while (1);
 }
 

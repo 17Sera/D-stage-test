@@ -112,39 +112,41 @@ module ysyx_23060219(
     .o_ifu_pc    (w_ifu_pc),
     .o_ifu_inst  (w_ifu_inst),
 
+    .o_ifu_req (i_ifu_req),
+
     .o_araddr  ( o_araddr_ifu  ),
     .o_arvalid ( o_arvalid_ifu ),
     .i_arready ( i_arready_ifu ),
-    .o_arid    (  ),
-    .o_arlen   (  ),
-    .o_arsize  (  ),
-    .o_arburst (  ),
+    // .o_arid    (  ),
+    // .o_arlen   (  ),
+    // .o_arsize  (  ),
+    // .o_arburst (  ),
 
     .i_rdata   ( i_rdata_ifu   ),
     .i_rresp   ( i_rresp_ifu   ),
     .i_rvalid  ( i_rvalid_ifu  ),
     .o_rready  ( o_rready_ifu  ),
-    .i_rlast   ( i_rlast_ifu   ),
-    .i_rid     ( i_rid_ifu     ),
+    // .i_rlast   ( i_rlast_ifu   ),
+    // .i_rid     ( i_rid_ifu     ),
 
     .o_awaddr  (  ),
     .o_awvalid (  ),
     .i_awready (i_awready_ifu),
-    .o_awid    (  ),
-    .o_awlen   (  ),
-    .o_awsize  (  ),
-    .o_awburst (  ),
+    // .o_awid    (  ),
+    // .o_awlen   (  ),
+    // .o_awsize  (  ),
+    // .o_awburst (  ),
 
     .o_wdata   (  ),
     .o_wstrb   (  ),
     .o_wvalid  (  ),
     .i_wready  (i_wready_ifu),
-    .o_wlast   (  ),
+    // .o_wlast   (  ),
 
     .i_bresp   (i_bresp_ifu),
     .i_bvalid  (i_bvalid_ifu),
-    .o_bready  (  ),
-    .i_bid     (i_bid_ifu)
+    .o_bready  (  )
+    // .i_bid     (i_bid_ifu)
   );
 
 
@@ -338,7 +340,8 @@ module ysyx_23060219(
   wire             i_bvalid_lsu;
   wire  [3:0]      i_bid_lsu;
 
-
+  wire             i_ifu_req;
+  wire             i_lsu_req;
 
 
   ysyx_23060219_lsu lsu_inst( 
@@ -394,43 +397,44 @@ module ysyx_23060219(
     .o_lsu_csr_rd  (w_lsu_csr_rd),
 
   //读操作
+    .o_lsu_req (i_lsu_req),
+
     .o_araddr  ( o_araddr_lsu  ),
     .o_arvalid ( o_arvalid_lsu ),
     .i_arready ( i_arready_lsu ),
-    .o_arid    (  ),
-    .o_arlen   (  ),
-    .o_arsize  (  ),
-    .o_arburst (  ),
+    // .o_arid    (  ),
+    // .o_arlen   (  ),
+    // .o_arsize  (  ),
+    // .o_arburst (  ),
 
     .i_rdata   ( i_rdata_lsu   ),
     .i_rresp   ( i_rresp_lsu   ),
     .i_rvalid  ( i_rvalid_lsu  ),
     .o_rready  ( o_rready_lsu  ),
-    .i_rlast   ( i_rlast_lsu   ),
-    .i_rid     ( i_rid_lsu     ),
+    // .i_rlast   ( i_rlast_lsu   ),
+    // .i_rid     ( i_rid_lsu     ),
 
 //写操作
     .o_awaddr  ( o_awaddr_lsu ),
     .o_awvalid ( o_awvalid_lsu ),
     .i_awready ( i_awready_lsu ),
-    .o_awid    (  ),
-    .o_awlen   (  ),
-    .o_awsize  (  ),
-    .o_awburst (  ),
+    // .o_awid    (  ),
+    // .o_awlen   (  ),
+    // .o_awsize  (  ),
+    // .o_awburst (  ),
 
     .o_wdata   ( o_wdata_lsu ),
     .o_wstrb   ( o_wstrb_lsu ),
     .o_wvalid  ( o_wvalid_lsu ),
     .i_wready  ( i_wready_lsu ),
-    .o_wlast   (  ),
+    // .o_wlast   (  ),
 
     .i_bresp   ( i_bresp_lsu ),
     .i_bvalid  ( i_bvalid_lsu ),
     .o_bready  (  ),
-    .i_bid     ( i_bid_lsu ),
+    // .i_bid     ( i_bid_lsu ),
 
     .i_exu_success(exu_success)
-
   );
 
 
@@ -512,82 +516,82 @@ module ysyx_23060219(
   // Arbiter --------------------------------------------------------
   ysyx_23060219_arbiter arbiter(
     // System
-        .clk              (clock),
-        .rst              (reset),
+        .clock              (clock),
+        .reset              (reset),
     /*------------------------ ifu -----------------------*/
     // Read Address IFU
-        // .i_ifu_req        (    ),
+        .i_ifu_req        (i_ifu_req),
 
         .i_ifu_araddr     (o_araddr_ifu ),
         .i_ifu_arvalid    (o_arvalid_ifu),
-        .i_ifu_arready    (i_arready_ifu),
-        .i_ifu_arid       (  ),
-        .i_ifu_arlen      (  ),
-        .i_ifu_arsize     (  ),
-        .i_ifu_arburst    (  ),
+        .o_ifu_arready    (i_arready_ifu),
+        // .i_ifu_arid       (  ),
+        // .i_ifu_arlen      (  ),
+        // .i_ifu_arsize     (  ),
+        // .i_ifu_arburst    (  ),
     // Read Data  IFU
         .o_ifu_rdata      (i_rdata_ifu  ),
         .o_ifu_rresp      (i_rresp_ifu),
         .i_ifu_rready     (o_rready_ifu ),
         .o_ifu_rvalid     (i_rvalid_ifu ),
-        .o_ifu_rlast      (i_rlast_ifu),
-        .o_ifu_rid        (i_rid_ifu),
+        // .o_ifu_rlast      (i_rlast_ifu),
+        // .o_ifu_rid        (i_rid_ifu),
     // Write Address  IFU
         .i_ifu_awaddr     (   ),
         .i_ifu_awvalid    (   ),
         .o_ifu_awready    (i_awready_ifu),
-        .i_ifu_awid       (   ),
-        .i_ifu_awlen      (   ),
-        .i_ifu_awsize     (   ),
-        .i_ifu_awburst    (   ),
+        // .i_ifu_awid       (   ),
+        // .i_ifu_awlen      (   ),
+        // .i_ifu_awsize     (   ),
+        // .i_ifu_awburst    (   ),
     // Write Data IFU
         .i_ifu_wdata      (   ), 
         .i_ifu_wstrb      (   ),
         .i_ifu_wvalid     (   ),
         .o_ifu_wready     (i_wready_ifu),
-        .i_ifu_wlast      (   ),
+        // .i_ifu_wlast      (   ),
     // Write Back IFU
         .o_ifu_bresp      (i_bresp_ifu),
         .o_ifu_bvalid     (i_bvalid_ifu),
         .i_ifu_bready     (   ),
-        .o_ifu_bid        (i_bid_ifu),
+        // .o_ifu_bid        (i_bid_ifu),
     /*------------------------ lsu -----------------------*/
     // Read Address
-        // .i_lsu_req        (    ),
+        .i_lsu_req        (i_lsu_req),
 
         .i_lsu_araddr     (o_araddr_lsu ), 
         .i_lsu_arvalid    (o_arvalid_lsu),
         .o_lsu_arready    (i_arready_lsu),
-        .i_lsu_arid       (   ),
-        .i_lsu_arlen      (   ),
-        .i_lsu_arsize     (   ),
-        .i_lsu_arburst    (   ),
+        // .i_lsu_arid       (   ),
+        // .i_lsu_arlen      (   ),
+        // .i_lsu_arsize     (   ),
+        // .i_lsu_arburst    (   ),
     // Read Data
         .o_lsu_rdata      (i_rdata_lsu  ),
         .o_lsu_rresp      (i_rresp_lsu),
         .i_lsu_rready     (o_rready_lsu ),
         .o_lsu_rvalid     (i_rvalid_lsu ),
-        .o_lsu_rlast      (i_rlast_lsu),
-        .o_lsu_rid        (i_rid_lsu),
+        // .o_lsu_rlast      (i_rlast_lsu),
+        // .o_lsu_rid        (i_rid_lsu),
     // Write Address
         .i_lsu_awaddr     (o_awaddr_lsu  ),
         .i_lsu_awvalid    (o_awvalid_lsu ),
         .o_lsu_awready    (i_awready_lsu ),
-        .i_lsu_awid       (   ),
-        .i_lsu_awlen      (   ),
-        .i_lsu_awsize     (   ),
-        .i_lsu_awburst    (   ),
+        // .i_lsu_awid       (   ),
+        // .i_lsu_awlen      (   ),
+        // .i_lsu_awsize     (   ),
+        // .i_lsu_awburst    (   ),
     // Write Data
         .i_lsu_wdata      ( o_wdata_lsu  ),
         .i_lsu_wstrb      ( o_wstrb_lsu  ),
         .i_lsu_wvalid     ( o_wvalid_lsu ),
         .o_lsu_wready     ( i_wready_lsu ),
-        .i_lsu_wlast      (   ),
+        // .i_lsu_wlast      (   ),
     // Write Back
         .o_lsu_bresp      ( i_bresp_lsu  ), 
         .o_lsu_bvalid     ( i_bvalid_lsu ),
         .i_lsu_bready     (   ),
-        .o_lsu_bid        ( i_bid_lsu  ),
+        // .o_lsu_bid        ( i_bid_lsu  ),
     /*------------------------ soc -----------------------*/
         .io_master_awready   ( io_master_awready ),
         .io_master_awvalid   ( io_master_awvalid ),
@@ -621,7 +625,7 @@ module ysyx_23060219(
         .io_master_rresp    ( io_master_rresp  ), 
         .io_master_rdata    ( io_master_rdata  ),
         .io_master_rlast    ( io_master_rlast  ),
-        .io_master_rid      ( io_master_rid    ),
+        .io_master_rid      ( io_master_rid    )
 
     /*------------------------ sram -----------------------*/
         // .io_master_awready   (o_awready),
@@ -658,76 +662,76 @@ module ysyx_23060219(
         // .io_master_rlast     (o_rlast ),
         // .io_master_rid       (o_rid   ),
 
-    /*------------------------ uart -----------------------*/
-    // Read Address
-        .o_uart_araddr    (),
-        .o_uart_arvalid   (),
-        .i_uart_arready   (),
-        .o_uart_arid      (),
-        .o_uart_arlen     (),
-        .o_uart_arsize    (),
-        .o_uart_arburst   (),
-    // Read Data
-        .i_uart_rdata     (),
-        .i_uart_rresp     (),
-        .i_uart_rvalid    (),
-        .o_uart_rready    (),
-        .i_uart_rlast     (),
-        .i_uart_rid       (),
-    // Write Address
-        .o_uart_awaddr    (),
-        .o_uart_awvalid   (),
-        .i_uart_awready   (),
-        .o_uart_awid      (),
-        .o_uart_awlen     (),
-        .o_uart_awsize    (),
-        .o_uart_awburst   (),
-    // Write Data
-        .o_uart_wdata     (),
-        .o_uart_wstrb     (),
-        .o_uart_wvalid    (),
-        .i_uart_wready    (),
-        .o_uart_wlast     (),
-    // Write Back
-        .i_uart_bresp     (),
-        .i_uart_bvalid    (),
-        .o_uart_bready    (),
-        .i_uart_bid       (),
-    /*------------------------ clint -----------------------*/
-    // Read Address
-        .o_clint_araddr    (),
-        .o_clint_arvalid   (),
-        .i_clint_arready   (),
-        .o_clint_arid      (),
-        .o_clint_arlen     (),
-        .o_clint_arsize    (),
-        .o_clint_arburst   (),
-    // Read Data
-        .i_clint_rdata     (),
-        .i_clint_rresp     (),
-        .i_clint_rvalid    (),
-        .o_clint_rready    (),
-        .i_clint_rlast     (),
-        .i_clint_rid       (),
-    // Write Address
-        .o_clint_awaddr    (),
-        .o_clint_awvalid   (),
-        .i_clint_awready   (),
-        .o_clint_awid      (),
-        .o_clint_awlen     (),
-        .o_clint_awsize    (),
-        .o_clint_awburst   (),
-    // Write Data
-        .o_clint_wdata     (),
-        .o_clint_wstrb     (),
-        .o_clint_wvalid    (),
-        .i_clint_wready    (),
-        .o_clint_wlast     (),
-    // Write Back
-        .i_clint_bresp     (),
-        .i_clint_bvalid    (),
-        .o_clint_bready    (),
-        .i_clint_bid       ()
+    // /*------------------------ uart -----------------------*/
+    // // Read Address
+    //     .o_uart_araddr    (),
+    //     .o_uart_arvalid   (),
+    //     .i_uart_arready   (),
+    //     .o_uart_arid      (),
+    //     .o_uart_arlen     (),
+    //     .o_uart_arsize    (),
+    //     .o_uart_arburst   (),
+    // // Read Data
+    //     .i_uart_rdata     (),
+    //     .i_uart_rresp     (),
+    //     .i_uart_rvalid    (),
+    //     .o_uart_rready    (),
+    //     .i_uart_rlast     (),
+    //     .i_uart_rid       (),
+    // // Write Address
+    //     .o_uart_awaddr    (),
+    //     .o_uart_awvalid   (),
+    //     .i_uart_awready   (),
+    //     .o_uart_awid      (),
+    //     .o_uart_awlen     (),
+    //     .o_uart_awsize    (),
+    //     .o_uart_awburst   (),
+    // // Write Data
+    //     .o_uart_wdata     (),
+    //     .o_uart_wstrb     (),
+    //     .o_uart_wvalid    (),
+    //     .i_uart_wready    (),
+    //     .o_uart_wlast     (),
+    // // Write Back
+    //     .i_uart_bresp     (),
+    //     .i_uart_bvalid    (),
+    //     .o_uart_bready    (),
+    //     .i_uart_bid       (),
+    // /*------------------------ clint -----------------------*/
+    // // Read Address
+    //     .o_clint_araddr    (),
+    //     .o_clint_arvalid   (),
+    //     .i_clint_arready   (),
+    //     .o_clint_arid      (),
+    //     .o_clint_arlen     (),
+    //     .o_clint_arsize    (),
+    //     .o_clint_arburst   (),
+    // // Read Data
+    //     .i_clint_rdata     (),
+    //     .i_clint_rresp     (),
+    //     .i_clint_rvalid    (),
+    //     .o_clint_rready    (),
+    //     .i_clint_rlast     (),
+    //     .i_clint_rid       (),
+    // // Write Address
+    //     .o_clint_awaddr    (),
+    //     .o_clint_awvalid   (),
+    //     .i_clint_awready   (),
+    //     .o_clint_awid      (),
+    //     .o_clint_awlen     (),
+    //     .o_clint_awsize    (),
+    //     .o_clint_awburst   (),
+    // // Write Data
+    //     .o_clint_wdata     (),
+    //     .o_clint_wstrb     (),
+    //     .o_clint_wvalid    (),
+    //     .i_clint_wready    (),
+    //     .o_clint_wlast     (),
+    // // Write Back
+    //     .i_clint_bresp     (),
+    //     .i_clint_bvalid    (),
+    //     .o_clint_bready    (),
+    //     .i_clint_bid       ()
     );
 
 //   // SRAM -----------------------------------------------------------

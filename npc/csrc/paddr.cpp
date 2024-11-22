@@ -133,9 +133,8 @@ extern VysyxSoCFull      *top;
 extern vluint64_t main_time;
 extern void close_tfp(void);
 /*********************************************/
-
-
 uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
+uint8_t mrom[MROM_SIZE] PG_ALIGN = {};
 static const word_t img [] = {
   //0x06400593,    //li	  a1,100
   //0x00100073,    //ebreak
@@ -157,8 +156,22 @@ static const word_t img [] = {
 //   0xdeadbeef,    // some data
 };
 
+extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
+extern "C" void mrom_read(int32_t addr, int32_t *data)
+{ 
+    assert(data != NULL); // 确保 data 指针不为空
+    assert(addr >= MROM_BASE && addr < MROM_BASE + MROM_SIZE); // 地址合法性检查
+
+    uint32_t offset = ((addr & 0xfffffffc) - MROM_BASE);
+    *data = *((uint32_t *)(mrom + offset));
+
+    // *data = 0x00100073;   // 测试mrom，输入ebreak指令
+}
+
+uint8_t* mrom_guest_to_host(paddr_t paddr) { return mrom + paddr - MROM_BASE; }   
 
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - PMEM_BASE; }   //0x8000_0000 -> pmem[0]
+
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + PMEM_BASE; }
 
 
@@ -236,10 +249,13 @@ void pmem_w(paddr_t addr, int len, word_t data)
 
 void init_mem(void) 
 {
-  memset(pmem, 0, PMEM_SIZE); //将pmem物理内存的所有字节设置为0，pmem指向物理内存的起始地址，PMEM_SIZE为要填充的内存区域大小
+  memset(mrom, 0, MROM_SIZE);
+  // memset(pmem, 0, PMEM_SIZE); //将pmem物理内存的所有字节设置为0，pmem指向物理内存的起始地址，PMEM_SIZE为要填充的内存区域大小
   Log("physical memory area [0x%08x, 0x%08x]", PMEM_LEFT, PMEM_RIGHT); //记录物理内存区域边界
 
   /* Load built-in image. */
-  memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
+  memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
+  // memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
+
   //guest_to_hoat(RESET_VECTOR)：返回指向物理内存中RESET_VECTOR位置的指针，是程序的起始位置
 }

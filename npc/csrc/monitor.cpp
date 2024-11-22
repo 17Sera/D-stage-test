@@ -11,7 +11,7 @@ extern void     init_log(const char *log_file);
 extern void     init_sdb();
 extern void     init_mem(void);
 extern void     sdb_set_batch_mode(void); 
-extern uint8_t* guest_to_host(paddr_t paddr);
+extern uint8_t* mrom_guest_to_host(paddr_t paddr);
 extern long load_binary_to_mrom();
 
 #ifdef CONFIG_FTRACE 
@@ -26,6 +26,7 @@ char *elf_file = NULL;
 char *diff_so_file = NULL;
 int  difftest_port = 1234;
 long img_size;
+long bin_size;
 NPCState npc_state = { .state = NPC_STOP };
 
 
@@ -70,7 +71,7 @@ static long load_img()
   Log("The image is %s, size = %ld", img_file, size); //记录日志，显示图像文件的名称和大小
 
   fseek(fp, 0, SEEK_SET); //将文件指针移动回文件开头
-  int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);//从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
+  int ret = fread( mrom_guest_to_host(MROM_BASE), size, 1, fp);//从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
   assert(ret == 1);
 
   fclose(fp); //关闭文件，释放资源
@@ -128,7 +129,8 @@ void init_monitor(int argc, char *argv[]) {
     init_mem();
 
   /* Load binary data into mrom array */
-    long bin_size = load_binary_to_mrom();
+    // long bin_size = load_binary_to_mrom();
+    // bin_size = load_binary_to_mrom();
 
     /* Load the image to memory. This will overwrite the built-in image. */
     // long img_size = load_img();
