@@ -39,7 +39,7 @@ module ysyx_23060219_exu(
     input  wire [31:0]  i_exu_csr_src,
     input  wire [`CPU_Bus] i_exu_csr_npc,
     // to LSU
-    output wire [`CPU_Bus] o_exu_exu_res, //bug
+    output wire [`CPU_Bus] o_exu_exu_res, 
     output wire            o_exu_is_load,
     output wire            o_exu_is_store,
     output wire [2:0]      o_exu_func3,
@@ -143,17 +143,13 @@ module ysyx_23060219_exu(
     always @(posedge clk) begin
         if(rst == 1'b1) 
             exu_valid_data_reg <= 0;
-        else if(exu_reg_wen == 1'b1) //big bug
-            exu_valid_data_reg <= { exu_exu_res, exu_is_load, exu_is_store, exu_func3,
-                                    exu_rs1, exu_rs2, exu_csr_npc, exu_is_mret, exu_is_ecall, 
-                                    exu_imm, exu_pc, exu_is_jal, exu_is_jalr, exu_brch, exu_rd_id, 
-                                    exu_gpr_wen, exu_csr_wid, exu_csr_rd, exu_csr_wen };
+        else if(exu_reg_wen == 1'b1) 
+            exu_valid_data_reg <= { exu_exu_res, exu_is_load, exu_is_store, exu_func3, exu_rs1, exu_rs2, exu_csr_npc, exu_is_mret, exu_is_ecall, 
+                                    exu_imm, exu_pc, exu_is_jal, exu_is_jalr, exu_brch, exu_rd_id, exu_gpr_wen, exu_csr_wid, exu_csr_rd, exu_csr_wen };
     end
 
-    assign{ o_exu_exu_res, o_exu_is_load, o_exu_is_store, o_exu_func3,
-            o_exu_rs1, o_exu_rs2, o_exu_csr_npc, o_exu_is_mret, o_exu_is_ecall, 
-            o_exu_imm, o_exu_pc, o_exu_is_jal, o_exu_is_jalr, o_exu_brch, o_exu_rd_id, 
-            o_exu_gpr_wen, o_exu_csr_wid, o_exu_csr_rd, o_exu_csr_wen } = exu_valid_data_reg;
+    assign{ o_exu_exu_res, o_exu_is_load, o_exu_is_store, o_exu_func3, o_exu_rs1, o_exu_rs2, o_exu_csr_npc, o_exu_is_mret, o_exu_is_ecall, 
+            o_exu_imm, o_exu_pc, o_exu_is_jal, o_exu_is_jalr, o_exu_brch, o_exu_rd_id, o_exu_gpr_wen, o_exu_csr_wid, o_exu_csr_rd, o_exu_csr_wen } = exu_valid_data_reg;
 
 
 
