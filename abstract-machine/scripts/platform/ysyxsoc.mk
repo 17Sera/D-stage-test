@@ -12,18 +12,21 @@ CFLAGS    += -fdata-sections -ffunction-sections
 LDFLAGS   += -T $(AM_HOME)/scripts/linker_ysyxsoc.ld \
 						 --defsym=_pmem_start=0x20000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
+LDFLAGS   += --print-map    #查看ld如何链接
+# LDFLAGS   += --gc-sections  #移除未使用的代码段
+
 ##
 NPCFLAGS += -l $(shell dirname $(IMAGE).elf)/ysyxsoc-log.txt
 # NPCFLAGS += -l ./log/ysyxsoc-log.txt
 NPCFLAGS += -e $(IMAGE).elf
 NPCFLAGS += -b
 
-
+# CFLAGS += -Os   #优化代码体积
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 .PHONY: $(AM_HOME)/am/src/riscv/ysyxsoc/trm.c
 
 image: $(IMAGE).elf
-	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
+	@$(OBJDUMP) -d -h -t $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 ##

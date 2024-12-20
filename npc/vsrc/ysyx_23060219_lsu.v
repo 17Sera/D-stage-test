@@ -152,17 +152,13 @@ module ysyx_23060219_lsu(
                 o_arvalid <= 1;
                 o_lsu_req <= 1;
             end
-            if(i_arready) begin     //控制端将i_rvalid改成i_arready
-                o_arvalid <= 0;     //和i_arready一起拉高一个周期之后再拉低
-            end
             if(o_arvalid && i_arready) begin
                 o_rready <= 1;
-            end
-            if(i_rvalid) begin
-                o_rready <= 0;
-                o_lsu_req <= 0;
+                o_arvalid <= 0; 
             end
             if(i_rvalid && o_rready) begin
+                o_rready <= 0;
+                o_lsu_req <= 0;
                 dmem_rdata_tmp <= i_rdata;      // 读到的数据放dmem_rdata_tmp
             end
         end
@@ -186,10 +182,9 @@ module ysyx_23060219_lsu(
                 end
                 else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;             // dmem_raddr[1:0] == 2'b00保持不变
             end
-
             else if( (i_lsu_func3 == `INST_LHU) || (i_lsu_func3 == `INST_LH) ) begin    // 双字节
                 if ( dmem_raddr[1:0] == 2'b10 ) begin           // 位移2个字节
-                    dmem_rdata_t = dmem_rdata_t >> 5'd16;
+                    dmem_rdata_t = dmem_rdata_tmp >> 5'd16;
                 end
                 else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;             // dmem_raddr[1:0] == 2'b00保持不变
             end
@@ -278,7 +273,7 @@ module ysyx_23060219_lsu(
                 o_awaddr <= dmem_waddr;
                 o_lsu_req <= 1;
             end
-            if(i_awready) begin
+            if(i_awready && o_awvalid) begin
                 o_wvalid <= 1'b1;
                 o_wdata <= dmem_wdata;
                 o_wstrb <= wmask;

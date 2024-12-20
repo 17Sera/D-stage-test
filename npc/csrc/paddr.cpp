@@ -251,7 +251,8 @@ void init_mem(void)
 {
   memset(mrom, 0, MROM_SIZE);
   // memset(pmem, 0, PMEM_SIZE); //将pmem物理内存的所有字节设置为0，pmem指向物理内存的起始地址，PMEM_SIZE为要填充的内存区域大小
-  Log("physical memory area [0x%08x, 0x%08x]", PMEM_LEFT, PMEM_RIGHT); //记录物理内存区域边界
+  // Log("physical memory area [0x%08x, 0x%08x]", PMEM_LEFT, PMEM_RIGHT); //记录物理内存区域边界
+    Log("mrom memory area [0x%08x, 0x%08x]", MROM_BASE, MROM_BASE+MROM_SIZE-1); //记录物理内存区域边界
 
   /* Load built-in image. */
   memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置

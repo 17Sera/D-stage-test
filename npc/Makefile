@@ -282,7 +282,7 @@ verilate: .zhong.verilate
 	@echo
 	@echo "### VERILATING ###"
 # 不加自动生成依赖项 $^ error:Duplicate declaration of task: 'flash_read' from DPI-C
-	verilator  $(VERILATOR_FLAGS) #-LDFLAGS $(LDFLAGS)
+	verilator  $(VERILATOR_FLAGS) 	#-LDFLAGS $(LDFLAGS)
 
 	@echo "LIBS +=$(LIBS)" >> ./obj_dir/V$(MODULE).mk    # to link readline and dlfcn library
 # @echo "CXXFLAGS +=$(CXXFLAGS)" >> ./obj_dir/V$(MODULE).mk 
