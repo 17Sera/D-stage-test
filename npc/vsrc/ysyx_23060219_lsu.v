@@ -1,6 +1,3 @@
-//==============================================================================================================
-// add arbiter
-
 `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 `define LSU_PKG_WDITH (`CPU_Width+`CPU_Width+`CPU_Width+1+1+1+`CPU_Width+1+`CPU_Width+5+1+1+1+1+12+`CPU_Width)
 
@@ -12,7 +9,7 @@ module ysyx_23060219_lsu(
     input  wire             i_pre_valid,   //来自EXU，代表EXU的数据有效
     output wire             o_pre_ready,   //传递给WBU，代表LSU准备好处理新数据了
     output reg              o_post_valid,  //传递给WBU，代表此时数据包寄存器的数据有效
-    input  wire             i_post_ready,  //来自WBU，代表WBU准备好处理新数据了
+    input  wire             i_post_ready,  //来自WBU，代表WBU准备好处理新数据了, unused
     // from IFU
     input  wire [`CPU_Bus]  i_lsu_pc,
     // from IDU
@@ -20,9 +17,9 @@ module ysyx_23060219_lsu(
     input  wire             i_lsu_is_store,
     input  wire [2:0]       i_lsu_func3,
     input  wire [`CPU_Bus]  i_lsu_imm,
-    input  wire             i_lsu_is_jal,
-    input  wire             i_lsu_is_jalr,
-    input  wire             i_lsu_brch,
+    input  wire             i_lsu_is_jal,   
+    input  wire             i_lsu_is_jalr,  
+    input  wire             i_lsu_brch,     
     input  wire [4:0]       i_lsu_rd_id,
     input  wire             i_lsu_gpr_wen,  
     // from Register File
@@ -96,23 +93,13 @@ module ysyx_23060219_lsu(
     input   reg             i_exu_success
 );
 
+/*------------------------------------------------------------------------------------------------ */
+
     import "DPI-C" function int  dmem_read(input int raddr);
     import "DPI-C" function void pmem_write(input int waddr, input int wdata, input byte wmask);
     import "DPI-C" function void TRAP(input int station, input byte unit);
 
-/*-------------- output set 0 --------------- */
-    // assign o_arid = 0;
-    // assign o_arlen = 0;
-    // assign o_arsize = 0;
-    // assign o_arburst = 0;
-
-    // assign o_awid = 0;
-    // assign o_awlen = 0;
-    // assign o_awsize = 0;
-    // assign o_awburst = 0;
-
-    // assign o_wlast = 0;
-/*-------------------------------------------*/
+/*------------------------------------------------------------------------------------------------ */
 
     // to BRU
     wire [`CPU_Bus] lsu_imm      = i_lsu_imm;
@@ -134,7 +121,8 @@ module ysyx_23060219_lsu(
     wire [`CPU_Bus] lsu_csr_rd   = i_lsu_csr_rd;
 
 
-    /************ read dmem ************/
+    /*------------------------------- read dmem ------------------------------------*/
+
     wire [`CPU_Bus] dmem_raddr = i_lsu_exu_res;
     reg  [`CPU_Bus] dmem_rdata_t;
     reg  [`CPU_Bus] dmem_rdata;
@@ -171,24 +159,24 @@ module ysyx_23060219_lsu(
          // 位移后的数据放dmem_rdata_t
         if(i_lsu_is_load == `TRUE)  begin
             if( (i_lsu_func3 == `INST_LBU) || (i_lsu_func3 == `INST_LB) ) begin         // 单字节
-                if ( dmem_raddr[1:0] == 2'b01 ) begin           // 位移一个字节
+                if ( dmem_raddr[1:0] == 2'b01 ) begin                                   // 位移一个字节
                     dmem_rdata_t = dmem_rdata_tmp >> 4'd8;     
                 end
-                else if ( dmem_raddr[1:0] == 2'b10 ) begin      // 位移二个字节
+                else if ( dmem_raddr[1:0] == 2'b10 ) begin                              // 位移二个字节
                     dmem_rdata_t = dmem_rdata_tmp >> 5'd16;
                 end
-                else if ( dmem_raddr[1:0] == 2'b11 ) begin      // 位移三个字节
+                else if ( dmem_raddr[1:0] == 2'b11 ) begin                              // 位移三个字节
                     dmem_rdata_t = dmem_rdata_tmp >> 5'd24;
                 end
-                else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;             // dmem_raddr[1:0] == 2'b00保持不变
+                else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;                             // dmem_raddr[1:0] == 2'b00保持不变
             end
             else if( (i_lsu_func3 == `INST_LHU) || (i_lsu_func3 == `INST_LH) ) begin    // 双字节
-                if ( dmem_raddr[1:0] == 2'b10 ) begin           // 位移2个字节
+                if ( dmem_raddr[1:0] == 2'b10 ) begin                                   // 位移2个字节
                     dmem_rdata_t = dmem_rdata_tmp >> 5'd16;
                 end
-                else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;             // dmem_raddr[1:0] == 2'b00保持不变
+                else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;                             // dmem_raddr[1:0] == 2'b00保持不变
             end
-            else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;                 // LW保持不变   // 四字节
+            else dmem_rdata_t = dmem_rdata_tmp >> 1'd0;                                 // LW保持不变   // 四字节
 
             // 截取后的最终数据放dmem_rdata
             case (i_lsu_func3)
@@ -200,16 +188,16 @@ module ysyx_23060219_lsu(
                 default:    TRAP(`ABORT, `Unit_LSU1);  
             endcase
         end
-        else dmem_rdata_t = dmem_rdata_tmp >> 1'd0; //i_lsu_is_load 不为 `TRUE，保持不变
+        else dmem_rdata_t = dmem_rdata_tmp >> 1'd0; 
     end           
 
     assign o_lsu_rd = (i_lsu_is_load == `TRUE) ? dmem_rdata : i_lsu_exu_res; 
 
 
 
-    /*------------------ write dmem ------------------*/
+    /*----------------------------------------- write dmem --------------------------------------*/
     wire [`CPU_Bus] dmem_waddr = i_lsu_exu_res;
-    wire [`CPU_Bus] dmem_wdata_tmp = i_lsu_rs2;         // 想要写入的数据放在dmem_wdata
+    wire [`CPU_Bus] dmem_wdata_tmp = i_lsu_rs2; 
     reg  [3:0]      wmask , wmask_init;
     reg  [`CPU_Bus] dmem_wdata;
     // wmask
@@ -224,7 +212,7 @@ module ysyx_23060219_lsu(
                 default:  TRAP(`ABORT, `Unit_LSU2);
             endcase
 
-            if( i_lsu_func3 == `INST_SB ) begin         // 单字节
+            if( i_lsu_func3 == `INST_SB ) begin                     // 单字节
                 if ( dmem_waddr[1:0] == 2'b01 ) begin               // 位移一个字节
                     dmem_wdata = dmem_wdata_tmp << 4'd8;    
                     wmask = wmask_init << 2'd1;
@@ -243,7 +231,7 @@ module ysyx_23060219_lsu(
                 end
             end
 
-            else if( i_lsu_func3 == `INST_SH ) begin    // 双字节
+            else if( i_lsu_func3 == `INST_SH ) begin                // 双字节
                 if ( dmem_waddr[1:0] == 2'b10 ) begin               // 位移2个字节
                     dmem_wdata = dmem_wdata_tmp << 5'd16;
                     wmask = wmask_init << 2'd2;
@@ -254,7 +242,7 @@ module ysyx_23060219_lsu(
                 end
             end
             else begin
-                dmem_wdata = dmem_wdata_tmp << 1'd0;    // 四字节    // SW保持不变
+                dmem_wdata = dmem_wdata_tmp << 1'd0;                // 四字节    // SW保持不变
                 wmask = wmask_init << 2'd0;
             end
         end
@@ -289,74 +277,85 @@ module ysyx_23060219_lsu(
         end
     end
 
-
-    // data package
-    wire  lsu_reg_wen  = i_pre_valid & o_pre_ready; 
+/*------------------------------  data package ------------------------------------------------------------------ */
+   
+    wire  lsu_reg_wen  = i_pre_valid & o_pre_ready;     // 和前者握手的瞬间拉高数据包写使能
     reg  [`LSU_PKG_WDITH-1 : 0] lsu_valid_data_reg;  
 
     always @(posedge clk) begin
         if(rst == 1'b1) 
             lsu_valid_data_reg <= 0;
-        else if(lsu_reg_wen == 1'b1) begin
-            lsu_valid_data_reg <= { lsu_imm, lsu_pc, lsu_rs1, lsu_is_jal, lsu_is_jalr, lsu_brch, 
-            lsu_csr_npc, lsu_is_ejump, o_lsu_rd, lsu_rd_id, lsu_gpr_wen, lsu_csr_wen, lsu_is_mret, lsu_is_ecall, lsu_csr_wid, lsu_csr_rd };
-            
+        else if(lsu_reg_wen == 1'b1) begin              // lsu_reg_wen拉高的下个周期数据包才传过去
+            lsu_valid_data_reg <= { lsu_imm, lsu_pc, lsu_rs1, lsu_is_jal,
+            lsu_is_jalr, lsu_brch, lsu_csr_npc, lsu_is_ejump, o_lsu_rd, 
+            lsu_rd_id, lsu_gpr_wen, lsu_csr_wen, lsu_is_mret, lsu_is_ecall, 
+            lsu_csr_wid, lsu_csr_rd };
         end
     end
 
 
+    assign{ o_lsu_imm, o_lsu_pc, o_lsu_rs1, o_lsu_is_jal, o_lsu_is_jalr, 
+    o_lsu_brch, o_lsu_csr_npc, o_lsu_is_ejump, o_lsu_rd, o_lsu_rd_id, 
+    o_lsu_gpr_wen, o_lsu_csr_wen, o_lsu_is_mret, o_lsu_is_ecall, 
+    o_lsu_csr_wid, o_lsu_csr_rd } = lsu_valid_data_reg;
 
-    assign{ o_lsu_imm, o_lsu_pc, o_lsu_rs1, o_lsu_is_jal, o_lsu_is_jalr, o_lsu_brch, o_lsu_csr_npc, o_lsu_is_ejump, o_lsu_rd, o_lsu_rd_id, o_lsu_gpr_wen, 
-    o_lsu_csr_wen, o_lsu_is_mret, o_lsu_is_ecall, o_lsu_csr_wid, o_lsu_csr_rd } = lsu_valid_data_reg;
+ /* --------------------------- delay --------------------------------------------------------------------------------------------- */
+    // reg post_valid_reg;
+    // reg post_valid_delay_1, post_valid_delay_2, post_valid_delay_3, post_valid_delay_4, post_valid_delay_5;
 
 
-    reg post_valid_reg;
-    reg post_valid_delay_1, post_valid_delay_2, post_valid_delay_3, post_valid_delay_4, post_valid_delay_5;
+    // // 寄存器用于保存前一个周期的状态
+    // always @(posedge clk) begin
+    //     if (rst) begin
+    //         post_valid_reg     <= 1'b0;
+    //         post_valid_delay_1 <= 1'b0;
+    //         post_valid_delay_2 <= 1'b0;
+    //         post_valid_delay_3 <= 1'b0;
+    //         post_valid_delay_4 <= 1'b0;
+    //         post_valid_delay_5 <= 1'b0;
+    //     end else begin
+    //         // 更新 post_valid_reg
+    //         post_valid_reg <= i_pre_valid;      // 延迟一个周期赋值
 
-    // 寄存器用于保存前一个周期的状态
-    always @(posedge clk) begin
-        if (rst) begin
-            post_valid_reg <= 1'b0;
-            post_valid_delay_1 <= 1'b0;
-            post_valid_delay_2 <= 1'b0;
-            post_valid_delay_3 <= 1'b0;
-            post_valid_delay_4 <= 1'b0;
-            post_valid_delay_5 <= 1'b0;
-        end else begin
-            // 更新 post_valid_reg
-            post_valid_reg <= i_pre_valid;
+    //         // 检测 i_lsu_is_load 、i_lsu_is_store指令
+    //         if (i_lsu_is_load | i_lsu_is_store) begin
+    //             post_valid_delay_1 <= post_valid_reg; 
+    //             post_valid_delay_2 <= post_valid_delay_1; 
+    //             post_valid_delay_3 <= post_valid_delay_2; 
+    //             post_valid_delay_4 <= post_valid_delay_3;
+    //             post_valid_delay_5 <= post_valid_delay_4; 
+    //         end else begin
+    //             // 当 i_lsu_is_load 为低时，立即使用 post_valid_reg 的值
+    //             post_valid_delay_1 <= 1'b0;
+    //             post_valid_delay_2 <= 1'b0;
+    //             post_valid_delay_3 <= 1'b0;
+    //             post_valid_delay_4 <= 1'b0;
+    //             post_valid_delay_5 <= 1'b0;
+    //         end
+    //     end
+    // end
 
-            // 检测 i_lsu_is_load 指令
-            if (i_lsu_is_load | i_lsu_is_store) begin
-                // 当 i_lsu_is_load 为高时，推迟两个周期
-                post_valid_delay_1 <= post_valid_reg; // 第一个周期
-                post_valid_delay_2 <= post_valid_delay_1; // 第二个周期
-                post_valid_delay_3 <= post_valid_delay_2; // 第二个周期
-                post_valid_delay_4 <= post_valid_delay_3; // 第二个周期
-                post_valid_delay_5 <= post_valid_delay_4; // 第二个周期
-            end else begin
-                // 当 i_lsu_is_load 为低时，立即使用 post_valid_reg 的值
-                post_valid_delay_1 <= 1'b0;
-                post_valid_delay_2 <= 1'b0;
-                post_valid_delay_3 <= 1'b0;
-                post_valid_delay_4 <= 1'b0;
-                post_valid_delay_5 <= 1'b0;
-            end
-        end
-    end
 
-    // assign o_post_valid = 
+    // always@(*) begin
+    //     if(i_lsu_is_load)           o_post_valid = post_valid_delay_5;
+    //     else if(i_lsu_is_store)     o_post_valid = post_valid_delay_1;
+    //     else                        o_post_valid = post_valid_reg;     // 把前者的valid输送给后者，但有延迟，这句两个变量是同步的
+    // end
 
-    always@(*) begin
-        if(i_lsu_is_load) o_post_valid = post_valid_delay_5;
-        else if(i_lsu_is_store) o_post_valid = post_valid_delay_1;
-        else o_post_valid = post_valid_reg;
-    end
+    // assign o_pre_ready = ~o_post_valid;     // 和后者握手的同时 不和前者握手，导致数据混乱
+
+ /* ------------------------------------------------------------------------------------------------------------------------------- */
 
     // 输出信号
-    assign o_pre_ready = ~o_post_valid;
+    always @(posedge clk) begin
+        if (rst) begin
+            o_post_valid <= 1'b0;
+        end else begin
+            o_post_valid <= i_pre_valid;      // 和前者只握手一周期，下一周期再拉高 valid, o_post_valid至少延迟一周期再等于i_pre_valid，留一周期给前者握手
+        end
+    end
 
-
+    assign o_pre_ready = ~o_post_valid;      // 和后者握手的同时 不和前者握手，导致数据混乱
 
 
 endmodule

@@ -1,11 +1,7 @@
-//======================================================================================================
-//add arbiter
-
 `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 `define IFU_PKG_WDITH  (`CPU_Width+`CPU_Width)
 
 module ysyx_23060219_ifu(
-    // system
     input  wire             clk,
     input  wire             rst,
     // shake hands
@@ -20,7 +16,7 @@ module ysyx_23060219_ifu(
 
     output reg              o_ifu_req,
 
-    // to SRAM
+    // to RAM
     /*---------------- 读地址 ----------------*/
     output  reg  [31:0]     o_araddr,
     output  reg             o_arvalid, //写使能
@@ -32,7 +28,7 @@ module ysyx_23060219_ifu(
     /*---------------- 读数据 ----------------*/
     input   reg  [31:0]     i_rdata,
     input   reg  [1:0]      i_rresp,    //
-    input   reg             i_rvalid,
+    input   reg             i_rvalid,       // shake hand
     output  reg             o_rready,
     // input   reg             i_rlast,    //悬空 ###
     // input   reg  [3:0]      i_rid,
@@ -56,20 +52,6 @@ module ysyx_23060219_ifu(
     output  wire            o_bready
     // input   reg  [3:0]      i_bid
 );
-
-/*-------------- output set 0 --------------- */
-    // assign o_arid = 0;
-    // assign o_arlen = 0;
-    // assign o_arsize = 0;
-    // assign o_arburst = 0;
-
-    // assign o_awid = 0;
-    // assign o_awlen = 0;
-    // assign o_awsize = 0;
-    // assign o_awburst = 0;
-
-    // assign o_wlast = 0;
-/*-------------------------------------------*/
 
     reg temp;
     reg [31:0] o_ifu_inst_temp, o_ifu_pc_temp;
@@ -99,7 +81,7 @@ module ysyx_23060219_ifu(
     end
 
 
-    assign o_post_valid = temp;/*~i_rvalid& && temp;*/
+    assign o_post_valid = temp;
 
 
 endmodule

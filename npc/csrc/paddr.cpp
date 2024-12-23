@@ -128,13 +128,17 @@
 #include "VysyxSoCFull.h"
 
 
-/********extern functions or variables********/
+/*------------------------------------------*/
 extern VysyxSoCFull      *top;
 extern vluint64_t main_time;
 extern void close_tfp(void);
-/*********************************************/
+/*------------------------------------------*/
+
 uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
 uint8_t mrom[MROM_SIZE] PG_ALIGN = {};
+
+/*------------------------------------------*/
+
 static const word_t img [] = {
   //0x06400593,    //li	  a1,100
   //0x00100073,    //ebreak
@@ -156,6 +160,8 @@ static const word_t img [] = {
 //   0xdeadbeef,    // some data
 };
 
+/*---------------------------------------------------------------------------------------------*/
+
 extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
 extern "C" void mrom_read(int32_t addr, int32_t *data)
 { 
@@ -168,12 +174,13 @@ extern "C" void mrom_read(int32_t addr, int32_t *data)
     // *data = 0x00100073;   // 测试mrom，输入ebreak指令
 }
 
-uint8_t* mrom_guest_to_host(paddr_t paddr) { return mrom + paddr - MROM_BASE; }   
+/*--------------------------------------------------------------------------------------------*/
 
-uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - PMEM_BASE; }   //0x8000_0000 -> pmem[0]
+uint8_t*   mrom_guest_to_host(paddr_t paddr) { return mrom + paddr - MROM_BASE; }   
+uint8_t*   guest_to_host(paddr_t paddr) { return pmem + paddr - PMEM_BASE; }   //0x8000_0000 -> pmem[0]
+paddr_t    host_to_guest(uint8_t *haddr) { return haddr - pmem + PMEM_BASE; }
 
-paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + PMEM_BASE; }
-
+/*--------------------------------------------------------------------------------------------*/
 
 word_t host_read(void *addr, int len) 
 {
@@ -181,31 +188,32 @@ word_t host_read(void *addr, int len)
     case 1: return *(uint8_t  *)addr;
     case 2: return *(uint16_t *)addr;
     case 4: return *(uint32_t *)addr;
-    // case 8: return *(uint64_t *)addr;
     default: assert(0); return 0;
   }
 }
+
 
 static void host_write(void *addr, int len, word_t data) {
   switch (len) {
     case 1: *(uint8_t  *)addr = data; return;
     case 2: *(uint16_t *)addr = data; return;
     case 4: *(uint32_t *)addr = data; return;
-    // case 8: *(uint64_t *)addr = data; return;
     default: assert(0);
   }
 }
+
 
 static inline bool in_pmem(paddr_t addr) {
   return (addr - PMEM_BASE < PMEM_SIZE);
 }
 
+
 static inline void out_of_bound(paddr_t addr) {
   close_tfp();
-  //npc_state.state = NPC_END;
   panic("address = 0x%08x is out of bound of pmem [0x%08x, 0x%08x] at pc = 0x%08x  time = %ld", 
          addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, main_time);
 }
+
 
 word_t pmem_r(paddr_t addr, int len) 
 {
@@ -225,11 +233,13 @@ word_t pmem_r(paddr_t addr, int len)
   return 0;
 }
 
+
+
 int pmem_read(int addr) {
-    //printf("read    addr:0x%x, len:4\n", addr);
     int ret = host_read(guest_to_host(addr), 4);
     return ret;
 }
+
 
 void pmem_w(paddr_t addr, int len, word_t data) 
 {
@@ -242,21 +252,22 @@ void pmem_w(paddr_t addr, int len, word_t data)
 #endif
     host_write(guest_to_host(addr), len, data);
     return;
-  }  
-
+  } 
   out_of_bound(addr);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------------*/
+
 void init_mem(void) 
 {
-  memset(mrom, 0, MROM_SIZE);
+    memset(mrom, 0, MROM_SIZE);
+    Log("mrom memory area [0x%08x, 0x%08x]", MROM_BASE, MROM_BASE+MROM_SIZE-1); //记录物理内存区域边界
+  /* Load built-in image. */
+    memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
+
+
   // memset(pmem, 0, PMEM_SIZE); //将pmem物理内存的所有字节设置为0，pmem指向物理内存的起始地址，PMEM_SIZE为要填充的内存区域大小
   // Log("physical memory area [0x%08x, 0x%08x]", PMEM_LEFT, PMEM_RIGHT); //记录物理内存区域边界
-    Log("mrom memory area [0x%08x, 0x%08x]", MROM_BASE, MROM_BASE+MROM_SIZE-1); //记录物理内存区域边界
-
-  /* Load built-in image. */
-  memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
   // memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));  //将内置镜像img的内容复制到物理内存中的启动位置
-
   //guest_to_hoat(RESET_VECTOR)：返回指向物理内存中RESET_VECTOR位置的指针，是程序的起始位置
 }
