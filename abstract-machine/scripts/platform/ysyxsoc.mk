@@ -13,7 +13,6 @@ LDFLAGS   += -T $(AM_HOME)/scripts/linker_ysyxsoc.ld \
 						 --defsym=_pmem_start=0x20000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
 LDFLAGS   += --print-map    #查看ld如何链接
-# LDFLAGS   += --gc-sections  #移除未使用的代码段
 
 ##
 NPCFLAGS += -l $(shell dirname $(IMAGE).elf)/ysyxsoc-log.txt
