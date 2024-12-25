@@ -42,7 +42,8 @@ module ysyx_23060219_bru(
     reg [`CPU_Bus] npc_reg;
     always @(posedge clk) begin
         if(rst == 1'b1) 
-            npc_reg <= `RESET_MROM;           /////////////////////
+            // npc_reg <= `RESET_FLASH;
+            npc_reg <= `RESET_MROM; 
             // npc_reg <= `RESET_VECTOR;
         else if(i_bru_npc_wen == 1'b1)
             npc_reg <= npc_t2;

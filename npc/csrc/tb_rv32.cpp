@@ -41,32 +41,7 @@ extern uint64_t get_time();
 extern void   difftest_skip_ref();
 extern uint8_t* guest_to_host(paddr_t paddr);
 
-//---------Load binary data into mrom array--------------------------------------------------------------------
-static uint8_t mrom[MROM_SIZE] = {};
 
-const char* binary = "/home/zhong/ysyx-workbench/am-kernels/tests/cpu-tests/build/char-test-riscv32e-npc.bin";
-
-long load_binary_to_mrom() {
-  if (binary == NULL) {
-    Log("No binary image is given. Use the default built-in binary.");
-    return 4096; // built-in binary size
-  }
-  FILE *fp = fopen(binary, "rb");
-  Assert(fp, "Cannot open '%s'", binary);
-
-  fseek(fp, 0, SEEK_END);
-  long size = ftell(fp);
-
-  Log("Loading binary image %s, size = %ld", binary, size);
-
-  fseek(fp, 0, SEEK_SET);
-  int ret = fread(mrom, size, 1, fp); 
-  assert(ret == 1);
-
-  fclose(fp);
-  return size;
-}
-/*----------------------------------------------------------------------------------------*/
 
 static uint32_t rtc_port_base[2] = {0, 0};
 static const char *unit_names[14] = {

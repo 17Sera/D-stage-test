@@ -121,8 +121,9 @@
 `define RESET_VECTOR 32'h8000_0000
 `define PC_INCREMENT 32'd4
 
-`define RESET_MROM  32'h2000_0000
-
+// reset
+`define RESET_MROM   32'h2000_0000
+`define RESET_FLASH  32'h3000_0000
 
 // RegisterFile
 `define Reg_x0     5'd0

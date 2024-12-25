@@ -2,9 +2,11 @@ ENTRY(_start)
 PHDRS { text PT_LOAD; rodata PT_LOAD; data PT_LOAD; bss PT_LOAD; }   /*定义 ELF 文件的程序头表,若去掉则.text 和 .data 段的加载地址可能无法被识别*/
 
 MEMORY {
-  mrom : ORIGIN = 0x20000000, LENGTH = 4K   /* mrom = 0x20000000 ~ 0x20000fff */
-  sram : ORIGIN = 0x0f000000, LENGTH = 8K   /* sram = 0x0f000000 ~ 0x0f001fff */
-  /* mrom(rx) : ORIGIN = 0x20000000, LENGTH = 4K   mrom = 0x20000000 ~ 0x20000fff (rx)(rxw)会增大text*/ 
+  mrom  : ORIGIN = 0x20000000, LENGTH = 4K    /* mrom  = 0x20000000 ~ 0x20000fff */
+  sram  : ORIGIN = 0x0f000000, LENGTH = 8K    /* sram  = 0x0f000000 ~ 0x0f001fff */
+  flash : ORIGIN = 0x30000000, LENGTH = 16M   /* flash = 0x30000000 ~ 0x3fffffff */
+
+  /* mrom(rx) : ORIGIN = 0x20000000, LENGTH = 4K   mrom = 0x20000000 ~ 0x20000fff      (rx)(rxw)会增大text*/ 
   /* sram(rxw) : ORIGIN = 0x0f000000, LENGTH = 8K   sram = 0x0f000000 ~ 0x0f001fff */
 }
 
@@ -54,11 +56,13 @@ SECTIONS {
 
   _heap_start = 0x0f000800;
   /* _heap_start = ALIGN(0x10);     确保堆起始地址对齐到 16 字节 */
-  _heap_end = _stack_top;
+  /* _heap_start = 0x30000800; */
   /* . =  _heap_start + 0x800;
   _heap_end = .; */ 
 
-  _stack_top = 0x0f001400;    /* 栈顶---堆底 */
+  _heap_end = _stack_top;
+  /* _stack_top = 0x3001400;  */
+  _stack_top = 0x0f001400;    /*栈顶---堆底*/
   . = _stack_top + 0x0500;
   _stack_pointer = .;
 
