@@ -193,7 +193,7 @@ static void execute_once()
 {
     PCSet.pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;  PCSet.inst = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
     // take 5 cycles to excute one instruction
-    single_cycle(); single_cycle(); single_cycle(); single_cycle(); single_cycle(); single_cycle();
+    single_cycle();
     PCSet.npc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;  PCSet.ninst = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
     
 

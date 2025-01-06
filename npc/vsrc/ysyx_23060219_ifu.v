@@ -20,7 +20,7 @@ module ysyx_23060219_ifu(
     /*---------------- 读地址 ----------------*/
     output  reg  [31:0]     o_araddr,
     output  reg             o_arvalid, 
-    input   reg             i_arready,  // 没用上
+    input   reg             i_arready,  
     // output  reg  [3:0]      o_arid,     
     // output  reg  [7:0]      o_arlen,
     // output  reg  [2:0]      o_arsize,
@@ -53,9 +53,7 @@ module ysyx_23060219_ifu(
     // input   reg  [3:0]      i_bid
 );
 
-    reg         temp_post_valid;
-    reg [31:0]  o_ifu_inst_temp, o_ifu_pc_temp;
-    reg [2:0]   arvalid_counter;
+    reg   temp_post_valid;
 
     always@(posedge clk or posedge rst) begin
         if(rst) begin

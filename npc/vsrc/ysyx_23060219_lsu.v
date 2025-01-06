@@ -127,13 +127,15 @@ module ysyx_23060219_lsu(
     reg  [`CPU_Bus] dmem_rdata_t;
     reg  [`CPU_Bus] dmem_rdata;
     reg  [`CPU_Bus] dmem_rdata_tmp;
+    // reg             o_lsu_npc_wen;
 
 
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-            o_rready <= 0; 
+            o_rready  <= 0; 
             o_arvalid <= 0;
             o_lsu_req <= 0;
+            // o_lsu_npc_wen <= 0;
         end else begin      // load 读RAM 
             if(i_lsu_is_load == `TRUE && i_exu_success && !o_arvalid) begin
                 o_araddr  <= dmem_raddr;
@@ -148,6 +150,7 @@ module ysyx_23060219_lsu(
                 o_rready <= 0;
                 o_lsu_req <= 0;
                 dmem_rdata_tmp <= i_rdata;      // 读到的数据放dmem_rdata_tmp
+                // o_lsu_npc_wen <= 1;
             end
         end
     end    

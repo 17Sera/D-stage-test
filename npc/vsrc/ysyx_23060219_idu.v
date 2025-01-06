@@ -129,7 +129,7 @@ module ysyx_23060219_idu(
             `TYPE_R:        begin idu_num_sel = `RS1_RS2;  idu_gpr_wen = `Enable;    idu_imm = `CPU_Width'd0;                                                              end
             `TYPE_I:        begin idu_num_sel = `RS1_IMM;  idu_gpr_wen = `Enable;    idu_imm = {{20{func7[6]}}, func7, rs_id2};                                            end
             `TYPE_I_LOAD:   begin idu_num_sel = `RS1_IMM;  idu_gpr_wen = `Enable;    idu_imm = {{20{func7[6]}}, func7, rs_id2};                                            end
-            `TYPE_I_JALR:   begin idu_num_sel = `PC_4;     idu_gpr_wen = `Enable;    idu_imm = `CPU_Width'd0;                                                              end
+            `TYPE_I_JALR:   begin idu_num_sel = `PC_4;     idu_gpr_wen = `Enable;    idu_imm = {{20{func7[6]}}, func7, rs_id2};                                            end      ////////////
             `TYPE_STORE:    begin idu_num_sel = `RS1_IMM;  idu_gpr_wen = `Disen;     idu_imm = {{20{func7[6]}}, func7, rd_id};                                             end
             `TYPE_B:        begin idu_num_sel = `RS1_RS2;  idu_gpr_wen = `Disen;     idu_imm = {{20{func7[6]}}, rd_id[0], func7[5:0], rd_id[4:1], 1'b0};                   end
             `TYPE_U_LUI:    begin idu_num_sel = `RS1_IMM;  idu_gpr_wen = `Enable;    idu_imm = {func7, rs_id2, rs_id1, func3, 12'd0};                                      end

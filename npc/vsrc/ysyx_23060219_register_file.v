@@ -1,6 +1,3 @@
-// // //都可
-
-
 `include "/home/zhong/ysyx-workbench/npc/vsrc/ysyx_23060219_defines.v"
 
 module ysyx_23060219_register_file(

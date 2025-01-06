@@ -183,7 +183,7 @@ void single_cycle(void)
 static void reset(void)
 {
   top->reset = 0; single_cycle();
-  top->reset = 1; single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();
+  top->reset = 1; single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();single_cycle();
   top->reset = 0;
 }
 
