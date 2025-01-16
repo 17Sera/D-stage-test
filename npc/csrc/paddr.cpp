@@ -18,33 +18,13 @@ uint8_t   flash  [FLASH_SIZE]  PG_ALIGN = {};
 /*------------------------------------------*/
 
 static const word_t img [] = {
-
   // char-test inst test flash
     0x100007b7,     
     0x04100713,      
     0x00e78023,     
-    0x00a00713,      
+    0x04200713,      
     0x00e78023,      
     0x0000006f,   
-
-//   //0x06400593,    //li	  a1,100
-//   //0x00100073,    //ebreak
-//   //0x01012783,        //  	lw	a5,16(sp)
-//   0x06458613,    //addi	a2,a1,100
-//   0x0c860693,    //addi	a3,a2,200
-//   0xed468713,    //addi	a4,a3,-300
-//   0x30571073,    //csrw	mtvec,a4
-//   0xe7070793,    //addi	a5,a4,-400
-//   0x80178813,    //addi	a6,a5,-2047
-//   0x7fa80893,    //addi	a7,a6,2042
-//   0x7fa88893,    //addi	a7,a7,2042
-//   0x00100073,    //ebreak
-//   // 0x06458613,    //addi	a2,a1,100
-// //   0x0c860693,    //addi	a3,a2,200
-// //   0x00000297,    // auipc t0,0
-// //   0x00000513,    //	li	a0,0
-// //   0x00100073,    // ebreak 
-// //   0xdeadbeef,    // some data
 };
 
 /*---------------------------------------------------------------------------------------------*/
@@ -61,7 +41,7 @@ extern "C" void flash_read(int32_t addr, int32_t *data) {
   }
 
   *data = ( (uint32_t*) flash )  [ addr / 4 ];          // 读取flash数据
-  fprintf(stderr, "Flash read addr: 0x%x      flash read data: 0x%x\n",  addr + FLASH_BASE, *data);
+  // fprintf(stderr, "Flash read addr: 0x%x      flash read data: 0x%x\n",  addr + FLASH_BASE, *data);
 }
 
 

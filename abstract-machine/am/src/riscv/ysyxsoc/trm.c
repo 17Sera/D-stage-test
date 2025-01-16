@@ -9,11 +9,8 @@
 #define soc_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code)) 
 
 extern char _heap_start , _heap_end;
-// extern char _data_start[] , _data_end[] , _m_data_start[];
-// extern char _bss_start[] , _bss_end[];
 extern char _data_start , _data_end , _m_data_start;
 extern char _bss_start , _bss_end;
-
 
 int main(const char *args);
 
@@ -31,6 +28,14 @@ static const char mainargs[] = MAINARGS;
 //   outb(SERIAL_PORT, ch);
 // }
 
+void init_uart(void)
+{
+  outb(UART_LCR, 0x80);   // 启用除数寄存器
+  outb(UART_DLH, 0x00);   // 波特率分频器高字节
+  outb(UART_DLL, 0x08);   // 波特率分频器低字节
+  outb(UART_LCR, 0x03);   // DLAB位置为0，恢复正常寄存器访问
+}
+
 
 void putch(char ch) {
   // init_uart();
@@ -46,12 +51,6 @@ void halt(int code) {
 
 
 void bootloader() {
-  // 定义段的大小
-  // size_t data_size = _data_end - _data_start;
-  // size_t bss_size = _bss_end - _bss_start;
-  // memcpy(_data_start, _m_data_start, data_size);   // 复制.data段
-  // memset(_bss_start, 0, bss_size);                 // 清零.bss段
-
   char* p = &_m_data_start;
   for(char* i=&_data_start; i<&_data_end; i++, p++) {
     *i = *p;      // 复制.data段
@@ -61,19 +60,33 @@ void bootloader() {
   }
 }
 
-void init_uart(void)
-{
-  outb(UART_LCR, 0x80);   // 启用除数寄存器
-  // outb(UART_LCR, 0b10000011);
-  outb(UART_DLH, 0x00);   // 波特率分频器高字节
-  outb(UART_DLL, 0x08);   // 波特率分频器低字节
-  outb(UART_LCR, 0x03);   // DLAB位置为0，恢复正常寄存器访问
+
+void print_ysyxCSR(void) {
+  uint32_t value;
+  asm volatile ("csrr %0, %1" : "=r" (value) : "i" (CSR_MVENDORID));
+  putch ((char) (value >> 24)); 
+  putch ((char) (value >> 16)); 
+  putch ((char) (value >> 8 )); 
+  putch ((char)  value       ); 
+  asm volatile ("csrr %0, %1" : "=r" (value) : "i" (CSR_MARCHID_1));
+  putch ((char) (value >> 24)); 
+  putch ((char) (value >> 16)); 
+  putch ((char) (value >> 8 )); 
+  putch ((char)  value       ); 
+  asm volatile ("csrr %0, %1" : "=r" (value) : "i" (CSR_MARCHID_2));
+  putch ((char) (value >> 24)); 
+  putch ((char) (value >> 16)); 
+  putch ((char) (value >> 8 )); 
+  putch ((char)  value       ); 
 }
+
 
 
 void _trm_init() {
   init_uart();
   bootloader();
+  print_ysyxCSR();
   int ret = main(mainargs);
   halt(ret);
 }
+

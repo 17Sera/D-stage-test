@@ -34,6 +34,9 @@
 #define UART_THR            ( UART_BASE + 0x00 )     // 向发送 FIFO 写入要发送的数据
 #define UART_LSR_EMPTY_MASK ( UART_BASE + 0x20 )     // 发送缓冲区空闲位掩码，1=空闲，0=繁忙
 
+#define CSR_MVENDORID           0xFC0
+#define CSR_MARCHID_1           0xFC1
+#define CSR_MARCHID_2           0xFC2
 
 
 #endif

@@ -25,7 +25,7 @@ module ysyx_23060219_lsu(
     // from Register File
     input  wire [31:0]      i_lsu_rs1,
     input  wire [31:0]      i_lsu_rs2,
-    // from CSR Ctrl
+    // from EXU
     input  wire [`CPU_Bus]  i_lsu_csr_npc,
     input  wire [`CSR_Bus]  i_lsu_csr_wid,
     input  wire [31:0]      i_lsu_csr_rd,
@@ -85,9 +85,9 @@ module ysyx_23060219_lsu(
     input   reg             i_wready,
     // output  wire            o_wlast,    //0 ###
     /*---------------- 写回复 ----------------*/
-    input   reg  [1:0]      i_bresp,
-    input   reg             i_bvalid,
-    output  reg             o_bready,
+    input   reg  [1:0]      i_bresp,        // 没用上
+    input   reg             i_bvalid,       // 没用上
+    output  reg             o_bready,       // 没用上
     // input   reg  [3:0]      i_bid,
 
     input   reg             i_exu_success
@@ -256,26 +256,26 @@ module ysyx_23060219_lsu(
     always@(posedge clk or posedge rst) begin
         if(rst) begin
             o_awvalid <= 1'b0;
-            o_wvalid <= 1'b0;
+            o_wvalid  <= 1'b0;
             o_lsu_req <= 0;
         end else begin
             if(i_lsu_is_store == `TRUE && i_exu_success && !o_awvalid) begin
                 o_awvalid <= 1'b1;
-                o_awaddr <= dmem_waddr;
+                o_awaddr  <= dmem_waddr;
                 o_lsu_req <= 1;
             end
             if(i_awready && o_awvalid) begin
-                o_wvalid <= 1'b1;
-                o_wdata <= dmem_wdata;
-                o_wstrb <= wmask;
+                o_wvalid  <= 1'b1;
+                o_wdata   <= dmem_wdata;
+                o_wstrb   <= wmask;
                 o_awvalid <= 1'b0;
             end
             if(i_wready && o_wvalid) begin
-                o_wvalid <= 1'b0;
+                o_wvalid  <= 1'b0;
                 o_lsu_req <= 0;
-                o_awaddr <= 0;
-                o_wstrb <= 0;
-                o_wdata <= 0;
+                o_awaddr  <= 0;
+                o_wstrb   <= 0;
+                o_wdata   <= 0;
             end
         end
     end
@@ -348,13 +348,16 @@ module ysyx_23060219_lsu(
     // assign o_pre_ready = ~o_post_valid;     // 和后者握手的同时 不和前者握手，导致数据混乱
 
  /* ------------------------------------------------------------------------------------------------------------------------------- */
+    reg post_valid_reg;
+    assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( (o_wvalid && i_wready) | (o_rready && i_rvalid) ) : i_pre_valid;
+    // assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( i_pre_valid & ( o_wvalid | !o_rready )) : i_pre_valid;
 
-    // 输出信号
     always @(posedge clk) begin
         if (rst) begin
             o_post_valid <= 1'b0;
         end else begin
-            o_post_valid <= i_pre_valid;      // 和前者只握手一周期，下一周期再拉高 valid, o_post_valid至少延迟一周期再等于i_pre_valid，留一周期给前者握手
+            o_post_valid <= post_valid_reg;
+            // o_post_valid <= i_pre_valid;
         end
     end
 

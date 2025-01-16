@@ -5,7 +5,7 @@ module ysyx_23060219_register_file(
     input  wire           clk,
     input  wire           rst,
     // from WBU
-    input  wire           i_rf_gpr_wen, // write enable
+    input  wire           i_rf_gpr_wen, 
     input  wire [4:0]     i_rf_rd_id,   
     input  wire [31:0]    i_rf_rd,
     // from IDU

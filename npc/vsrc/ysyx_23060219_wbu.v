@@ -14,7 +14,7 @@ module ysyx_23060219_wbu(
     input  wire             i_wbu_gpr_wen,  
     // from Register File
     input  wire [31:0]      i_wbu_rs1,
-    // from CSR Ctrl
+    // from LSU
     input  wire             i_wbu_is_mret,
     input  wire             i_wbu_is_ecall,
     input  wire [`CSR_Bus]  i_wbu_csr_wid,
@@ -73,7 +73,6 @@ always @(posedge clk) begin
         delay_cycle_end_3 <= delay_cycle_end_2;
 end
 
-
 /* -------------------------------------------------------------------------------- */
 
 always @(posedge clk) begin
@@ -94,6 +93,7 @@ end
     assign o_wbu_rd        = i_wbu_rd;
     assign o_wbu_rd_id     = i_wbu_rd_id;
     assign o_wbu_gpr_wen   = i_wbu_gpr_wen & o_wbu_npc_wen;    //只有效一周期，防止反复写入gpr  // o_wbu_gpr_wen 可以从LSU多加一个控制信号，有效数据传的同时拉高
+
     // to CSR Ctrl
     assign o_wbu_mcause_in = i_wbu_rs1;
     assign o_wbu_mepc_in   = i_wbu_pc;

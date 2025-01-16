@@ -77,8 +77,8 @@ static long load_img()
   Log("The image is %s, size = %ld", img_file, size); //记录日志，显示图像文件的名称和大小
 
   fseek(fp, 0, SEEK_SET); //将文件指针移动回文件开头
-//   int ret = fread( flash_guest_to_host(FLASH_BASE), size, 1, fp);//从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
-  int ret = fread( mrom_guest_to_host(MROM_BASE), size, 1, fp);//从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
+  int ret = fread( flash_guest_to_host(FLASH_BASE), size, 1, fp);   //从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
+//   int ret = fread( mrom_guest_to_host(MROM_BASE), size, 1, fp);  //从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
 
   assert(ret == 1);
 

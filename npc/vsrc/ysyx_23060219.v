@@ -246,7 +246,7 @@ module ysyx_23060219(
     .o_pre_ready   (w_exu_ready),  
     .o_post_valid  (w_exu_valid),  
     .i_post_ready  (w_lsu_ready),  
-    // from from IFU
+    // from IFU
     .i_exu_pc      (w_idu_pc),
     // from IDU
     .i_exu_alu_type(w_idu_alu_type),
@@ -281,13 +281,13 @@ module ysyx_23060219(
     .o_exu_csr_npc (w_exu_csr_npc),
     .o_exu_is_mret (w_exu_is_mret),
     .o_exu_is_ecall(w_exu_is_ecall),
-    // to to BRU
+    // to BRU
     .o_exu_imm     (w_exu_imm),
     .o_exu_pc      (w_exu_pc),
     .o_exu_is_jal  (w_exu_is_jal),
     .o_exu_is_jalr (w_exu_is_jalr),
     .o_exu_brch    (w_exu_brch),
-    // to to WEU
+    // to LSU ---> WBU
     .o_exu_rd_id   (w_exu_rd_id),
     .o_exu_gpr_wen (w_exu_gpr_wen),
     .o_exu_csr_wid (w_exu_csr_wid),
@@ -386,7 +386,7 @@ module ysyx_23060219(
     .o_lsu_brch    (w_lsu_brch),    
     .o_lsu_csr_npc (w_lsu_csr_npc),
     .o_lsu_is_ejump(w_lsu_is_ejump),
-    // to WEU
+    // to WBU
     .o_lsu_rd      (w_lsu_rd),
     .o_lsu_rd_id   (w_lsu_rd_id),
     .o_lsu_gpr_wen (w_lsu_gpr_wen),
@@ -466,7 +466,7 @@ module ysyx_23060219(
     .i_wbu_gpr_wen (w_lsu_gpr_wen),  
     // from Register File
     .i_wbu_rs1     (w_lsu_rs1),
-    // from CSR Ctrl
+    // from LSU
     .i_wbu_is_mret (w_lsu_is_mret),
     .i_wbu_is_ecall(w_lsu_is_ecall),
     .i_wbu_csr_wid (w_lsu_csr_wid),

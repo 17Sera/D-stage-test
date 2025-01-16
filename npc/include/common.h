@@ -49,7 +49,7 @@
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 // trace
-#define CONFIG_ITRACE      1
+// #define CONFIG_ITRACE      1
 // #define CONFIG_MTRACE      1
 // #define CONFIG_FTRACE      1
 // #define CONFIG_ETRACE      1

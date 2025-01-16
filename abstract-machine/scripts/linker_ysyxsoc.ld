@@ -13,13 +13,13 @@ MEMORY {
 SECTIONS {
   /* _pmem_start and _entry_offset are defined in LDFLAGS */
   /* . = _pmem_start + _entry_offset; */
-  . = ORIGIN(mrom);     /*用于初始化位置,确保段的地址分配从指定内存区域的起始地址开始*/
+  . = ORIGIN(flash);     /*用于初始化位置,确保段的地址分配从指定内存区域的起始地址开始*/
 
   .text : {
     *(entry)
     *(.text*)
     /* _text_end = .; */
-  } > mrom : text
+  } > flash : text
 
   etext = .;
   _etext = .;
@@ -28,7 +28,7 @@ SECTIONS {
   .rodata : {
     *(.rodata*)
     *(.srodata*)
-  } > mrom : rodata
+  } > flash : rodata
 
 
   .data : {
@@ -36,7 +36,7 @@ SECTIONS {
     *(.data*)
     *(.sdata*)
     _data_end = .;      /*.data 段运行时结束地址 --- VMA --- SRAM*/
-  } > sram AT> mrom : data
+  } > sram AT> flash : data
 
 
   /* _data_end = ADDR(.bss); */
@@ -54,6 +54,7 @@ SECTIONS {
   } > sram : bss
 
 
+  /* sram  = 0x0f000000 ~ 0x0f001fff */
   _heap_start = 0x0f000800;
   /* _heap_start = ALIGN(0x10);     确保堆起始地址对齐到 16 字节 */
   /* _heap_start = 0x30000800; */
@@ -62,8 +63,8 @@ SECTIONS {
 
   _heap_end = _stack_top;
   /* _stack_top = 0x3001400;  */
-  _stack_top = 0x0f001400;    /*栈顶---堆底*/
-  . = _stack_top + 0x0500;
+  _stack_top = 0x0f001b00;    /*栈顶---堆底*/
+  . = _stack_top + 0x0400;
   _stack_pointer = .;
 
 
