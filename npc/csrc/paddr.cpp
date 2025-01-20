@@ -5,17 +5,18 @@
 #include "VysyxSoCFull__Syms.h"
 #include "VysyxSoCFull.h"
 
-/*------------------------------------------*/
+/*-----------------------------------------------*/
 extern VysyxSoCFull      *top;
 extern vluint64_t         main_time;
 extern void close_tfp    (void);
-/*------------------------------------------*/
+/*-----------------------------------------------*/
 
 uint8_t   pmem   [PMEM_SIZE]   PG_ALIGN = {};
 uint8_t   mrom   [MROM_SIZE]   PG_ALIGN = {};
 uint8_t   flash  [FLASH_SIZE]  PG_ALIGN = {};
+uint8_t   sram   [SRAM_SIZE]   PG_ALIGN = {};
 
-/*------------------------------------------*/
+/*-----------------------------------------------*/
 
 static const word_t img [] = {
   // char-test inst test flash
@@ -25,6 +26,8 @@ static const word_t img [] = {
     0x04200713,      
     0x00e78023,      
     0x0000006f,   
+
+    // 0x00100073,    // ebreak 
 };
 
 /*---------------------------------------------------------------------------------------------*/
@@ -59,10 +62,11 @@ extern "C" void mrom_read(int32_t addr, int32_t *data)
 
 /*--------------------------------------------------------------------------------------------*/
 
+uint8_t*   sram_guest_to_host  (paddr_t paddr)  { return sram  + paddr -  SRAM_BASE; }   
 uint8_t*   flash_guest_to_host (paddr_t paddr)  { return flash + paddr - FLASH_BASE; }   
-uint8_t*   mrom_guest_to_host  (paddr_t paddr)  { return mrom + paddr -  MROM_BASE; }   
-uint8_t*   guest_to_host       (paddr_t paddr)  { return pmem + paddr -  PMEM_BASE; }   //0x8000_0000 -> pmem[0]
-paddr_t    host_to_guest       (uint8_t *haddr) { return haddr - pmem +  PMEM_BASE; }
+uint8_t*   mrom_guest_to_host  (paddr_t paddr)  { return mrom  + paddr -  MROM_BASE; }   
+uint8_t*   guest_to_host       (paddr_t paddr)  { return pmem  + paddr -  PMEM_BASE; }   //0x8000_0000 -> pmem[0]
+paddr_t    host_to_guest       (uint8_t *haddr) { return haddr - pmem  +  PMEM_BASE; }
 
 /*--------------------------------------------------------------------------------------------*/
 
@@ -101,7 +105,7 @@ static inline void out_of_bound(paddr_t addr) {
 
 word_t pmem_r(paddr_t addr, int len) 
 {
-  if(in_pmem(addr))   //check if within the bound
+  if(in_pmem(addr))  
 #ifdef CONFIG_MTRACE
   {
     word_t data = host_read(guest_to_host(addr), len);
@@ -127,7 +131,7 @@ int pmem_read(int addr) {
 
 void pmem_w(paddr_t addr, int len, word_t data) 
 {
-  if(in_pmem(addr))   //check if within the bound
+  if(in_pmem(addr)) 
   {
 #ifdef CONFIG_MTRACE
     _Log(ANSI_FG_YELLOW "[mtrace]" ANSI_NONE " wr_mem  " ANSI_FG_YELLOW 
@@ -144,15 +148,16 @@ void pmem_w(paddr_t addr, int len, word_t data)
 
 void init_mem(void)   
 {
-  // flash
+/**** flash ****/
   memset(flash, 0, FLASH_SIZE);
-  Log("flash memory area [0x%08x, 0x%08x]", FLASH_BASE, FLASH_BASE + FLASH_SIZE - 1 ); //记录物理内存区域边界
+  Log("flash memory area [0x%08x, 0x%08x]", FLASH_BASE, FLASH_BASE + FLASH_SIZE - 1 ); 
   /* Load built-in image. */
-  memcpy(flash_guest_to_host(FLASH_BASE), img, sizeof(img));  //将内置镜像img的内容复制到内存中的启动位置
+  memcpy(flash_guest_to_host(FLASH_BASE), img, sizeof(img));  // 加载内置镜像到内存
 
-  // mrom
+
+/**** mrom ****/
   // memset(mrom, 0, MROM_SIZE);
   // Log("mrom memory area [0x%08x, 0x%08x]", MROM_BASE, MROM_BASE + MROM_SIZE); 
   // /* Load built-in image. */
-  // memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  //将内置镜像img的内容复制到内存中的启动位置
+  // memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  // 加载内置镜像到内存
 }

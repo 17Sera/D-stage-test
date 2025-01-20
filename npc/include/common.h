@@ -17,6 +17,9 @@
 #define FLASH_BASE  0x30000000
 #define FLASH_SIZE  0x10000000
 
+#define SRAM_BASE   0x0f000000
+#define SRAM_SIZE   0x1000000
+
 #define paddr_t   uint32_t
 #define word_t    uint32_t
 #define vaddr_t   word_t
@@ -45,7 +48,6 @@
 #define WWord  0b00001111
 
 
-// calculate the length of an array
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 // trace
@@ -54,7 +56,7 @@
 // #define CONFIG_FTRACE      1
 // #define CONFIG_ETRACE      1
 // #define CONFIG_IRINGBUF    1
-// #define CONFIG_DIFFTEST    1
+#define CONFIG_DIFFTEST    1
 
 #define MAX_iringbuf_size  20
 

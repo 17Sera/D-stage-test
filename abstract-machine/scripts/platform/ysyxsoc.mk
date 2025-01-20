@@ -10,7 +10,7 @@ AM_SRCS := riscv/ysyxsoc/start.S \
 
 CFLAGS    += -fdata-sections -ffunction-sections
 LDFLAGS   += -T $(AM_HOME)/scripts/linker_ysyxsoc.ld \
-						 --defsym=_pmem_start=0x20000000 --defsym=_entry_offset=0x0
+						 --defsym=_pmem_start=0x30000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
 # LDFLAGS   += --print-map    #查看ld如何链接
 
@@ -19,6 +19,7 @@ NPCFLAGS += -l $(shell dirname $(IMAGE).elf)/ysyxsoc-log.txt
 # NPCFLAGS += -l ./log/ysyxsoc-log.txt
 NPCFLAGS += -e $(IMAGE).elf
 NPCFLAGS += -b
+# NPCFLAGS += -d $(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 
 # CFLAGS += -Os   #优化代码体积
 CFLAGS += -DMAINARGS=\"$(mainargs)\"

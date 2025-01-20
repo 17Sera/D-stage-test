@@ -18,15 +18,42 @@
 #include <difftest-def.h>
 #include <memory/paddr.h>
 
+#define SRAM_BASE   0x0f000000
+#define SRAM_SIZE   0x1000000
+
+#define FLASH_BASE  0x30000000
+#define FLASH_SIZE  0x10000000
 
 
 __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) 
 {
-  if(direction == DIFFTEST_TO_REF)
-    memcpy(guest_to_host(RESET_VECTOR), buf, n);
+  if (addr >= FLASH_BASE && addr < FLASH_BASE + FLASH_SIZE){      // flash
+    if (direction == DIFFTEST_TO_DUT) {
+      for (int i = 0; i < n; i++) {
+        *((uint8_t *)(buf) + i) = *guest_to_host(addr + i);
+      }
+    } else {
+      for (int i = 0; i < n; i++) {
+        *guest_to_host(addr + i) = *((uint8_t *)(buf) + i);
+      }
+    }
+  }
+  else if (addr >= SRAM_BASE && addr < SRAM_BASE + SRAM_SIZE) {   // sram
+    if (direction == DIFFTEST_TO_DUT) {
+      for (int i = 0; i < n; i++) {
+        *((uint8_t *)(buf) + i) = *guest_to_host(addr + i);
+      }
+    } else {
+      for (int i = 0; i < n; i++) {
+        *guest_to_host(addr + i) = *((uint8_t *)(buf) + i);
+      }
+    }
+  }
   else
     assert(0);
 }
+
+
 
 __EXPORT void difftest_regcpy(void *dut, bool direction) {
   if(direction == DIFFTEST_TO_REF)
@@ -37,79 +64,19 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
     assert(0);
 }
 
+
+
 __EXPORT void difftest_exec(uint64_t n) {
   cpu_exec(n);
 }
 
 
 
-//-------------------------------------------------------------
-// __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
-//   assert(0);
-// }
-//在DUT host memory的buf和REF guest memory的dest间拷贝n个字节
-// void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
-//   if(direction == DIFFTEST_TO_REF){
-//     memcpy(guest_to_host(addr), buf, n);
-//   } else{
-//     assert(0);
-//   }
-// }
-
-
-// // __EXPORT void difftest_regcpy(void *dut, bool direction) {
-// //   assert(0);
-// // }
-// //获取及设置REF的寄存器状态到DUT
-// void difftest_regcpy(void *dut, bool direction) {
-//   CPU_state *_dut = (CPU_state*)dut;
-//   if(direction == DIFFTEST_TO_REF){
-//     for(int i = 0; i < 32; i = i + 1){
-//       cpu.gpr[i] = _dut->gpr[i];
-//     }
-//     #ifdef CONFIG_RV_Privileged
-//     for(int i = 0; i < 4096; i = i + 1){
-//       cpu.csr[i] = _dut->csr[i];
-//     }
-//     #endif
-//     cpu.pc = _dut->pc;
-//   }else{
-//     for(int i = 0; i < 32; i = i + 1){
-//       _dut->gpr[i] = cpu.gpr[i];
-//       //Log("gpr x%d is 0x%lx", i, cpu.gpr[i]);
-//     }
-//     #ifdef CONFIG_RV_Privileged
-//     for(int i = 0; i < 4096; i = i + 1){
-//       _dut->csr[i] = cpu.csr[i];
-//     }
-//     _dut->csr[0x300] = 0xa00001800; // need later refinements
-//     //Log("csr0x300 is 0x%lx", cpu.csr[0x300]);
-//     //Log("csr0x305 is 0x%lx", cpu.csr[0x305]);
-//     //Log("csr0x341 is 0x%lx", cpu.csr[0x341]);
-//     //Log("csr0x342 is 0x%lx", cpu.csr[0x342]);
-//     #endif
-//     _dut->pc = cpu.pc;
-//     //Log("pc is 0x%lx", cpu.pc);
-//   }
-// }
-
-// // __EXPORT void difftest_exec(uint64_t n) {
-// //   assert(0);
-// // }
-// //REF执行n条指令
-// void difftest_exec(uint64_t n) {
-//   cpu_exec(n);
-
-//   #ifdef CONFIG_ShowExecuteStep
-//   Log("Use NEMU as ref model, CPU execute at PC = 0x%x", cpu.pc);
-//   #endif
-// }
-//-------------------------------------------------------------
-
-
 __EXPORT void difftest_raise_intr(word_t NO) {
   assert(0);
 }
+
+
 
 __EXPORT void difftest_init(int port) {
   void init_mem();

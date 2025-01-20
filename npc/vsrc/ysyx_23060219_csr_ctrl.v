@@ -26,7 +26,7 @@ module ysyx_23060219_csr_ctrl(
     reg [31:0] mepc;
     reg [31:0] mcause;
 
-    reg [31:0] mvendorid;                              ///
+    reg [31:0] mvendorid; 
     reg [31:0] marchid_1;
     reg [31:0] marchid_2;
 

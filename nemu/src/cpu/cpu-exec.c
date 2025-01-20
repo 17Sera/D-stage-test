@@ -38,10 +38,8 @@ void wp_difftest();
 
 
  
-//void display_inst(); ///////  
 #define INST_NUM 16     ////////for iringbuf begin
 static int cur_inst = 0;
-//static int func_num = 0;
 typedef struct
 {
   word_t pc;
@@ -59,24 +57,31 @@ void trace_inst(word_t pc, uint32_t inst)
 
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-
-#ifdef CONFIG_ITRACE_COND   //ITRACE_COND额外考虑写入log
+#ifdef CONFIG_ITRACE_COND  
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-	IFDEF(CONFIG_WATCHPOINT, wp_difftest());   ////
+	IFDEF(CONFIG_WATCHPOINT, wp_difftest()); 
 }
+
+
 
 static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
-  cpu.pc = s->dnpc;
+  if(s->isa.inst.val == 0x00100073){    // 遇到ebreak 让nemu停下
+    nemu_state.state = NEMU_STOP;
+  }
+  else{
+    cpu.pc = s->dnpc;
+  }
 
-IFDEF(CONFIG_IRINGBUF, trace_inst( s->pc, s->isa.inst.val )); ///////////////
 
-#ifdef CONFIG_ITRACE    //itrace的实现
+IFDEF(CONFIG_IRINGBUF, trace_inst( s->pc, s->isa.inst.val )); 
+
+#ifdef CONFIG_ITRACE  
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc); //将pc值存入p所指向的位置，并更新p
   int ilen = s->snpc - s->pc; //表示指令的长度
@@ -113,10 +118,7 @@ void display_inst()         //出错的是前一条指令    //负责打印
   do{
       p = buf;
       if(i == end) p += sprintf(buf, "-->");
-      p += sprintf(buf, "%s" FMT_WORD ":  %08x\t", (i + 1) % INST_NUM == end ? "--->  " : "      ", iringbuf[i].pc, iringbuf[i].inst);
-      // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-      // disassemble(p, buf + sizeof(buf) - p, iringbuf[i].pc, (uint8_t *)&iringbuf[i].inst, 4);
-      //printf("%s",buf);
+      p += sprintf(buf, "%s" FMT_WORD "   inst: 0x%08x\t", (i + 1) % INST_NUM == end ? "--->  " : "      ", iringbuf[i].pc, iringbuf[i].inst);
       puts(buf);
       i = (i + 1) % INST_NUM;
   } while (i != end);
@@ -145,7 +147,7 @@ static void statistic() {
 
 void assert_fail_msg() {
   isa_reg_display();
-  IFDEF(CONFIG_IRINGBUF,display_inst());  /////////////
+  IFDEF(CONFIG_IRINGBUF,display_inst());  
   statistic();
 }
 
@@ -169,11 +171,11 @@ void cpu_exec(uint64_t n) {
   switch (nemu_state.state) {
     case NEMU_RUNNING: 
       nemu_state.state = NEMU_STOP; 
-      IFDEF(CONFIG_IRINGBUF,display_inst());  ////////////
+      IFDEF(CONFIG_IRINGBUF,display_inst()); 
       break;
 
     case NEMU_END: case NEMU_ABORT:
-      IFDEF(CONFIG_IRINGBUF,display_inst());  ////////////
+      IFDEF(CONFIG_IRINGBUF,display_inst()); 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :

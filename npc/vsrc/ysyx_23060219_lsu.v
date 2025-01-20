@@ -302,6 +302,28 @@ module ysyx_23060219_lsu(
     o_lsu_gpr_wen, o_lsu_csr_wen, o_lsu_is_mret, o_lsu_is_ecall, 
     o_lsu_csr_wid, o_lsu_csr_rd } = lsu_valid_data_reg;
 
+
+
+    reg post_valid_reg;
+    assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( (o_wvalid && i_wready) | (o_rready && i_rvalid) ) : i_pre_valid;
+    // assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( i_pre_valid & ( o_wvalid | !o_rready )) : i_pre_valid;
+
+    always @(posedge clk) begin
+        if (rst) begin
+            o_post_valid <= 1'b0;
+        end else begin
+            o_post_valid <= post_valid_reg;
+            // o_post_valid <= i_pre_valid;
+        end
+    end
+
+    assign o_pre_ready = ~o_post_valid;      // 和后者握手的同时 不和前者握手，导致数据混乱
+
+
+endmodule
+
+
+
  /* --------------------------- delay --------------------------------------------------------------------------------------------- */
     // reg post_valid_reg;
     // reg post_valid_delay_1, post_valid_delay_2, post_valid_delay_3, post_valid_delay_4, post_valid_delay_5;
@@ -348,20 +370,3 @@ module ysyx_23060219_lsu(
     // assign o_pre_ready = ~o_post_valid;     // 和后者握手的同时 不和前者握手，导致数据混乱
 
  /* ------------------------------------------------------------------------------------------------------------------------------- */
-    reg post_valid_reg;
-    assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( (o_wvalid && i_wready) | (o_rready && i_rvalid) ) : i_pre_valid;
-    // assign post_valid_reg = ( i_lsu_is_load | i_lsu_is_store ) ? ( i_pre_valid & ( o_wvalid | !o_rready )) : i_pre_valid;
-
-    always @(posedge clk) begin
-        if (rst) begin
-            o_post_valid <= 1'b0;
-        end else begin
-            o_post_valid <= post_valid_reg;
-            // o_post_valid <= i_pre_valid;
-        end
-    end
-
-    assign o_pre_ready = ~o_post_valid;      // 和后者握手的同时 不和前者握手，导致数据混乱
-
-
-endmodule

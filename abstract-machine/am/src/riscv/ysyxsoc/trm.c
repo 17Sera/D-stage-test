@@ -38,7 +38,6 @@ void init_uart(void)
 
 
 void putch(char ch) {
-  // init_uart();
   while ((inb(UART_LSR) & UART_LSR_EMPTY_MASK) == 0);   // 查询串口发送队列的情况,等待fifo空闲
   outb(UART_THR, ch);
 }
@@ -83,9 +82,10 @@ void print_ysyxCSR(void) {
 
 
 void _trm_init() {
-  init_uart();
+  // difftest要注释
+  // init_uart(); 
   bootloader();
-  print_ysyxCSR();
+  // print_ysyxCSR();
   int ret = main(mainargs);
   halt(ret);
 }

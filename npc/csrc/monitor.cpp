@@ -12,6 +12,7 @@ extern void      init_mem             (void);
 extern void      sdb_set_batch_mode   (void); 
 extern uint8_t*  mrom_guest_to_host   (paddr_t paddr);
 extern uint8_t*  flash_guest_to_host  (paddr_t paddr);
+extern uint8_t*  guest_to_host        (paddr_t paddr);
 
 
 #ifdef CONFIG_FTRACE 
@@ -25,14 +26,14 @@ static uint8_t flash [FLASH_SIZE] = {};
 
 /*---------------------------------------------------------------------------------------------------------*/
 
-static char *log_file = NULL;
-static char *img_file = NULL;
-char *elf_file = NULL;
-char *diff_so_file = NULL;
-int  difftest_port = 1234;
-long img_size;
-long bin_size;
-NPCState npc_state = { .state = NPC_STOP };
+static char *log_file      = NULL;
+static char *img_file      = NULL;
+char        *elf_file      = NULL;
+char        *diff_so_file  = NULL;
+int          difftest_port = 1234;
+long         img_size;
+long         bin_size;
+NPCState     npc_state = { .state = NPC_STOP };
 
 /*---------------------------------------------------------------------------------------------------------*/
 
@@ -61,28 +62,29 @@ static void welcome()
 }
 
 
+
 static long load_img() 
 {
   if (img_file == NULL) {
     Log("No image is given. Use the default build-in image.");
-    return 4096; // built-in image size
+    return 4096; 
   }
 
-  FILE *fp = fopen(img_file, "rb");  //使用fopen函数以二进制模式（“rb”）打开指定的图像文件。如果文件无法打开，就assert
+  FILE *fp = fopen(img_file, "rb");  
   Assert(fp, "Can not open '%s'", img_file);
 
-  fseek(fp, 0, SEEK_END); //将文件指针挪到文件末尾
-  long size = ftell(fp); //返回文件指针的偏移量，即文件的大小（字节）
+  fseek(fp, 0, SEEK_END); 
+  long size = ftell(fp); 
 
-  Log("The image is %s, size = %ld", img_file, size); //记录日志，显示图像文件的名称和大小
+  Log("The image is %s, size = %ld", img_file, size);
 
-  fseek(fp, 0, SEEK_SET); //将文件指针移动回文件开头
-  int ret = fread( flash_guest_to_host(FLASH_BASE), size, 1, fp);   //从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
-//   int ret = fread( mrom_guest_to_host(MROM_BASE), size, 1, fp);  //从文件中读取数据。将图像数据读入到内存的起始位置。ret表示实际读取的元素数目
+  fseek(fp, 0, SEEK_SET);
+  int ret = fread( flash_guest_to_host(FLASH_BASE), size, 1, fp);  
+// int ret = fread( mrom_guest_to_host(MROM_BASE), size, 1, fp);
 
   assert(ret == 1);
 
-  fclose(fp); //关闭文件，释放资源
+  fclose(fp); 
   return size;
 }
 
@@ -120,10 +122,8 @@ static int parse_args(int argc, char *argv[])
 }
 
 
-
 void init_monitor(int argc, char *argv[]) {
     /* Perform some global initialization. */
-
     /* Parse arguments. */
     parse_args(argc, argv);
 
@@ -134,10 +134,8 @@ void init_monitor(int argc, char *argv[]) {
     /* Load the ELF file of the image */
     load_elf();
 #endif
-
     /* Initialize memory. */
     init_mem();
-
     /* Load the image to memory. This will overwrite the built-in image. */
     // long img_size = load_img();
     img_size = load_img();

@@ -16,14 +16,40 @@
 #include <isa.h>
 #include <memory/paddr.h>
 
+
 word_t vaddr_ifetch(vaddr_t addr, int len) {
+#ifdef CONFIG_MTRACE
+  word_t data = paddr_read(addr, len);
+  printf("\33[1;33m[mtrace]\33[0m  ifetch_inst  \33[1;33m addr:\33[0m 0x%08x  \33[1;33m inst:\33[0m 0x%08x\n", addr, data);
+  log_write("[mtrace] rd_inst  addr: 0x%08x  data: 0x%08x\n", addr, data); 
+  return data;
+#else
   return paddr_read(addr, len);
+#endif
 }
+
+
 
 word_t vaddr_read(vaddr_t addr, int len) {
+#ifdef CONFIG_MTRACE
+  word_t data = paddr_read(addr, len);
+  printf("\33[1;33m[mtrace]\33[0m  read_mem   \33[1;33m   addr:\33[0m 0x%08x  \33[1;33m data:\33[0m 0x%08x\n", addr, data);
+  log_write("[mtrace] rd_mem  addr: 0x%08x  data: 0x%08x\n", addr, data); 
+  // printf("\n************ reg data is done read_mem inst before ************\n");
+  // isa_reg_display();
+  return data;
+#else
   return paddr_read(addr, len);
+#endif
 }
 
+
+
 void vaddr_write(vaddr_t addr, int len, word_t data) {
+#ifdef CONFIG_MTRACE
+  printf("\33[1;33m[mtrace]\33[0m  write_mem   \33[1;33m  addr:\33[0m 0x%08x  \33[1;33m data:\33[0m 0x%08x\n", addr, data);
+  log_write("[mtrace] wr_mem   addr: 0x%08x  data: 0x%08x\n", addr, data); 
+#endif
   paddr_write(addr, len, data);
+  // isa_reg_display();
 }

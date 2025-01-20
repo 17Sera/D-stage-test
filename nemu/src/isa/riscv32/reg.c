@@ -29,9 +29,11 @@ void isa_reg_display() {
 	int number = sizeof( regs ) / sizeof( regs[0] );
 	for(int i = 0; i < number; i++ )
 	{
-		printf("$%s ---> 0x%08x   %u\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
+		printf("regs: [%s] ---> value: 0x%08x \n", regs[i], cpu.gpr[i]);
   }                        
 }
+
+
 
 word_t isa_reg_str2val(const char *s, bool *success) {
 	s++;
