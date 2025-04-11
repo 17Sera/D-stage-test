@@ -12,7 +12,6 @@ extern void      init_mem             (void);
 extern void      sdb_set_batch_mode   (void); 
 extern uint8_t*  mrom_guest_to_host   (paddr_t paddr);
 extern uint8_t*  flash_guest_to_host  (paddr_t paddr);
-extern uint8_t*  guest_to_host        (paddr_t paddr);
 
 
 #ifdef CONFIG_FTRACE 

@@ -5,15 +5,11 @@
 #include "VysyxSoCFull__Dpi.h"
 #include "VysyxSoCFull__Syms.h"
 #include "VysyxSoCFull.h"
-// #include "../include/difftest.h"
-// #include <dlfcn.h>
-// #include "Vysyx_23060219_top.h"
-// #include "Vysyx_23060219_top___024root.h"
+
 
 /*------------------------------------------------------------------------------------*/
 extern VysyxSoCFull *top;
 extern NPCState npc_state;
-extern uint8_t* guest_to_host(paddr_t paddr);
 extern uint8_t* flash_guest_to_host(paddr_t paddr);
 extern uint8_t* sram_guest_to_host(paddr_t paddr);
 /*------------------------------------------------------------------------------------*/
