@@ -71,12 +71,12 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
-// if(s->isa.inst.val == 0x00100073){    // 遇到ebreak 让nemu停下   // for difftest
-//   nemu_state.state = NEMU_STOP;
-// }
-// else{
+  if(s->isa.inst.val == 0x00100073){    // 遇到ebreak 让nemu停下   // for difftest
+    nemu_state.state = NEMU_STOP;
+  }
+  else{
     cpu.pc = s->dnpc;
-// }
+  }
 
 
 IFDEF(CONFIG_IRINGBUF, trace_inst( s->pc, s->isa.inst.val )); 

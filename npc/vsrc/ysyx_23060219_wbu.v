@@ -78,9 +78,10 @@ end
 always @(posedge clk) begin
     if (rst == 1'b1) 
         o_cycle_end   <= 1'b1;
-    else 
+    else begin
         o_cycle_end   <= delay_cycle_end_3; 
         o_wbu_npc_wen <= delay_cycle_end_2;
+    end
 end
 
 /* -------------------------------------------------------------------------------- */
