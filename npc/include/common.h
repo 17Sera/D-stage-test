@@ -20,9 +20,6 @@
 #define SRAM_BASE   0x0f000000
 #define SRAM_SIZE   0x1000000
 
-#define PSRAM_BASE  0x80000000
-#define PSRAM_SIZE  0x20000000
-
 #define paddr_t   uint32_t
 #define word_t    uint32_t
 #define vaddr_t   word_t
@@ -64,7 +61,7 @@
 #define MAX_iringbuf_size  20
 
 // wave
-// #define CONFIG_WAVES       1
+#define CONFIG_WAVES       1
 
 // device 
 #define CONFIG_DEVICE        1

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+// #include "verilated_fst_c.h"
 #include "verilated_vcd_c.h"
 #include "svdpi.h"
 #include "../include/common.h"
@@ -14,9 +15,10 @@
 
 /*------------------------------------------------------------------------------------*/
 VysyxSoCFull  *top = new VysyxSoCFull("top");
-VerilatedVcdC *tfp = new VerilatedVcdC(); 
+VerilatedVcdC *tfp = new VerilatedVcdC();     //导出vcd波形需要加此语句
+// VerilatedFstC *tfp = new VerilatedFstC();  //导出fst波形需要加此语句
 
-vluint64_t      main_time = 0;
+vluint64_t    main_time = 0;                  //initial 仿真时间
 /*------------------------------------------------------------------------------------*/
 extern char     *diff_so_file;
 extern int      difftest_port;
@@ -29,9 +31,14 @@ extern int      is_exit_status_bad();
 extern void     init_difftest     (char *ref_so_file, long img_size, int port);
 extern word_t   pmem_r            (paddr_t addr, int len); 
 extern void     pmem_w            (paddr_t addr, int len, word_t data);
-extern void     TRAP              (int station, char unit);                                              
+extern void     TRAP              (int station, char unit);             
+extern int      imem_read         (int raddr);                 
+extern int      dmem_read         (int raddr);                  
+extern void     pmem_write        (int waddr, int wdata, char wmask);    
+// extern void   etrace(int inst);                                     
 extern uint64_t get_time          ();                               
 extern void     difftest_skip_ref ();
+extern uint8_t* guest_to_host     (paddr_t paddr);
 /*------------------------------------------------------------------------------------*/
 
 static uint32_t rtc_port_base[2] = {0, 0};
@@ -47,6 +54,7 @@ extern void TRAP(int station, char unit)
 {
   if(Verilated::gotFinish())
     return;
+  // at the begining (main_time < start_time and before the reset), all gprs are zeros
   if(main_time >= start_time + 1)   
   {
     npc_state.halt_ret = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__register_file_inst__DOT__regs[10]; //a0
@@ -71,6 +79,76 @@ extern void TRAP(int station, char unit)
         break;
     }
     Verilated::gotFinish(true);
+  }
+}
+/*--------------------------------------------------------------------------------------------------------------------------------*/
+
+extern int imem_read(int raddr)
+{
+  static int data = 0xdead0009;
+
+  if(main_time < start_time)  //表示内存还未初始化或尚未开始工作
+    return data;
+  
+  data = pmem_r(raddr, 4);  // 从物理内存中读取数据,通常用于读取一条程序指令---读取的长度为4个字节,32位
+  return data;    
+}
+
+
+extern int dmem_read(int raddr)
+{
+  static int data = 0xdead000a;
+
+  // if(main_time < start_time || top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__clock_cnt != 3)
+  if(main_time < start_time ){
+    return data;
+  }
+
+  // device rtc 检查读取地址是否为 RTC 的内存映射IO地址
+  if((raddr == CONFIG_RTC_MMIO) || (raddr == CONFIG_RTC_MMIO + 4)){
+    if(raddr == CONFIG_RTC_MMIO + 4){   //如果是高32位地址
+      uint64_t us = get_time();         //获取当前时间
+      rtc_port_base[0] = (uint32_t)us;  //拆分为低32位和高32位分别存入 rtc_port_base 中
+      rtc_port_base[1] = us >> 32;
+    }
+    data = rtc_port_base[(raddr - CONFIG_RTC_MMIO) / 4];
+#ifdef CONFIG_DIFFTEST
+    difftest_skip_ref();
+#endif
+  }
+  else
+    data = pmem_r(raddr, 4);  //如果不是RTC地址，则从物理内存中读取数据（通过pmem_r）
+  return data;   
+}
+
+
+void pmem_write(int waddr, int wdata, char wmask){
+  // if(main_time < start_time || top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
+    if(main_time < start_time ){
+      return;
+    }
+
+  // device serial
+  if(waddr == CONFIG_SERIAL_MMIO){
+    assert(wmask == WByte);
+    char ch = (char)wdata;
+    putchar(ch);
+#ifdef CONFIG_DIFFTEST
+    difftest_skip_ref();
+#endif
+    return;
+  }
+
+  // memory
+  switch (wmask){
+    case WByte: pmem_w(waddr, 1, wdata);
+                break;
+    case WHalf: pmem_w(waddr, 2, wdata);
+                break;
+    case WWord: pmem_w(waddr, 4, wdata);
+                break;
+    default:    assert(0);
+                break;
   }
 }
 
@@ -112,7 +190,7 @@ static void init_verilator(void)
   top->trace(tfp, 0);
   // tfp->open("waveform.fst");
   tfp->open("waveform.vcd"); 
-  reset(); 
+  reset();  //复位
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -145,39 +223,3 @@ int main(int argc, char *argv[])
 
   return is_exit_status_bad();
 }
-
-
-
-
-
-
-/* ------------------------------------  unused  ---------------------------------------------------------- */
-// void pmem_write(int waddr, int wdata, char wmask){
-//   // if(main_time < start_time || top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__clock_cnt != 3)  //clk_cnt == 3 表示LSU处于内存访问阶段
-//     if(main_time < start_time ){
-//       return;
-//     }
-
-//   // device serial
-//   if(waddr == CONFIG_SERIAL_MMIO){
-//     assert(wmask == WByte);
-//     char ch = (char)wdata;
-//     putchar(ch);
-// #ifdef CONFIG_DIFFTEST
-//     difftest_skip_ref();
-// #endif
-//     return;
-//   }
-
-//   // memory
-//   switch (wmask){
-//     case WByte: pmem_w(waddr, 1, wdata);
-//                 break;
-//     case WHalf: pmem_w(waddr, 2, wdata);
-//                 break;
-//     case WWord: pmem_w(waddr, 4, wdata);
-//                 break;
-//     default:    assert(0);
-//                 break;
-//   }
-// }

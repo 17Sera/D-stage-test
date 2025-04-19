@@ -95,6 +95,8 @@ module ysyx_23060219_lsu(
 
 /*------------------------------------------------------------------------------------------------ */
 
+    import "DPI-C" function int  dmem_read(input int raddr);
+    import "DPI-C" function void pmem_write(input int waddr, input int wdata, input byte wmask);
     import "DPI-C" function void TRAP(input int station, input byte unit);
 
 /*------------------------------------------------------------------------------------------------ */

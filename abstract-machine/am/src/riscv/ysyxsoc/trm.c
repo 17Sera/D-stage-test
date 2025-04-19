@@ -82,7 +82,8 @@ void print_ysyxCSR(void) {
 
 
 void _trm_init() {
-  init_uart();  // difftest要注释
+  // difftest要注释
+  // init_uart(); 
   bootloader();
   // print_ysyxCSR();
   int ret = main(mainargs);

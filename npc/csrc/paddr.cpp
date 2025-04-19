@@ -8,14 +8,13 @@
 /*-----------------------------------------------*/
 extern VysyxSoCFull      *top;
 extern vluint64_t         main_time;
-// extern void close_tfp    (void);
+extern void close_tfp    (void);
 /*-----------------------------------------------*/
 
 uint8_t   pmem   [PMEM_SIZE]   PG_ALIGN = {};
 uint8_t   mrom   [MROM_SIZE]   PG_ALIGN = {};
 uint8_t   flash  [FLASH_SIZE]  PG_ALIGN = {};
 uint8_t   sram   [SRAM_SIZE]   PG_ALIGN = {};
-uint8_t   psram  [PSRAM_SIZE]  PG_ALIGN = {};
 
 /*-----------------------------------------------*/
 
@@ -30,34 +29,6 @@ static const word_t img [] = {
 
     // 0x00100073,    // ebreak 
 };
-/*--------------------------------------------------------------------------------------------*/
-
-word_t host_read(void *addr, int len) 
-{
-  switch (len) {
-    case 1: return *(uint8_t  *)addr;
-    case 2: return *(uint16_t *)addr;
-    case 4: return *(uint32_t *)addr;
-    default: assert(0); return 0;
-  }
-}
-
-
-static void host_write(void *addr, int len, word_t data) {
-  switch (len) {
-    case 1: *(uint8_t  *)addr = data; return;
-    case 2: *(uint16_t *)addr = data; return;
-    case 4: *(uint32_t *)addr = data; return;
-    default: assert(0);
-  }
-}
-/*--------------------------------------------------------------------------------------------*/
-
-uint8_t*   guest_to_host       (paddr_t paddr)  { return pmem  + paddr -  PMEM_BASE;  }  
-uint8_t*   sram_guest_to_host  (paddr_t paddr)  { return sram  + paddr -  SRAM_BASE;  }   
-uint8_t*   flash_guest_to_host (paddr_t paddr)  { return flash + paddr -  FLASH_BASE; }   
-uint8_t*   mrom_guest_to_host  (paddr_t paddr)  { return mrom  + paddr -  MROM_BASE;  }
-uint8_t*   psram_guest_to_host (paddr_t paddr)  { return psram + paddr -  PSRAM_BASE; }  
 
 /*---------------------------------------------------------------------------------------------*/
 
@@ -80,27 +51,97 @@ extern "C" void flash_read(int32_t addr, int32_t *data) {
 
 extern "C" void mrom_read(int32_t addr, int32_t *data)
 { 
-    assert(data != NULL); 
-    assert(addr >= MROM_BASE && addr < MROM_BASE + MROM_SIZE); 
+    assert(data != NULL); // 确保 data 指针不为空
+    assert(addr >= MROM_BASE && addr < MROM_BASE + MROM_SIZE); // 地址合法性检查
 
     uint32_t offset = ((addr & 0xfffffffc) - MROM_BASE);
     *data = *((uint32_t *)(mrom + offset));
 
-    // *data = 0x00100073;   // ebreak
+    // *data = 0x00100073;   // 测试mrom，输入ebreak指令
+}
+
+/*--------------------------------------------------------------------------------------------*/
+
+uint8_t*   sram_guest_to_host  (paddr_t paddr)  { return sram  + paddr -  SRAM_BASE; }   
+uint8_t*   flash_guest_to_host (paddr_t paddr)  { return flash + paddr - FLASH_BASE; }   
+uint8_t*   mrom_guest_to_host  (paddr_t paddr)  { return mrom  + paddr -  MROM_BASE; }   
+uint8_t*   guest_to_host       (paddr_t paddr)  { return pmem  + paddr -  PMEM_BASE; }   //0x8000_0000 -> pmem[0]
+paddr_t    host_to_guest       (uint8_t *haddr) { return haddr - pmem  +  PMEM_BASE; }
+
+/*--------------------------------------------------------------------------------------------*/
+
+word_t host_read(void *addr, int len) 
+{
+  switch (len) {
+    case 1: return *(uint8_t  *)addr;
+    case 2: return *(uint16_t *)addr;
+    case 4: return *(uint32_t *)addr;
+    default: assert(0); return 0;
+  }
+}
+
+
+static void host_write(void *addr, int len, word_t data) {
+  switch (len) {
+    case 1: *(uint8_t  *)addr = data; return;
+    case 2: *(uint16_t *)addr = data; return;
+    case 4: *(uint32_t *)addr = data; return;
+    default: assert(0);
+  }
+}
+
+
+static inline bool in_pmem(paddr_t addr) {
+  return (addr - PMEM_BASE < PMEM_SIZE);
+}
+
+
+static inline void out_of_bound(paddr_t addr) {
+  close_tfp();
+  panic("address = 0x%08x is out of bound of pmem [0x%08x, 0x%08x] at pc = 0x%08x  time = %ld", 
+         addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, main_time);
+}
+
+
+word_t pmem_r(paddr_t addr, int len) 
+{
+  if(in_pmem(addr))  
+#ifdef CONFIG_MTRACE
+  {
+    word_t data = host_read(guest_to_host(addr), len);
+    _Log(ANSI_FG_YELLOW "[mtrace]" ANSI_NONE " rd_mem  " ANSI_FG_YELLOW 
+        "addr:" ANSI_NONE " 0x%08x  " ANSI_FG_YELLOW "data:" 
+        ANSI_NONE " 0x%08x\n", addr, data);
+    return data;
+  }
+#else
+    return host_read(guest_to_host(addr), len);
+#endif
+  out_of_bound(addr);
+  return 0;
 }
 
 
 
-extern "C" void psram_read(int32_t addr, int32_t *data) {
-  assert(addr >= 0 && addr < PSRAM_SIZE); 
-  *data = host_read(psram + addr , 4);
+int pmem_read(int addr) {
+    int ret = host_read(guest_to_host(addr), 4);
+    return ret;
 }
 
 
-extern "C" void psram_write(int32_t addr, int32_t data, int32_t mask) {
-  assert(addr >= 0 && addr < PSRAM_SIZE); 
-  uint32_t wdata = data >> (( 8 - mask ) * 4);
-  host_write(psram + addr , mask / 2 , wdata);   //mask/2的商为整数时才会被写入
+void pmem_w(paddr_t addr, int len, word_t data) 
+{
+  if(in_pmem(addr)) 
+  {
+#ifdef CONFIG_MTRACE
+    _Log(ANSI_FG_YELLOW "[mtrace]" ANSI_NONE " wr_mem  " ANSI_FG_YELLOW 
+    "addr:" ANSI_NONE " 0x%08x  " ANSI_FG_YELLOW "data:" 
+    ANSI_NONE " 0x%08x\n", addr, data);
+#endif
+    host_write(guest_to_host(addr), len, data);
+    return;
+  } 
+  out_of_bound(addr);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
@@ -120,72 +161,3 @@ void init_mem(void)
   // /* Load built-in image. */
   // memcpy(mrom_guest_to_host(MROM_BASE), img, sizeof(img));  // 加载内置镜像到内存
 }
-
-
-
-
-
-
-
-
-
-
-
-
-/* *********************************************  unused  ******************************************************************************** */
-// paddr_t    host_to_guest       (uint8_t *haddr) { return haddr - pmem  +  PMEM_BASE; }
-
-
-
-// static inline bool in_pmem(paddr_t addr) {
-//   return (addr - PMEM_BASE < PMEM_SIZE);
-// }
-
-
-// static inline void out_of_bound(paddr_t addr) {
-//   close_tfp();
-//   panic("address = 0x%08x is out of bound of pmem [0x%08x, 0x%08x] at pc = 0x%08x  time = %ld", 
-//          addr, PMEM_LEFT, PMEM_RIGHT, top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg, main_time);
-// }
-
-
-// word_t pmem_r(paddr_t addr, int len) 
-// {
-//   if(in_pmem(addr))  
-// #ifdef CONFIG_MTRACE
-//   {
-//     word_t data = host_read(guest_to_host(addr), len);
-//     _Log(ANSI_FG_YELLOW "[mtrace]" ANSI_NONE " rd_mem  " ANSI_FG_YELLOW 
-//         "addr:" ANSI_NONE " 0x%08x  " ANSI_FG_YELLOW "data:" 
-//         ANSI_NONE " 0x%08x\n", addr, data);
-//     return data;
-//   }
-// #else
-//     return host_read(guest_to_host(addr), len);
-// #endif
-//   out_of_bound(addr);
-//   return 0;
-// }
-
-
-
-// void pmem_w(paddr_t addr, int len, word_t data) 
-// {
-//   if(in_pmem(addr)) 
-//   {
-// #ifdef CONFIG_MTRACE
-//     _Log(ANSI_FG_YELLOW "[mtrace]" ANSI_NONE " wr_mem  " ANSI_FG_YELLOW 
-//     "addr:" ANSI_NONE " 0x%08x  " ANSI_FG_YELLOW "data:" 
-//     ANSI_NONE " 0x%08x\n", addr, data);
-// #endif
-//     host_write(guest_to_host(addr), len, data);
-//     return;
-//   } 
-//   out_of_bound(addr);
-// }
-
-
-// int pmem_read(int addr) {
-//     int ret = host_read(guest_to_host(addr), 4);
-//     return ret;
-// }
