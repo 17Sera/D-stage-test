@@ -27,7 +27,7 @@ static uint8_t flash [FLASH_SIZE] = {};
 /*---------------------------------------------------------------------------------------------------------*/
 
 static char *log_file      = NULL;
-static char *img_file      = NULL;
+static char *img_file      = "/home/zhong/ysyx-workbench/ysyxSoC/ready-to-run/D-stage/hello-minirv-ysyxsoc.bin";
 char        *elf_file      = NULL;
 char        *diff_so_file  = NULL;
 int          difftest_port = 1234;

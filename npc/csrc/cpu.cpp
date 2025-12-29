@@ -56,9 +56,9 @@ word_t not_complete_pc = 0x30000000;
 static void execute_once() 
 {
     for(int i = 0; i < 500; i++){
-        PCSet.pc    =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;  
-        PCSet.inst  =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
-        word_t npc_cycle_end =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_wbu_cycle_end;
+        PCSet.pc    =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__PC;
+        PCSet.inst  =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__ifu__DOT__inst;
+        word_t npc_cycle_end =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__wbu__DOT__wbu_valid;
 
         if( PCSet.pc == not_complete_pc || PCSet.pc == 0x00000000 ){
             single_cycle(); 
@@ -68,8 +68,8 @@ static void execute_once()
             break;
         }
     }
-    PCSet.npc   =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__bru_inst__DOT__npc_reg;
-    PCSet.ninst =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
+    PCSet.npc   =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__pc__DOT__next_pc;
+    // PCSet.ninst =  top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__w_ifu_inst;
 
 /*---------------------------------------------------------------------------------------------------------*/
 

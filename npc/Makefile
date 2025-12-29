@@ -1,4 +1,4 @@
-MODULE = ysyxSoCFull
+MODULE = /home/zhong/ysyx-workbench/ysyxSoC/ready-to-run/D-stage/ysyxSoCFull
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")		
 VSRCS += $(shell find $(abspath ../ysyxSoC/build) -name "*.v")		
