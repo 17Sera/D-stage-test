@@ -23,13 +23,32 @@ NPCFLAGS += -b
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
-image: $(IMAGE).elf
+# image: $(IMAGE).elf
+# 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
+# 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
+# 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
+
+
+image: image-dep
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
+
+ELF_OFFSET := 370432
+
+HELLO_TEMPLATE := $(YSYX_HOME)/ysyxSoC/ready-to-run/D-stage/hello-minirv-ysyxsoc.bin
+
+IMAGE_BIN := $(IMAGE).bin
+
+$(IMAGE_BIN): $(IMAGE).elf $(HELLO_TEMPLATE)
+	@echo "  PATCH  $@"
+	@cp $(HELLO_TEMPLATE) $@.tmp
+	@dd if=$< of=$@.tmp bs=1 seek=$(ELF_OFFSET) conv=notrunc 2>/dev/null
+	@mv $@.tmp $@
+
 ##
 run: image
 	$(MAKE) -C $(NPC_HOME) ISA=$(ISA) run ARGS="$(NPCFLAGS)" IMG=$(IMAGE).bin
 
-gdb: image
-	$(MAKE) -C $(NPC_HOME) ISA=$(ISA) gdb ARGS="$(NPCFLAGS)" IMG=$(IMAGE).bin
+# gdb: image
+# 	$(MAKE) -C $(NPC_HOME) ISA=$(ISA) gdb ARGS="$(NPCFLAGS)" IMG=$(IMAGE).bin

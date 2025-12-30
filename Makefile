@@ -1,6 +1,5 @@
-STUID = ysyx_23060219
-STUNAME = 钟慧珊
-
+STUID = ysyx_25080202
+STUNAME = ysyx_25080202
 # DO NOT modify the following code!!!
 
 TRACER = tracer-ysyx

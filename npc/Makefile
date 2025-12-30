@@ -1,8 +1,10 @@
-MODULE = /home/zhong/ysyx-workbench/ysyxSoC/ready-to-run/D-stage/ysyxSoCFull
+MODULE = ysyx_25080202
+# ysyxSoCFull
 CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")		
-VSRCS += $(shell find $(abspath ../ysyxSoC/build) -name "*.v")		
+VSRCS += $(shell find $(abspath ../ysyxSoC/ready-to-run/D-stage/*) -name "*.v")
 VSRCS += $(shell find $(abspath ../ysyxSoC/perip/*) -name "*.v")	
+
 
 YSYXSOC_PATH = $(NPC_HOME)/../ysyxSoC
 YSYXSOC_PERIP_PATH = $(YSYXSOC_PATH)/perip
